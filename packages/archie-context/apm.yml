@@ -1,0 +1,10 @@
+name: archie-context
+version: 0.1.0-private.0
+description: Canonical Archie Agent Skills context for private trials.
+targets:
+  - agent-skills
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}
