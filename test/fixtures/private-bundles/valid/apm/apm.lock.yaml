@@ -1,0 +1,6 @@
+dependencies:
+  apm:
+    - resolved_commit: 0123456789abcdef0123456789abcdef01234567
+      resolved_ref: v0.1.0-private.0
+      content_hash: sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+deployments: {}

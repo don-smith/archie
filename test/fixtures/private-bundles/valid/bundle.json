@@ -1,0 +1,19 @@
+{
+  "format": "archie-private-bundle-input-v1",
+  "npm": {
+    "package": "@archie/runtime",
+    "version": "0.1.0-private.0",
+    "locator": "file:npm/archie-runtime.tgz",
+    "lockFile": "npm/package-lock.json",
+    "tarball": "npm/archie-runtime.tgz",
+    "requiredPlatformPayload": "vendor/html-design/SKILL.md"
+  },
+  "apm": {
+    "package": "archie-context",
+    "skill": "archie",
+    "locator": "file:apm/archie-context",
+    "ref": "v0.1.0-private.0",
+    "manifest": "apm/apm.yml",
+    "lockFile": "apm/apm.lock.yaml"
+  }
+}

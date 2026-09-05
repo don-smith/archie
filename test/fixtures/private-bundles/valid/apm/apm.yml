@@ -1,0 +1,7 @@
+name: archie-private-context
+dependencies:
+  apm:
+    - git: file:apm/archie-context
+      ref: v0.1.0-private.0
+      skills:
+        - archie

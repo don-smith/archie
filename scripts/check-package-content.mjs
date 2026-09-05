@@ -20,7 +20,7 @@ if (!existsSync("dist")) execFileSync("npm", ["run", "build"], { stdio: "inherit
 for (const [name] of packages) {
   const output = execFileSync("npm", ["pack", "--dry-run", "--json", "--workspace", name], { encoding: "utf8" });
   const packed = JSON.parse(output)[0].files.map((file) => file.path);
-  const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer)(\/|$)/i.test(file));
+  const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer|release-record-v1\.json)(\/|$)/i.test(file));
   if (forbidden.length) throw new Error(`${name} would ship forbidden paths: ${forbidden.join(", ")}`);
   if (name !== "@archie/context" && !packed.some((file) => file === "dist/index.js" || file === "dist/cli.js")) throw new Error(`${name} lacks prebuilt runtime code`);
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
