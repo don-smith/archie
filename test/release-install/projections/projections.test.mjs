@@ -6,8 +6,9 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { finalizeRelease } from "../../../dist/packages/archie-runtime/src/release-record/release-record-v1.js";
 import { selectLocalRelease } from "../../../dist/packages/archie-runtime/src/release-install/selection.js";
-import { bootstrapTarget, readPinnedTarget, upgradeTarget, verifyPinnedTarget } from "../../../dist/packages/archie-runtime/src/release-install/target-state.js";
+import { bootstrapTarget, readPinnedTarget, verifyPinnedTarget } from "../../../dist/packages/archie-runtime/src/release-install/target-state.js";
 import { assertPinnedApmProjection, planApmProjection } from "../../../dist/packages/archie-runtime/src/release-install/apm-projection.js";
+import * as runtime from "../../../dist/packages/archie-runtime/src/index.js";
 
 const fixture = "test/fixtures/private-bundles/valid";
 const provenance = "packages/archie-runtime/vendor/html-design.provenance.json";
@@ -67,6 +68,11 @@ test("selection and CLI enforce explicit local selection while verify consumes o
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
+test("the packaged runtime does not expose an unverified upgrade staging step", async () => {
+  assert.equal("stageUpgradeTarget" in runtime, false);
+  await assert.rejects(import("@archie/runtime/dist/release-install/target-state.js"), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" });
+});
+
 test("upgrade validates the current projection and APM ambiguity fails before writes", () => {
   const base = root();
   try {
@@ -74,7 +80,6 @@ test("upgrade validates the current projection and APM ambiguity fails before wr
     const project = target(base);
     bootstrapTarget(project, selected);
     writeFileSync(join(project, "apm.lock.yaml"), readFileSync(join(project, "apm.lock.yaml"), "utf8").replace(selected.record.apm.resolvedCommit, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
-    assert.throws(() => upgradeTarget(project, selected), /drifted/);
     assert.throws(() => verifyPinnedTarget(project), /drifted/);
     const other = target(join(base, "other"));
     const before = readFileSync(join(other, "apm.yml"), "utf8");

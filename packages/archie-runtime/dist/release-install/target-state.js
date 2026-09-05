@@ -64,7 +64,8 @@ export function bootstrapTarget(targetDirectory, selected) {
         throw new Error("target already has a release pin; use upgrade with an explicit local release");
     return stageSelectedRelease(targetDirectory, selected);
 }
-export function upgradeTarget(targetDirectory, selected) {
+/** Internal staging step; the public upgrade flow verifies the installed target before calling this. */
+export function stageUpgradeTarget(targetDirectory, selected) {
     const previous = readPinnedTarget(targetDirectory);
     return stageSelectedRelease(targetDirectory, selected, previous.record);
 }

@@ -19,6 +19,8 @@ export declare class ReleaseVerificationFailure extends Error {
     readonly cause?: unknown;
     constructor(message: string, report: ReleaseInstallReport, cause?: unknown);
 }
+/** Validates the installed projection without allowing a package-manager command to repair it. */
+export declare function verifyCurrentInstalledTarget(targetDirectory: string, options?: ReleaseInstallOptions): void;
 /** Executes the native, pinned-state-only checks in their required order. */
 export declare function verifyInstalledTarget(targetDirectory: string, options?: ReleaseInstallOptions): ReleaseInstallReport;
 export declare class ReleaseInstallFailure extends Error {

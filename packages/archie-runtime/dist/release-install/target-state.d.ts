@@ -16,6 +16,7 @@ export declare function readPinnedTarget(targetDirectory: string): PinnedTarget;
 /** Stages only Archie-owned state and a safely merged APM projection. Native installation is deferred to Phase 5. */
 export declare function stageSelectedRelease(targetDirectory: string, selected: SelectedRelease, previous?: ReleaseRecordV1): StagedTarget;
 export declare function bootstrapTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget;
-export declare function upgradeTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget;
+/** Internal staging step; the public upgrade flow verifies the installed target before calling this. */
+export declare function stageUpgradeTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget;
 /** Verify deliberately has no release input: it can only inspect the target-owned pin. */
 export declare function verifyPinnedTarget(targetDirectory: string): PinnedTarget;

@@ -2,12 +2,12 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { verifyHtmlSnapshot } from "../html-snapshot/verify.js";
 import { assertSupportedEnvironment } from "../analysis/contracts.js";
-import { readPinnedTarget, bootstrapTarget, upgradeTarget, type StagedTarget } from "./target-state.js";
+import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget, type StagedTarget } from "./target-state.js";
 import type { SelectedRelease } from "./selection.js";
 import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
 import { initialInstallReport, type ReleaseInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
-import { nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
+import { assertInstalledNpm, nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
 import { runApmChecks } from "./run-apm.js";
 export type { NativeCommand, NativeCommandResult, NativeCommandRunner } from "./run-npm.js";
 
@@ -26,6 +26,18 @@ function paths(targetDirectory: string) {
 
 export class ReleaseVerificationFailure extends Error {
   constructor(message: string, readonly report: ReleaseInstallReport, readonly cause?: unknown) { super(message); this.name = "ReleaseVerificationFailure"; }
+}
+
+/** Validates the installed projection without allowing a package-manager command to repair it. */
+export function verifyCurrentInstalledTarget(targetDirectory: string, options: ReleaseInstallOptions = {}): void {
+  const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
+  const verifyApmDeployment = options.verifyApmDeployment ?? ((root: string) => { if (!existsSync(root)) throw new Error("APM deployed Archie projection is missing"); });
+  assertSupportedEnvironment();
+  const pin = readPinnedTarget(targetDirectory);
+  assertInstalledNpm(pin);
+  const p = paths(pin.targetDirectory);
+  verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
+  verifyApmDeployment(join(pin.targetDirectory, ".agents", "skills", pin.record.apm.skill), pin.record);
 }
 
 /** Executes the native, pinned-state-only checks in their required order. */
@@ -84,7 +96,7 @@ function stageAndVerify(targetDirectory: string, skill: string, stage: () => Sta
     updateInstallJournal(targetDirectory, journal, "failed", failure);
     try {
       compensateInstall(targetDirectory, journal);
-      if (previousPin) readPinnedTarget(targetDirectory);
+      if (previousPin) verifyCurrentInstalledTarget(targetDirectory, options);
       failureReport.compensation = "passed";
       updateInstallJournal(targetDirectory, journal, "compensated", failure);
     } catch (compensationFailure) {
@@ -100,5 +112,13 @@ export function bootstrapAndVerifyTarget(targetDirectory: string, selected: Sele
   return stageAndVerify(targetDirectory, selected.record.apm.skill, () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory: string, selected: SelectedRelease, options: ReleaseInstallOptions = {}): StagedTarget & { report: ReleaseInstallReport } {
-  return stageAndVerify(targetDirectory, selected.record.apm.skill, () => upgradeTarget(targetDirectory, selected), true, options);
+  // Do not let staging overwrite a target whose installed runtime, HTML bytes, or deployed skill is already inconsistent.
+  try {
+    verifyCurrentInstalledTarget(targetDirectory, options);
+  } catch (failure) {
+    const report = initialInstallReport();
+    report.failedPhase = "pre-upgrade-verification";
+    throw new ReleaseInstallFailure("current installed target verification failed before upgrade staging", report, failure);
+  }
+  return stageAndVerify(targetDirectory, selected.record.apm.skill, () => stageUpgradeTarget(targetDirectory, selected), true, options);
 }

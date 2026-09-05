@@ -78,7 +78,8 @@ export function bootstrapTarget(targetDirectory: string, selected: SelectedRelea
   return stageSelectedRelease(targetDirectory, selected);
 }
 
-export function upgradeTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget {
+/** Internal staging step; the public upgrade flow verifies the installed target before calling this. */
+export function stageUpgradeTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget {
   const previous = readPinnedTarget(targetDirectory);
   return stageSelectedRelease(targetDirectory, selected, previous.record);
 }

@@ -8,7 +8,7 @@ export * from "./release-record/release-record-v1.js";
 export * from "./release-install/selection.js";
 export * from "./release-install/npm-projection.js";
 export * from "./release-install/apm-projection.js";
-export * from "./release-install/target-state.js";
+export { bootstrapTarget, readPinnedTarget, verifyPinnedTarget, type PinnedTarget, type StagedTarget } from "./release-install/target-state.js";
 export * from "./release-install/report.js";
 export * from "./release-install/run-npm.js";
 export * from "./release-install/run-apm.js";

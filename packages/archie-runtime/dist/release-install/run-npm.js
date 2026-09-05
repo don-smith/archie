@@ -12,12 +12,10 @@ export function requireNative(run, command, label) {
     return result;
 }
 /** npm owns lock and integrity validation; Archie checks the installed package identity afterward. */
-export function runNpmCi(pin, run) {
-    const runtime = join(pin.targetDirectory, ".archie", "runtime");
-    requireNative(run, { command: "npm", args: ["ci", "--ignore-scripts"], cwd: runtime }, "npm ci --ignore-scripts");
-    const packagePath = join(runtime, "node_modules", pin.record.npm.package, "package.json");
+export function assertInstalledNpm(pin) {
+    const packagePath = join(pin.targetDirectory, ".archie", "runtime", "node_modules", pin.record.npm.package, "package.json");
     if (!existsSync(packagePath))
-        throw new Error("installed npm package is missing after npm ci");
+        throw new Error("installed npm package is missing");
     let manifest;
     try {
         manifest = JSON.parse(readFileSync(packagePath, "utf8"));
@@ -27,5 +25,10 @@ export function runNpmCi(pin, run) {
     }
     if (manifest.name !== pin.record.npm.package || manifest.version !== pin.record.npm.version)
         throw new Error("installed npm package differs from the pinned record");
+}
+export function runNpmCi(pin, run) {
+    const runtime = join(pin.targetDirectory, ".archie", "runtime");
+    requireNative(run, { command: "npm", args: ["ci", "--ignore-scripts"], cwd: runtime }, "npm ci --ignore-scripts");
+    assertInstalledNpm(pin);
 }
 //# sourceMappingURL=run-npm.js.map

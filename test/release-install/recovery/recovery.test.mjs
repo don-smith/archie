@@ -28,7 +28,21 @@ test("records failure and restores a bootstrap target when native work fails", (
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
-test("restores the former upgrade runtime and pin after native failure", () => {
+test("upgrade rejects a broken installed target before it stages a replacement", () => {
+  const base = root();
+  try {
+    const target = join(base, "target"); mkdirSync(target);
+    const selected = selectLocalRelease(bundle(base));
+    bootstrapAndVerifyTarget(target, selected, { run: installedRunner, verifyHtml: () => undefined, verifyApmDeployment: () => undefined });
+    const recordPath = join(target, ".archie", "release", "release-record-v1.json");
+    const before = readFileSync(recordPath, "utf8");
+    writeFileSync(join(target, ".archie", "runtime", "node_modules", selected.record.npm.package, "package.json"), JSON.stringify({ name: selected.record.npm.package, version: "0.0.0" }));
+    assert.throws(() => upgradeAndVerifyTarget(target, selected, { verifyHtml: () => undefined, verifyApmDeployment: () => undefined }), ReleaseInstallFailure);
+    assert.equal(readFileSync(recordPath, "utf8"), before);
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});
+
+test("restores and revalidates the former installed target after native failure", () => {
   const base = root();
   try {
     const target = join(base, "target"); mkdirSync(target);
@@ -36,7 +50,14 @@ test("restores the former upgrade runtime and pin after native failure", () => {
     bootstrapAndVerifyTarget(target, selected, { run: installedRunner, verifyHtml: () => undefined, verifyApmDeployment: () => undefined });
     const installed = join(target, ".archie", "runtime", "node_modules", selected.record.npm.package, "package.json");
     const before = readFileSync(installed, "utf8");
-    assert.throws(() => upgradeAndVerifyTarget(target, selected, { run: () => ({ exitCode: 2, stdout: "", stderr: "offline" }) }), ReleaseInstallFailure);
+    let htmlChecks = 0, deploymentChecks = 0;
+    assert.throws(() => upgradeAndVerifyTarget(target, selected, {
+      run: () => ({ exitCode: 2, stdout: "", stderr: "offline" }),
+      verifyHtml: () => { htmlChecks += 1; },
+      verifyApmDeployment: () => { deploymentChecks += 1; }
+    }), ReleaseInstallFailure);
     assert.equal(readFileSync(installed, "utf8"), before);
+    assert.equal(htmlChecks, 2, "checks run before staging and after compensation");
+    assert.equal(deploymentChecks, 2, "checks run before staging and after compensation");
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

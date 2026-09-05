@@ -25,20 +25,36 @@ function copyBundle(base, name) {
 function finalize(bundle) {
   return runtime.finalizeRelease({ bundleDirectory: bundle, sourceCommit, htmlProvenancePath: provenance });
 }
-function nativeRunner({ install = true, policy = "passed" } = {}) {
+function unpackTarball(tarball, destination) {
+  const extracted = join(destination, "extracted");
+  mkdirSync(extracted, { recursive: true });
+  const result = spawnSync("tar", ["-xzf", tarball, "-C", extracted], { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`selected npm artifact could not be unpacked: ${result.stderr || result.stdout}`);
+  return join(extracted, "package");
+}
+function selectedApmSkill(bundle) {
+  const skill = join(bundle, "apm", "archie-context", ".apm", "skills", "archie");
+  if (!existsSync(skill)) throw new Error(`selected APM artifact is missing its Archie skill: ${skill}`);
+  return skill;
+}
+function nativeRunner(bundle, { install = true, policy = "passed" } = {}) {
   return ({ command, args, cwd }) => {
     if (command === "npm" && install) {
       const record = JSON.parse(readFileSync(join(cwd, "..", "release", "release-record-v1.json"), "utf8"));
       const installed = join(cwd, "node_modules", record.npm.package);
+      const extraction = join(cwd, ".selected-artifact-extract");
       rmSync(installed, { recursive: true, force: true });
-      mkdirSync(installed, { recursive: true });
-      writeFileSync(join(installed, "package.json"), `${JSON.stringify({ name: record.npm.package, version: record.npm.version })}\n`);
-      cpSync("packages/archie-runtime/vendor/html-design", join(installed, "vendor", "html-design"), { recursive: true });
+      rmSync(extraction, { recursive: true, force: true });
+      mkdirSync(extraction, { recursive: true });
+      mkdirSync(dirname(installed), { recursive: true });
+      cpSync(unpackTarball(join(cwd, "npm", record.npm.locator.replace(/^file:npm\//, "")), extraction), installed, { recursive: true });
+      rmSync(extraction, { recursive: true, force: true });
     }
     if (command === "apm" && args[0] === "install" && install) {
+      if (!bundle) throw new Error("a selected APM artifact is required for installation");
       const deployed = join(cwd, ".agents", "skills", "archie");
       rmSync(deployed, { recursive: true, force: true });
-      cpSync("packages/archie-context/.apm/skills/archie", deployed, { recursive: true });
+      cpSync(selectedApmSkill(bundle), deployed, { recursive: true });
     }
     if (command === "apm" && args[0] === "policy") {
       return policy === "not-applied"
@@ -57,7 +73,7 @@ function prepareTarget(base, policy = "passed") {
   const selected = runtime.selectLocalRelease(bundle);
   const target = join(base, "target");
   mkdirSync(target, { recursive: true });
-  const result = runtime.bootstrapAndVerifyTarget(target, selected, { run: nativeRunner({ policy }) });
+  const result = runtime.bootstrapAndVerifyTarget(target, selected, { run: nativeRunner(bundle, { policy }) });
   return { bundle, selected, target, result };
 }
 function files(root, current = root) {
@@ -71,13 +87,25 @@ function manifest(root) {
   const entries = Object.fromEntries(trackedFiles.map((file) => [file, createHash("sha256").update(readFileSync(join(root, file))).digest("hex")]));
   return { files: entries, digest: createHash("sha256").update(JSON.stringify(entries)).digest("hex") };
 }
+function artifactProjection(bundle, target, record) {
+  const extraction = temporary("archie-selected-npm-artifact-");
+  try {
+    const artifactPackage = unpackTarball(join(target, ".archie", "runtime", "npm", record.npm.locator.replace(/^file:npm\//, "")), extraction);
+    return {
+      npm: manifest(join(artifactPackage, "vendor", "html-design")).digest === manifest(join(target, ".archie", "runtime", "node_modules", record.npm.package, "vendor", "html-design")).digest,
+      apm: manifest(selectedApmSkill(bundle)).digest === manifest(join(target, ".agents", "skills", record.apm.skill)).digest
+    };
+  } finally {
+    rmSync(extraction, { recursive: true, force: true });
+  }
+}
 function rejectedMutation(name, mutate) {
   const base = temporary(`archie-private-trial-${name}-`);
   try {
     const { selected, target } = prepareTarget(base);
     mutate({ selected, target });
     try {
-      runtime.verifyInstalledTarget(target, { run: nativeRunner({ install: false }) });
+      runtime.verifyInstalledTarget(target, { run: nativeRunner(undefined, { install: false }) });
       return { rejected: false, error: "verification unexpectedly passed" };
     } catch (error) {
       return { rejected: true, error: error instanceof Error ? error.message : String(error) };
@@ -100,15 +128,16 @@ try {
   const selected = runtime.selectLocalRelease(firstBundle);
   const target = join(root, "target");
   mkdirSync(target);
-  const bootstrap = runtime.bootstrapAndVerifyTarget(target, selected, { run: nativeRunner() });
+  const bootstrap = runtime.bootstrapAndVerifyTarget(target, selected, { run: nativeRunner(firstBundle) });
+  const selectedArtifacts = artifactProjection(firstBundle, target, selected.record);
   const afterBootstrap = manifest(target);
-  const firstVerify = runtime.verifyInstalledTarget(target, { run: nativeRunner({ install: false }) });
+  const firstVerify = runtime.verifyInstalledTarget(target, { run: nativeRunner(undefined, { install: false }) });
   const afterFirstVerify = manifest(target);
-  const secondVerify = runtime.verifyInstalledTarget(target, { run: nativeRunner({ install: false }) });
+  const secondVerify = runtime.verifyInstalledTarget(target, { run: nativeRunner(undefined, { install: false }) });
   const afterSecondVerify = manifest(target);
-  const upgrade = runtime.upgradeAndVerifyTarget(target, selected, { run: nativeRunner() });
+  const upgrade = runtime.upgradeAndVerifyTarget(target, selected, { run: nativeRunner(firstBundle) });
   const afterUpgrade = manifest(target);
-  const replay = runtime.verifyInstalledTarget(target, { run: nativeRunner({ install: false }) });
+  const replay = runtime.verifyInstalledTarget(target, { run: nativeRunner(undefined, { install: false }) });
   const afterReplay = manifest(target);
 
   const mutations = {
@@ -117,9 +146,18 @@ try {
       const path = join(mutated, ".archie", "runtime", "package-lock.json");
       writeFileSync(path, readFileSync(path, "utf8").replace("sha512-", "sha512-corrupted-"));
     }),
+    "npm-locator": rejectedMutation("npm-locator", ({ selected: pin, target: mutated }) => {
+      const path = join(mutated, ".archie", "runtime", "package.json");
+      writeFileSync(path, readFileSync(path, "utf8").replace(pin.record.npm.locator, "file:npm/replaced-runtime.tgz"));
+    }),
+    "npm-tarball": rejectedMutation("npm-tarball", ({ selected: pin, target: mutated }) => writeFileSync(join(mutated, ".archie", "runtime", "npm", pin.record.npm.locator.replace(/^file:npm\//, "")), "changed tarball bytes")),
     "apm-locator": rejectedMutation("apm-locator", ({ selected: pin, target: mutated }) => {
       const path = join(mutated, "apm.yml");
       writeFileSync(path, readFileSync(path, "utf8").replace(pin.record.apm.locator, "file:apm/replaced-context"));
+    }),
+    "apm-ref": rejectedMutation("apm-ref", ({ selected: pin, target: mutated }) => {
+      const path = join(mutated, "apm.yml");
+      writeFileSync(path, readFileSync(path, "utf8").replace(pin.record.apm.ref, "v-replaced"));
     }),
     "apm-commit": rejectedMutation("apm-commit", ({ selected: pin, target: mutated }) => {
       const path = join(mutated, "apm.lock.yaml");
@@ -168,17 +206,18 @@ try {
   const coordinatedRecord = finalize(coordinatedBundle);
   const coordinatedTarget = join(root, "coordinated-target");
   mkdirSync(coordinatedTarget);
-  const coordinated = runtime.bootstrapAndVerifyTarget(coordinatedTarget, runtime.selectLocalRelease(coordinatedBundle), { run: nativeRunner() });
+  const coordinated = runtime.bootstrapAndVerifyTarget(coordinatedTarget, runtime.selectLocalRelease(coordinatedBundle), { run: nativeRunner(coordinatedBundle) });
 
   const textReport = runtime.formatInstallReport(bootstrap.report);
   const evidence = {
     format: "archie-private-trial-evidence-v1",
     authorization: "not-assessed",
     commands: ["archie-release finalize", "archie bootstrap --release <local-directory>", "archie verify", "archie upgrade --release <local-directory>", "apm install --frozen", "npm ci --ignore-scripts"],
-    execution: { nativeCommands: "hermetic deterministic evaluator", frozenApmContext: "npm run test:e2e -- apm-context" },
+    execution: { nativeCommands: "hermetic deterministic evaluator", selectedArtifacts: "npm tarball staged under target-owned runtime state and APM skill from the selected bundle" },
     environment: { node: process.version, platform: process.platform, architecture: process.arch, npm: version("npm"), apm: version("apm"), git: version("git") },
     finalization: { deterministic: readFileSync(first.recordPath, "utf8") === readFileSync(second.recordPath, "utf8"), recordSha256: first.recordSha256 },
     replay: { byteStable: afterBootstrap.digest === afterFirstVerify.digest && afterFirstVerify.digest === afterSecondVerify.digest && afterUpgrade.digest === afterReplay.digest, bootstrap: afterBootstrap, firstVerify: afterFirstVerify, secondVerify: afterSecondVerify, afterUpgrade, afterReplay, report: replay },
+    selectedArtifacts,
     mutations,
     policy: { baseline: firstVerify.apm.baseline, noPolicy: noPolicy.apm.policy, blocked: blocked.apm.policy },
     recovery,

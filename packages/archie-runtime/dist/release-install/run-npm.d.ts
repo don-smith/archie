@@ -13,4 +13,5 @@ export type NativeCommandRunner = (command: NativeCommand) => NativeCommandResul
 export declare const nativeRun: NativeCommandRunner;
 export declare function requireNative(run: NativeCommandRunner, command: NativeCommand, label: string): NativeCommandResult;
 /** npm owns lock and integrity validation; Archie checks the installed package identity afterward. */
+export declare function assertInstalledNpm(pin: PinnedTarget): void;
 export declare function runNpmCi(pin: PinnedTarget, run: NativeCommandRunner): void;
