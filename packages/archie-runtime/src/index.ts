@@ -5,3 +5,7 @@ export * from "./repository-checks/contracts.js";
 export * from "./repository-checks/run.js";
 export * from "./html-snapshot/verify.js";
 export * from "./release-record/release-record-v1.js";
+export * from "./release-install/selection.js";
+export * from "./release-install/npm-projection.js";
+export * from "./release-install/apm-projection.js";
+export * from "./release-install/target-state.js";

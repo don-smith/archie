@@ -40,3 +40,17 @@ Archie authorization: NOT ASSESSED — locally reviewed private release selected
 That is a consistency statement about bytes selected for local review. It is not a claim of release provenance. Signing, public-release trust, controller distribution, trust roots, key operations, rollback policy, and publication configuration are deferred. The record never contains a signature, signer, key, trust root, or release sequence.
 
 `archie-release finalize` is local-only. It does not fetch artifacts, publish a package, change a target, or choose a release for bootstrap, upgrade, or verify.
+
+## Target selection and projection planning
+
+Select the reviewed local directory explicitly when staging a target:
+
+```bash
+archie bootstrap --release ./release-bundle
+archie upgrade --release ./next-release-bundle
+archie verify
+```
+
+`bootstrap` and `upgrade` reject `latest`, network selectors, incomplete bundles, and any replacement record not contained in the chosen local directory. `verify` accepts no `--release` option; it reads only the target-owned `.archie/release/release-record-v1.json` and `.archie/version` pin.
+
+Planning stages the record, a selection receipt, and a nested npm manifest/lock under `.archie/`. The receipt may retain the selected local path for diagnosis, but that path is not replay identity. The npm tarball is copied into `.archie/runtime/npm/`; application `package.json` and `package-lock.json` are not edited. Archie structurally merges only its APM dependency and lock entry in root `apm.yml` and `apm.lock.yaml`, retaining unrelated dependencies, deployments, and policy or failing before writes when the supported shared structure is ambiguous. Native npm/APM installation and post-install verification are deferred.
