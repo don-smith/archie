@@ -1,0 +1,21 @@
+{
+  "name": "@archie/runtime",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "vendor/html-design",
+    "vendor/html-design.provenance.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "typescript": "7.0.2",
+    "@typescript/typescript-darwin-arm64": "7.0.2"
+  }
+}

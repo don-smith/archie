@@ -1,0 +1,22 @@
+{
+  "format": "archie-html-design-snapshot-v1",
+  "upstream": "https://github.com/don/html-design-skill",
+  "commit": "f8bc6fbf750f59caabd94ab98cb5c34fdad9cc58",
+  "sourcePath": "dist/skill/html-design",
+  "gitTree": "6ddea5582b8238392c7e6dff4adbd6f79c183edd",
+  "digest": {
+    "algorithm": "sha256",
+    "value": "fa6da6ca296596f8f79539d4cadcc88df5c74b01e59a54124286868656bd91d6",
+    "fileCount": 115
+  },
+  "license": {
+    "path": "LICENSE",
+    "sha256": "b7bcf64625da2122cefc6f591b8abee80604eee064bcf22ef2dd18d5b21d117d"
+  },
+  "requiredNotices": [
+    "node_modules/entities/LICENSE",
+    "node_modules/parse5/LICENSE"
+  ],
+  "importToolVersion": "archie-import-owned-sources-v1",
+  "verificationCommand": "npm run hash:html-snapshot"
+}

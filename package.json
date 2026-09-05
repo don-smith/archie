@@ -1,0 +1,26 @@
+{
+  "name": "archie",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "node scripts/sync-product-version.mjs && tsc -p tsconfig.build.json && node scripts/stage-package-dist.mjs",
+    "test": "npm run build --silent && node scripts/run-tests.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "pack:check": "node scripts/check-package-content.mjs",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "import:owned": "node scripts/import-owned-sources.mjs",
+    "hash:html-snapshot": "node scripts/hash-html-snapshot.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.9",
+    "typescript": "7.0.2"
+  }
+}

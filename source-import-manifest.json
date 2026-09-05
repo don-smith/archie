@@ -1,0 +1,74 @@
+{
+  "format": "archie-source-import-v1",
+  "productVersion": "0.1.0-private.0",
+  "imports": [
+    {
+      "id": "architecture-assessment",
+      "repository": "/Users/don/projects/architecture-assessment",
+      "revision": "a281d5e4f7ac286279b1aac1c3ce45cda0d59f2e",
+      "owner": "developer-owned",
+      "paths": [
+        "skills/architecture-assessment"
+      ],
+      "destination": "packages/capabilities/assets/assessment"
+    },
+    {
+      "id": "architecture-docs-and-likec4",
+      "repository": "/Users/don/projects/c4archviewer",
+      "revision": "f2b7c5f1353c5e76fe8739a657632edafc66580f",
+      "owner": "developer-owned",
+      "paths": [
+        "skills/architecture-docs",
+        "skills/likec4-authoring",
+        "src/architecture-docs",
+        "bin/architecture-docs.mjs",
+        "scripts/build-architecture-docs.mjs",
+        "scripts/check-architecture-docs.mjs",
+        "architecture-docs.schema.json"
+      ],
+      "destination": "packages/capabilities/assets/architecture-docs"
+    },
+    {
+      "id": "conformance-skills",
+      "repository": "/Users/don/projects/arch-conformance",
+      "revision": "361b4259a405113deaf777a38dea12f229b5b461",
+      "owner": "developer-owned",
+      "paths": [
+        "skills/architecture-conformance-onboarding",
+        "skills/architecture-contracts"
+      ],
+      "destination": "packages/capabilities/assets/conformance",
+      "retainedAdapterSourcePaths": [
+        "src/analyzer/typescript-program-v1.ts",
+        "src/analyzer/types.ts",
+        "src/analyzer/repository-paths.ts",
+        "src/artifacts/canonical-json.ts",
+        "src/artifacts/digest.ts"
+      ]
+    },
+    {
+      "id": "html-design-snapshot",
+      "repository": "/Users/don/projects/html-design-skill",
+      "revision": "f8bc6fbf750f59caabd94ab98cb5c34fdad9cc58",
+      "owner": "external-immutable-snapshot",
+      "paths": [
+        "dist/skill/html-design"
+      ],
+      "destination": "packages/archie-runtime/vendor/html-design"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "/Users/don/projects/myflow/skills/architecture-review",
+      "reason": "Architecture Review and MyFlow are outside shipped first-release membership. Archie retains only a neutral, serial structural-inspection contract."
+    },
+    {
+      "path": "skills/",
+      "reason": "The pre-monorepo foundation skill is replaced by workspace-owned assets; it is not shipped as a duplicate root product path."
+    },
+    {
+      "path": ".myflow/",
+      "reason": "MyFlow artifacts are development evidence, never shipped product content."
+    }
+  ]
+}
