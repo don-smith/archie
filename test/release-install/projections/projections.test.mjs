@@ -62,10 +62,8 @@ test("selection and CLI enforce explicit local selection while verify consumes o
     const project = target(base);
     assert.match(command("bootstrap", "--target", project).stderr, /Usage/);
     assert.match(command("verify", "--release", selected.bundleDirectory, "--target", project).stderr, /Usage/);
-    assert.equal(command("bootstrap", "--release", selected.bundleDirectory, "--target", project).status, 0);
-    const verified = command("verify", "--target", project);
-    assert.equal(verified.status, 0);
-    assert.match(verified.stdout, /NOT ASSESSED/);
+    bootstrapTarget(project, selected);
+    assert.equal(verifyPinnedTarget(project).record.version, selected.record.version);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 

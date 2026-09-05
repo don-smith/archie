@@ -1,37 +1,41 @@
-import { bootstrapTarget, selectLocalRelease, upgradeTarget, verifyPinnedTarget } from "@archie/runtime";
-
-const authorization = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
+import { bootstrapAndVerifyTarget, formatInstallReport, ReleaseInstallFailure, ReleaseVerificationFailure, selectLocalRelease, upgradeAndVerifyTarget, verifyInstalledTarget } from "@archie/runtime";
 
 type Operation = "bootstrap" | "upgrade" | "verify";
 
 function usage(): never {
-  throw new Error("Usage: archie bootstrap --release <local-directory> [--target <directory>] | archie upgrade --release <local-directory> [--target <directory>] | archie verify [--target <directory>]\nBootstrap and upgrade require an explicitly selected local bundle. Verify only uses the existing target pin. Signing, public-release trust, controller distribution, and key operations are deferred.");
+  throw new Error("Usage: archie bootstrap --release <local-directory> [--target <directory>] [--format text|json] | archie upgrade --release <local-directory> [--target <directory>] [--format text|json] | archie verify [--target <directory>] [--format text|json]\nBootstrap and upgrade require an explicitly selected local bundle. Verify only uses the existing target pin. Signing, public-release trust, controller distribution, and key operations are deferred.");
 }
 
-function options(operation: Operation, args: string[]): { release?: string; target: string } {
+function options(operation: Operation, args: string[]): { release?: string; target: string; format: "text" | "json" } {
   const values = new Map<string, string>();
   for (let index = 0; index < args.length; index += 2) {
     const name = args[index], value = args[index + 1];
-    if ((name !== "--release" && name !== "--target") || !value || values.has(name)) usage();
+    if ((name !== "--release" && name !== "--target" && name !== "--format") || !value || values.has(name)) usage();
     values.set(name, value);
   }
-  const release = values.get("--release");
-  if ((operation === "verify" && release) || (operation !== "verify" && !release)) usage();
-  return { release, target: values.get("--target") ?? process.cwd() };
+  const release = values.get("--release"), format = values.get("--format") ?? "text";
+  if ((operation === "verify" && release) || (operation !== "verify" && !release) || (format !== "text" && format !== "json")) usage();
+  return { release, target: values.get("--target") ?? process.cwd(), format };
+}
+
+function emit(report: Parameters<typeof formatInstallReport>[0], format: "text" | "json"): void {
+  console.log(format === "json" ? JSON.stringify(report) : formatInstallReport(report));
 }
 
 export function runReleaseInstallCommand(args: string[]): void {
   const operation = args[0] as Operation;
   if (operation !== "bootstrap" && operation !== "upgrade" && operation !== "verify") usage();
   const input = options(operation, args.slice(1));
-  if (operation === "verify") {
-    const result = verifyPinnedTarget(input.target);
-    console.log(`Verified pinned Archie ${result.record.version}`);
-  } else {
-    const selected = selectLocalRelease(input.release!);
-    const result = operation === "bootstrap" ? bootstrapTarget(input.target, selected) : upgradeTarget(input.target, selected);
-    console.log(`${operation === "bootstrap" ? "Bootstrapped" : "Upgraded"} Archie ${result.record.version}`);
-    console.log(`Selection receipt: ${result.selectionReceiptPath}`);
+  try {
+    if (operation === "verify") {
+      emit(verifyInstalledTarget(input.target), input.format);
+    } else {
+      const selected = selectLocalRelease(input.release!);
+      const result = operation === "bootstrap" ? bootstrapAndVerifyTarget(input.target, selected) : upgradeAndVerifyTarget(input.target, selected);
+      emit(result.report, input.format);
+    }
+  } catch (error) {
+    if (error instanceof ReleaseInstallFailure || error instanceof ReleaseVerificationFailure) emit(error.report, input.format);
+    throw error;
   }
-  console.log(authorization);
 }
