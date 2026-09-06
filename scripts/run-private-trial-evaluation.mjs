@@ -32,9 +32,9 @@ function unpackTarball(tarball, destination) {
   if (result.status !== 0) throw new Error(`selected npm artifact could not be unpacked: ${result.stderr || result.stdout}`);
   return join(extracted, "package");
 }
-function selectedApmSkill(bundle) {
-  const skill = join(bundle, "apm", "archie-context", ".apm", "skills", "archie");
-  if (!existsSync(skill)) throw new Error(`selected APM artifact is missing its Archie skill: ${skill}`);
+function selectedApmSkill(skillName) {
+  const skill = join("packages", "archie-context", ".apm", "skills", skillName);
+  if (!existsSync(skill)) throw new Error(`private APM context is missing its skill: ${skill}`);
   return skill;
 }
 function nativeRunner(bundle, { install = true, policy = "passed" } = {}) {
@@ -50,11 +50,17 @@ function nativeRunner(bundle, { install = true, policy = "passed" } = {}) {
       cpSync(unpackTarball(join(cwd, "npm", record.npm.locator.replace(/^file:npm\//, "")), extraction), installed, { recursive: true });
       rmSync(extraction, { recursive: true, force: true });
     }
+    if (command === "apm" && args[0] === "lock") {
+      if (!bundle) throw new Error("a selected APM release bundle is required for locking");
+      cpSync(join(bundle, "apm", "apm.lock.yaml"), join(cwd, "apm.lock.yaml"));
+    }
     if (command === "apm" && args[0] === "install" && install) {
-      if (!bundle) throw new Error("a selected APM artifact is required for installation");
-      const deployed = join(cwd, ".agents", "skills", "archie");
-      rmSync(deployed, { recursive: true, force: true });
-      cpSync(selectedApmSkill(bundle), deployed, { recursive: true });
+      const record = JSON.parse(readFileSync(join(cwd, ".archie", "release", "release-record-v1.json"), "utf8"));
+      for (const skill of record.apm.skills) {
+        const deployed = join(cwd, ".agents", "skills", skill);
+        rmSync(deployed, { recursive: true, force: true });
+        cpSync(selectedApmSkill(skill), deployed, { recursive: true });
+      }
     }
     if (command === "apm" && args[0] === "policy") {
       return policy === "not-applied"
@@ -93,7 +99,7 @@ function artifactProjection(bundle, target, record) {
     const artifactPackage = unpackTarball(join(target, ".archie", "runtime", "npm", record.npm.locator.replace(/^file:npm\//, "")), extraction);
     return {
       npm: manifest(join(artifactPackage, "vendor", "html-design")).digest === manifest(join(target, ".archie", "runtime", "node_modules", record.npm.package, "vendor", "html-design")).digest,
-      apm: manifest(selectedApmSkill(bundle)).digest === manifest(join(target, ".agents", "skills", record.apm.skill)).digest
+      apm: record.apm.skills.every((skill) => manifest(selectedApmSkill(skill)).digest === manifest(join(target, ".agents", "skills", skill)).digest)
     };
   } finally {
     rmSync(extraction, { recursive: true, force: true });
@@ -169,9 +175,9 @@ try {
     }),
     "installed-projection": rejectedMutation("installed-projection", ({ selected: pin, target: mutated }) => writeFileSync(join(mutated, ".archie", "runtime", "node_modules", pin.record.npm.package, "package.json"), `${JSON.stringify({ name: pin.record.npm.package, version: "0.0.0" })}\n`)),
     "html-byte": rejectedMutation("html-byte", ({ selected: pin, target: mutated }) => writeFileSync(join(mutated, ".archie", "runtime", "node_modules", pin.record.npm.package, "vendor", "html-design", "SKILL.md"), "changed\n")),
-    "shared-manifest": rejectedMutation("shared-manifest", ({ target: mutated }) => {
+    "shared-manifest": rejectedMutation("shared-manifest", ({ selected: pin, target: mutated }) => {
       const path = join(mutated, "apm.yml");
-      writeFileSync(path, readFileSync(path, "utf8").replace(".agents/skills/archie", ".agents/skills/replaced"));
+      writeFileSync(path, readFileSync(path, "utf8").replace(pin.record.apm.ref, "v-replaced"));
     })
   };
 

@@ -8,7 +8,7 @@ npm run private-trial:evaluate
 
 The command writes `evaluation/private-trials/latest.json`. It records the host versions, finalized record digest, replay byte manifests, text result, policy outcomes, recovery result, capability authority checks, and rejection result for each mutation.
 
-The evaluator stages the selected npm tarball in `.archie/runtime/npm/`, extracts that tarball for its hermetic npm simulation, and compares its HTML snapshot with the installed copy. It deploys the Archie skill from the selected bundle's APM artifact and compares that tree with `.agents/skills/archie/`. It does not copy either installed asset from `packages/` while evaluating a trial.
+The evaluator stages the selected npm tarball in `.archie/runtime/npm/`, extracts that tarball for its hermetic npm simulation, and compares its HTML snapshot with the installed copy. The native clean-target regression (`npm run test:e2e -- private-trials`) resolves the six-skill context from the private Git SSH locator, generates an APM 0.29 lock, and runs `apm install --frozen` without a target-local context source. The hermetic evaluator separately compares every deployed skill with the canonical context source.
 
 The mutation matrix covers npm lock, integrity, locator, and tarball bytes. It covers APM locator, ref, resolved commit, content hash, deployed projection, and shared manifest drift. It also rejects installed runtime and HTML changes.
 

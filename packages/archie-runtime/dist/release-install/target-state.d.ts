@@ -6,7 +6,7 @@ export interface PinnedTarget {
     targetDirectory: string;
     record: ReleaseRecordV1;
     recordBytes: string;
-    apm: ApmProjection;
+    apm: Required<ApmProjection>;
     npm: NpmProjection;
 }
 export interface StagedTarget extends PinnedTarget {

@@ -8,10 +8,16 @@ import { PRODUCT_VERSION } from "../product-version.js";
 import { validateHtmlSnapshotProvenance } from "../html-snapshot/verify.js";
 export const RELEASE_RECORD_SCHEMA_VERSION = 1;
 export const LOCAL_REVIEW_CLAIM = "locally-reviewed-private-trial";
+export const ARCHIE_SKILLS = ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "likec4-authoring"];
 const expectedRecordKeys = ["analyzerCompatibility", "apm", "authorization", "htmlDesignSnapshot", "npm", "product", "schemaVersion", "sourceCommit", "version"];
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const isSha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+function skills(value, label) {
+    if (!Array.isArray(value) || JSON.stringify(value) !== JSON.stringify(ARCHIE_SKILLS))
+        throw new Error(`${label} must be the complete sorted Archie skill set`);
+    return [...ARCHIE_SKILLS];
+}
 const object = (value, label) => {
     if (!value || typeof value !== "object" || Array.isArray(value))
         throw new Error(`${label} must be an object`);
@@ -43,7 +49,7 @@ function readBundleInput(path) {
     const npm = object(input.npm, "bundle npm input");
     const apm = object(input.apm, "bundle APM input");
     exactKeys(npm, ["package", "version", "locator", "lockFile", "tarball", "requiredPlatformPayload"], "bundle npm input");
-    exactKeys(apm, ["package", "skill", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
+    exactKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
     return {
         format: input.format,
         npm: {
@@ -51,7 +57,7 @@ function readBundleInput(path) {
             lockFile: string(npm.lockFile, "bundle npm lockFile"), tarball: string(npm.tarball, "bundle npm tarball"), requiredPlatformPayload: string(npm.requiredPlatformPayload, "bundle npm requiredPlatformPayload")
         },
         apm: {
-            package: string(apm.package, "bundle APM package"), skill: string(apm.skill, "bundle APM skill"), locator: string(apm.locator, "bundle APM locator"),
+            package: string(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: string(apm.locator, "bundle APM locator"),
             ref: string(apm.ref, "bundle APM ref"), manifest: string(apm.manifest, "bundle APM manifest"), lockFile: string(apm.lockFile, "bundle APM lockFile")
         }
     };
@@ -116,6 +122,8 @@ function apmEvidence(root, apm) {
     const manifest = readFileSync(within(root, apm.manifest), "utf8");
     if (field(manifest, "git", "APM manifest") !== apm.locator || field(manifest, "ref", "APM manifest") !== apm.ref)
         throw new Error("APM manifest differs from bundle input");
+    if (JSON.stringify([...manifest.matchAll(/^\s*-\s+([^\s]+)\s*$/gm)].map(match => match[1]).filter(value => ARCHIE_SKILLS.includes(value)).sort()) !== JSON.stringify(ARCHIE_SKILLS))
+        throw new Error("APM manifest skill subset differs from bundle input");
     const lock = readFileSync(within(root, apm.lockFile), "utf8");
     const resolvedCommit = field(lock, "resolved_commit", "APM lock");
     const contentHash = field(lock, "content_hash", "APM lock");
@@ -125,7 +133,7 @@ function apmEvidence(root, apm) {
         throw new Error("APM content hash is malformed");
     if (field(lock, "resolved_ref", "APM lock") !== apm.ref)
         throw new Error("APM lock ref differs from bundle input");
-    return { package: apm.package, skill: apm.skill, locator: apm.locator, ref: apm.ref, resolvedCommit, contentHash };
+    return { package: apm.package, skills: apm.skills, locator: apm.locator, ref: apm.ref, resolvedCommit, contentHash };
 }
 function validateHtmlRecord(value) {
     validateHtmlSnapshotProvenance(value);
@@ -163,9 +171,10 @@ function validateKnownRecord(record) {
     if (!isSha256(npm.tarballSha256) || !String(npm.lockIntegrity).startsWith("sha512-"))
         throw new Error("release record npm evidence is malformed");
     const apm = object(record.apm, "release record APM");
-    exactKeys(apm, ["package", "skill", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
-    for (const key of ["package", "skill", "locator", "ref"])
+    exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
+    for (const key of ["package", "locator", "ref"])
         string(apm[key], `release record APM ${key}`);
+    skills(apm.skills, "release record APM skills");
     if (!/^[a-f0-9]{40}$/i.test(string(apm.resolvedCommit, "release record APM resolvedCommit")) || !/^sha256:[a-f0-9]{64}$/i.test(string(apm.contentHash, "release record APM contentHash")))
         throw new Error("release record APM evidence is malformed");
     const compatibility = object(record.analyzerCompatibility, "release record analyzer compatibility");

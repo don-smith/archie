@@ -12,7 +12,7 @@ const provenance = "packages/archie-runtime/vendor/html-design.provenance.json";
 function root() { return mkdtempSync(join(tmpdir(), "archie-recovery-")); }
 function bundle(base) { const path = join(base, "bundle"); cpSync(fixture, path, { recursive: true }); finalizeRelease({ bundleDirectory: path, sourceCommit: "abcdef0123456789abcdef0123456789abcdef01", htmlProvenancePath: provenance }); return path; }
 
-function installedRunner({ command, cwd }) { if (command === "npm") { const record = JSON.parse(readFileSync(join(cwd, "..", "release", "release-record-v1.json"), "utf8")); const installed = join(cwd, "node_modules", record.npm.package); mkdirSync(installed, { recursive: true }); writeFileSync(join(installed, "package.json"), JSON.stringify({ name: record.npm.package, version: record.npm.version })); } return { exitCode: 0, stdout: "policy applied", stderr: "" }; }
+function installedRunner({ command, args, cwd }) { if (command === "npm") { const record = JSON.parse(readFileSync(join(cwd, "..", "release", "release-record-v1.json"), "utf8")); const installed = join(cwd, "node_modules", record.npm.package); mkdirSync(installed, { recursive: true }); writeFileSync(join(installed, "package.json"), JSON.stringify({ name: record.npm.package, version: record.npm.version })); } if (command === "apm" && args[0] === "lock") writeFileSync(join(cwd, "apm.lock.yaml"), readFileSync(join(fixture, "apm", "apm.lock.yaml"), "utf8")); return { exitCode: 0, stdout: "policy applied", stderr: "" }; }
 
 test("records failure and restores a bootstrap target when native work fails", () => {
   const base = root();
@@ -58,6 +58,6 @@ test("restores and revalidates the former installed target after native failure"
     }), ReleaseInstallFailure);
     assert.equal(readFileSync(installed, "utf8"), before);
     assert.equal(htmlChecks, 2, "checks run before staging and after compensation");
-    assert.equal(deploymentChecks, 2, "checks run before staging and after compensation");
+    assert.equal(deploymentChecks, 12, "all six skills are checked before staging and after compensation");
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

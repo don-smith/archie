@@ -1,6 +1,8 @@
 import { type HtmlSnapshotProvenance } from "../html-snapshot/verify.js";
 export declare const RELEASE_RECORD_SCHEMA_VERSION: 1;
 export declare const LOCAL_REVIEW_CLAIM: "locally-reviewed-private-trial";
+export declare const ARCHIE_SKILLS: readonly ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "likec4-authoring"];
+export type ArchieSkill = typeof ARCHIE_SKILLS[number];
 export interface ReleaseRecordV1 {
     schemaVersion: typeof RELEASE_RECORD_SCHEMA_VERSION;
     product: "archie";
@@ -20,7 +22,7 @@ export interface ReleaseRecordV1 {
     };
     apm: {
         package: string;
-        skill: string;
+        skills: ArchieSkill[];
         locator: string;
         ref: string;
         resolvedCommit: string;

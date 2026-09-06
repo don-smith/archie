@@ -8,11 +8,11 @@ This adapter has no extension, plugin, prompt-template alias, or host write inte
 
 ## Installation and discovery
 
-From a test-project root that contains the committed private context and already has a verified Archie runtime pin, deploy the frozen context:
+From an empty test-project root with GitHub SSH read access to `git@github.com:don-smith/archie.git`, bootstrap the selected local release bundle. Archie creates the APM manifest/lock, resolves the private context, and deploys it; do not copy `.apm`, `.agents`, or APM lock files into the target first:
 
 ```bash
 cd /path/to/test-project
-apm install --frozen
+archie bootstrap --release /path/to/reviewed-release-bundle
 pi
 ```
 
@@ -34,7 +34,7 @@ Record the adapter revision, Pi and APM versions, installation command, test pro
 
 | Case | Procedure | Expected evidence |
 |---|---|---|
-| Installation | Run the frozen APM command above. | `.agents/skills/archie/` and capability skill directories are deployed. |
+| Installation | Run bootstrap above; it runs native `apm lock` then `apm install --frozen`. | `.agents/skills/archie/` and all five capability skill directories are deployed. |
 | Skill discovery | Start Pi from the test-project root. | `archie` is available through the project Agent Skills directory. |
 | Explicit invocation | Enter `/skill:archie` with a fixture prompt. | Archie loads only on explicit invocation and reports its selected mode and route. |
 | Proposal boundary | Use the durable-change fixture. | Archie presents intent, evidence, affected artifacts, verification, and a developer decision before a durable change. |

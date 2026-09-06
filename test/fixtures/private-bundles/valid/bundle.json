@@ -10,8 +10,15 @@
   },
   "apm": {
     "package": "archie-context",
-    "skill": "archie",
-    "locator": "file:apm/archie-context",
+    "skills": [
+      "archie",
+      "architecture-assessment",
+      "architecture-conformance-onboarding",
+      "architecture-contracts",
+      "architecture-docs",
+      "likec4-authoring"
+    ],
+    "locator": "git@github.com:don-smith/archie.git",
     "ref": "v0.1.0-private.0",
     "manifest": "apm/apm.yml",
     "lockFile": "apm/apm.lock.yaml"

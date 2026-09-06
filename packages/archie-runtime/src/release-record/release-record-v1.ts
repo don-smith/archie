@@ -9,6 +9,8 @@ import { validateHtmlSnapshotProvenance, type HtmlSnapshotProvenance } from "../
 
 export const RELEASE_RECORD_SCHEMA_VERSION = 1 as const;
 export const LOCAL_REVIEW_CLAIM = "locally-reviewed-private-trial" as const;
+export const ARCHIE_SKILLS = ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "likec4-authoring"] as const;
+export type ArchieSkill = typeof ARCHIE_SKILLS[number];
 
 export interface ReleaseRecordV1 {
   schemaVersion: typeof RELEASE_RECORD_SCHEMA_VERSION;
@@ -17,7 +19,7 @@ export interface ReleaseRecordV1 {
   sourceCommit: string;
   authorization: { kind: "none"; claim: typeof LOCAL_REVIEW_CLAIM };
   npm: { package: string; version: string; locator: string; lockIntegrity: string; tarballSha256: string; requiredPlatformPayload: string };
-  apm: { package: string; skill: string; locator: string; ref: string; resolvedCommit: string; contentHash: string };
+  apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; resolvedCommit: string; contentHash: string };
   analyzerCompatibility: { adapter: string; typescript: string; nodeMajor: number; platform: string; architecture: string; platformPackage: string; knownDefects: string[] };
   htmlDesignSnapshot: HtmlSnapshotProvenance;
 }
@@ -38,13 +40,17 @@ export interface FinalizeReleaseResult {
 type BundleInput = {
   format: "archie-private-bundle-input-v1";
   npm: { package: string; version: string; locator: string; lockFile: string; tarball: string; requiredPlatformPayload: string };
-  apm: { package: string; skill: string; locator: string; ref: string; manifest: string; lockFile: string };
+  apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; manifest: string; lockFile: string };
 };
 
 const expectedRecordKeys = ["analyzerCompatibility", "apm", "authorization", "htmlDesignSnapshot", "npm", "product", "schemaVersion", "sourceCommit", "version"];
 const sha256 = (bytes: string | Buffer) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes: Buffer) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const isSha256 = (value: unknown) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+function skills(value: unknown, label: string): ArchieSkill[] {
+  if (!Array.isArray(value) || JSON.stringify(value) !== JSON.stringify(ARCHIE_SKILLS)) throw new Error(`${label} must be the complete sorted Archie skill set`);
+  return [...ARCHIE_SKILLS];
+}
 const object = (value: unknown, label: string): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object`);
   return value as Record<string, unknown>;
@@ -69,7 +75,7 @@ function readBundleInput(path: string): BundleInput {
   const npm = object(input.npm, "bundle npm input");
   const apm = object(input.apm, "bundle APM input");
   exactKeys(npm, ["package", "version", "locator", "lockFile", "tarball", "requiredPlatformPayload"], "bundle npm input");
-  exactKeys(apm, ["package", "skill", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
+  exactKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
   return {
     format: input.format,
     npm: {
@@ -77,7 +83,7 @@ function readBundleInput(path: string): BundleInput {
       lockFile: string(npm.lockFile, "bundle npm lockFile"), tarball: string(npm.tarball, "bundle npm tarball"), requiredPlatformPayload: string(npm.requiredPlatformPayload, "bundle npm requiredPlatformPayload")
     },
     apm: {
-      package: string(apm.package, "bundle APM package"), skill: string(apm.skill, "bundle APM skill"), locator: string(apm.locator, "bundle APM locator"),
+      package: string(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: string(apm.locator, "bundle APM locator"),
       ref: string(apm.ref, "bundle APM ref"), manifest: string(apm.manifest, "bundle APM manifest"), lockFile: string(apm.lockFile, "bundle APM lockFile")
     }
   };
@@ -132,13 +138,14 @@ function field(text: string, name: string, label: string): string {
 function apmEvidence(root: string, apm: BundleInput["apm"]): ReleaseRecordV1["apm"] {
   const manifest = readFileSync(within(root, apm.manifest), "utf8");
   if (field(manifest, "git", "APM manifest") !== apm.locator || field(manifest, "ref", "APM manifest") !== apm.ref) throw new Error("APM manifest differs from bundle input");
+  if (JSON.stringify([...manifest.matchAll(/^\s*-\s+([^\s]+)\s*$/gm)].map(match => match[1]).filter(value => ARCHIE_SKILLS.includes(value as ArchieSkill)).sort()) !== JSON.stringify(ARCHIE_SKILLS)) throw new Error("APM manifest skill subset differs from bundle input");
   const lock = readFileSync(within(root, apm.lockFile), "utf8");
   const resolvedCommit = field(lock, "resolved_commit", "APM lock");
   const contentHash = field(lock, "content_hash", "APM lock");
   if (!/^[a-f0-9]{40}$/i.test(resolvedCommit)) throw new Error("APM resolved commit is malformed");
   if (!/^sha256:[a-f0-9]{64}$/i.test(contentHash)) throw new Error("APM content hash is malformed");
   if (field(lock, "resolved_ref", "APM lock") !== apm.ref) throw new Error("APM lock ref differs from bundle input");
-  return { package: apm.package, skill: apm.skill, locator: apm.locator, ref: apm.ref, resolvedCommit, contentHash };
+  return { package: apm.package, skills: apm.skills, locator: apm.locator, ref: apm.ref, resolvedCommit, contentHash };
 }
 
 function validateHtmlRecord(value: unknown): asserts value is HtmlSnapshotProvenance {
@@ -171,8 +178,9 @@ function validateKnownRecord(record: Record<string, unknown>): void {
   for (const key of ["package", "version", "locator", "lockIntegrity", "requiredPlatformPayload"]) string(npm[key], `release record npm ${key}`);
   if (!isSha256(npm.tarballSha256) || !String(npm.lockIntegrity).startsWith("sha512-")) throw new Error("release record npm evidence is malformed");
   const apm = object(record.apm, "release record APM");
-  exactKeys(apm, ["package", "skill", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
-  for (const key of ["package", "skill", "locator", "ref"]) string(apm[key], `release record APM ${key}`);
+  exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
+  for (const key of ["package", "locator", "ref"]) string(apm[key], `release record APM ${key}`);
+  skills(apm.skills, "release record APM skills");
   if (!/^[a-f0-9]{40}$/i.test(string(apm.resolvedCommit, "release record APM resolvedCommit")) || !/^sha256:[a-f0-9]{64}$/i.test(string(apm.contentHash, "release record APM contentHash"))) throw new Error("release record APM evidence is malformed");
   const compatibility = object(record.analyzerCompatibility, "release record analyzer compatibility");
   exactKeys(compatibility, ["adapter", "typescript", "nodeMajor", "platform", "architecture", "platformPackage", "knownDefects"], "release record analyzer compatibility");

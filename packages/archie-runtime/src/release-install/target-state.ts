@@ -12,7 +12,7 @@ export interface PinnedTarget {
   targetDirectory: string;
   record: ReleaseRecordV1;
   recordBytes: string;
-  apm: ApmProjection;
+  apm: Required<ApmProjection>;
   npm: NpmProjection;
 }
 
@@ -68,8 +68,9 @@ export function stageSelectedRelease(targetDirectory: string, selected: Selected
   writeFileSync(p.lock, npm.lock);
   copyFileSync(selected.tarballPath, join(p.runtimeNpm, selected.tarballName));
   writeFileSync(p.apmManifest, apm.manifest);
-  writeFileSync(p.apmLock, apm.lock);
-  return { targetDirectory: p.target, record: selected.record, recordBytes: selected.recordBytes, npm, apm, selectionReceiptPath: p.receipt };
+  // APM rejects an empty lockfile; only preserve an existing preimage until native `apm lock` replaces it.
+  if (apm.lock !== undefined) writeFileSync(p.apmLock, apm.lock);
+  return { targetDirectory: p.target, record: selected.record, recordBytes: selected.recordBytes, npm, apm: { ...apm, lock: apm.lock ?? "" }, selectionReceiptPath: p.receipt };
 }
 
 export function bootstrapTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget {

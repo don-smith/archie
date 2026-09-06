@@ -14,7 +14,7 @@ test("rejects pinned APM lock drift before npm or APM native work", () => {
   try {
     const bundle = join(base, "bundle"); cpSync(fixture, bundle, { recursive: true }); finalizeRelease({ bundleDirectory: bundle, sourceCommit: "abcdef0123456789abcdef0123456789abcdef01", htmlProvenancePath: provenance });
     const target = join(base, "target"); mkdirSync(target); bootstrapTarget(target, selectLocalRelease(bundle));
-    const lock = join(target, "apm.lock.yaml"); writeFileSync(lock, readFileSync(lock, "utf8").replace(/content_hash: .*/, "content_hash: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+    const lock = join(target, "apm.lock.yaml"); writeFileSync(lock, readFileSync(join(bundle, "apm", "apm.lock.yaml"), "utf8").replace(/content_hash: .*/, "content_hash: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
     let calls = 0;
     assert.throws(() => verifyInstalledTarget(target, { run: () => { calls += 1; return { exitCode: 0, stdout: "", stderr: "" }; } }), /drifted/);
     assert.equal(calls, 0);

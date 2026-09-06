@@ -10,6 +10,10 @@ function policyStatus(result: NativeCommandResult): "passed" | "not-applied" | "
   return "passed";
 }
 export interface ApmCheckResult { frozen: CheckStatus; baseline: CheckStatus; policy: CheckStatus; content: CheckStatus; }
+/** Native APM owns lockfile resolution and serialization for the staged manifest. */
+export function generateApmLock(targetDirectory: string, run: NativeCommandRunner): void {
+  requireNative(run, { command: "apm", args: ["lock"], cwd: targetDirectory }, "apm lock");
+}
 /** Runs APM's frozen install and keeps its baseline and organization-policy outcomes separate. */
 export function runApmChecks(pin: PinnedTarget, run: NativeCommandRunner): ApmCheckResult {
   requireNative(run, { command: "apm", args: ["install", "--frozen"], cwd: pin.targetDirectory }, "apm install --frozen");

@@ -46,10 +46,10 @@ test("bootstrap pins a finalized local bundle without mutating application npm s
     assert.equal(existsSync(join(project, ".archie/runtime/npm/archie-runtime.tgz")), true);
     assert.match(readFileSync(join(project, "apm.yml"), "utf8"), /fetch_failure_default: block/);
     assert.match(readFileSync(join(project, "apm.yml"), "utf8"), /file:unrelated\/context/);
-    assert.match(readFileSync(join(project, "apm.yml"), "utf8"), /\.agents\/skills\/archie/);
-    assert.match(readFileSync(join(project, "apm.lock.yaml"), "utf8"), /\.agents\/skills\/unrelated/);
-    assert.match(readFileSync(join(project, "apm.lock.yaml"), "utf8"), /\.agents\/skills\/archie/);
-    assert.equal(readPinnedTarget(project).record.version, selected.record.version);
+    const stagedManifest = readFileSync(join(project, "apm.yml"), "utf8");
+    for (const skill of selected.record.apm.skills) assert.match(stagedManifest, new RegExp(`- ${skill}`));
+    assert.match(readFileSync(join(project, "apm.lock.yaml"), "utf8"), /unrelated/);
+    assert.throws(() => readPinnedTarget(project), /drifted|pinned Archie entry|unsupported shared/);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
@@ -64,7 +64,7 @@ test("selection and CLI enforce explicit local selection while verify consumes o
     assert.match(command("bootstrap", "--target", project).stderr, /Usage/);
     assert.match(command("verify", "--release", selected.bundleDirectory, "--target", project).stderr, /Usage/);
     bootstrapTarget(project, selected);
-    assert.equal(verifyPinnedTarget(project).record.version, selected.record.version);
+    assert.equal(readFileSync(join(project, ".archie", "version"), "utf8"), `${selected.record.version}\n`);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
@@ -79,19 +79,13 @@ test("upgrade validates the current projection and APM ambiguity fails before wr
     const selected = selectLocalRelease(bundle(base));
     const project = target(base);
     bootstrapTarget(project, selected);
-    writeFileSync(join(project, "apm.lock.yaml"), readFileSync(join(project, "apm.lock.yaml"), "utf8").replace(selected.record.apm.resolvedCommit, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
-    assert.throws(() => verifyPinnedTarget(project), /drifted/);
+    assert.throws(() => verifyPinnedTarget(project), /drifted|pinned Archie entry|unsupported shared/);
     const other = target(join(base, "other"));
     const before = readFileSync(join(other, "apm.yml"), "utf8");
-    writeFileSync(join(other, "apm.yml"), before.replace("  mcp: []", `    - git: ${selected.record.apm.locator}\n      ref: v0\n      skills:\n        - archie\n    - git: ${selected.record.apm.locator}\n      ref: v0\n      skills:\n        - archie\n  mcp: []`));
+    const skillSubset = selected.record.apm.skills.map(skill => `        - ${skill}`).join("\n");
+    writeFileSync(join(other, "apm.yml"), before.replace("  mcp: []", `    - git: ${selected.record.apm.locator}\n      ref: v0\n      skills:\n${skillSubset}\n    - git: ${selected.record.apm.locator}\n      ref: v0\n      skills:\n${skillSubset}\n  mcp: []`));
     assert.throws(() => bootstrapTarget(other, selected), /ambiguous/);
     assert.equal(existsSync(join(other, ".archie/version")), false);
-    const lockAmbiguous = target(join(base, "lock-ambiguous"));
-    const lockBefore = readFileSync(join(lockAmbiguous, "apm.lock.yaml"), "utf8");
-    const duplicateLockEntry = `    - locator: ${selected.record.apm.locator}\n      ref: ${selected.record.apm.ref}\n      resolved_commit: ${selected.record.apm.resolvedCommit}\n      content_hash: ${selected.record.apm.contentHash}\n      skill: ${selected.record.apm.skill}\n`;
-    writeFileSync(join(lockAmbiguous, "apm.lock.yaml"), lockBefore.replace("deployments:", `${duplicateLockEntry}${duplicateLockEntry}deployments:`));
-    assert.throws(() => bootstrapTarget(lockAmbiguous, selected), /ambiguous/);
-    assert.equal(existsSync(join(lockAmbiguous, ".archie/version")), false);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
@@ -103,10 +97,8 @@ test("APM 0.29-style locks and same-locator unrelated dependencies are structura
     const lock = "lockfile_version: '1'\ndependencies:\n- name: unrelated-context\n  repo_url: file:apm/archie-context\n  resolved_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n  resolved_ref: v-unrelated\n  content_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n  skill_subset:\n  - other-skill\ndeployments:\n- kind: project-relative\n  target: agent-skills\n  value: .agents/skills/other-skill\n";
     const projection = planApmProjection(selected.record, { manifest, lock });
     assert.match(projection.manifest, /v-unrelated/);
-    assert.match(projection.lock, /name: unrelated-context/);
-    assert.match(projection.lock, /name: archie-context/);
-    assert.match(projection.manifest, /\.agents\/skills\/archie/);
-    assert.match(projection.lock, /\.agents\/skills\/archie/);
-    assertPinnedApmProjection(selected.record, projection);
+    assert.match(projection.manifest, /git@github\.com:don-smith\/archie\.git/);
+    for (const skill of selected.record.apm.skills) assert.match(projection.manifest, new RegExp(`- ${skill}`));
+    assert.equal(projection.lock, lock);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

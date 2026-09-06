@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
-import { parseReleaseRecord, validateBundleLayout } from "../release-record/release-record-v1.js";
+import { ARCHIE_SKILLS, parseReleaseRecord, validateBundleLayout } from "../release-record/release-record-v1.js";
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const object = (value, label) => {
@@ -26,6 +26,11 @@ const json = (path, label) => {
         throw new Error(`${label} is not valid JSON`);
     }
 };
+const skills = (value, label) => {
+    if (!Array.isArray(value) || JSON.stringify(value) !== JSON.stringify(ARCHIE_SKILLS))
+        throw new Error(`${label} must be the complete sorted Archie skill set`);
+    return [...ARCHIE_SKILLS];
+};
 function bundleFile(root, entry) {
     if (!entry || entry.startsWith("/") || relative(root, resolve(root, entry)).startsWith(".."))
         throw new Error(`bundle path escapes its directory: ${entry}`);
@@ -42,11 +47,11 @@ function bundleInput(root) {
     const npm = object(value.npm, "bundle npm input");
     const apm = object(value.apm, "bundle APM input");
     exactKeys(npm, ["package", "version", "locator", "lockFile", "tarball", "requiredPlatformPayload"], "bundle npm input");
-    exactKeys(apm, ["package", "skill", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
+    exactKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
     return {
         format: value.format,
         npm: { package: text(npm.package, "bundle npm package"), version: text(npm.version, "bundle npm version"), locator: text(npm.locator, "bundle npm locator"), lockFile: text(npm.lockFile, "bundle npm lockFile"), tarball: text(npm.tarball, "bundle npm tarball"), requiredPlatformPayload: text(npm.requiredPlatformPayload, "bundle npm requiredPlatformPayload") },
-        apm: { package: text(apm.package, "bundle APM package"), skill: text(apm.skill, "bundle APM skill"), locator: text(apm.locator, "bundle APM locator"), ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile") }
+        apm: { package: text(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: text(apm.locator, "bundle APM locator"), ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile") }
     };
 }
 function field(contents, name, label) {
@@ -82,7 +87,7 @@ export function selectLocalRelease(directory) {
         throw new Error("selected bundle npm evidence differs from its finalized record");
     const manifest = readFileSync(bundleFile(root, input.apm.manifest), "utf8");
     const apmLock = readFileSync(bundleFile(root, input.apm.lockFile), "utf8");
-    if (input.apm.package !== record.apm.package || input.apm.skill !== record.apm.skill || input.apm.locator !== record.apm.locator || input.apm.ref !== record.apm.ref || field(manifest, "git", "bundle APM manifest") !== record.apm.locator || field(manifest, "ref", "bundle APM manifest") !== record.apm.ref || field(apmLock, "resolved_commit", "bundle APM lock") !== record.apm.resolvedCommit || field(apmLock, "resolved_ref", "bundle APM lock") !== record.apm.ref || field(apmLock, "content_hash", "bundle APM lock") !== record.apm.contentHash)
+    if (input.apm.package !== record.apm.package || JSON.stringify(input.apm.skills) !== JSON.stringify(record.apm.skills) || input.apm.locator !== record.apm.locator || input.apm.ref !== record.apm.ref || field(manifest, "git", "bundle APM manifest") !== record.apm.locator || field(manifest, "ref", "bundle APM manifest") !== record.apm.ref || field(apmLock, "resolved_commit", "bundle APM lock") !== record.apm.resolvedCommit || field(apmLock, "resolved_ref", "bundle APM lock") !== record.apm.ref || field(apmLock, "content_hash", "bundle APM lock") !== record.apm.contentHash)
         throw new Error("selected bundle APM evidence differs from its finalized record");
     return { bundleDirectory: root, record, recordBytes, recordSha256: sha256(recordBytes), tarballPath, tarballName: basename(tarballPath) };
 }

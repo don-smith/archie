@@ -55,8 +55,10 @@ export function stageSelectedRelease(targetDirectory, selected, previous) {
     writeFileSync(p.lock, npm.lock);
     copyFileSync(selected.tarballPath, join(p.runtimeNpm, selected.tarballName));
     writeFileSync(p.apmManifest, apm.manifest);
-    writeFileSync(p.apmLock, apm.lock);
-    return { targetDirectory: p.target, record: selected.record, recordBytes: selected.recordBytes, npm, apm, selectionReceiptPath: p.receipt };
+    // APM rejects an empty lockfile; only preserve an existing preimage until native `apm lock` replaces it.
+    if (apm.lock !== undefined)
+        writeFileSync(p.apmLock, apm.lock);
+    return { targetDirectory: p.target, record: selected.record, recordBytes: selected.recordBytes, npm, apm: { ...apm, lock: apm.lock ?? "" }, selectionReceiptPath: p.receipt };
 }
 export function bootstrapTarget(targetDirectory, selected) {
     const p = paths(targetDirectory);

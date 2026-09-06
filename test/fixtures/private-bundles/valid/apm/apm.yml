@@ -1,7 +1,19 @@
 name: archie-private-context
+version: 0.1.0-private.0
+private: true
+targets:
+  - agent-skills
 dependencies:
   apm:
-    - git: file:apm/archie-context
+    - git: git@github.com:don-smith/archie.git
       ref: v0.1.0-private.0
       skills:
         - archie
+        - architecture-assessment
+        - architecture-conformance-onboarding
+        - architecture-contracts
+        - architecture-docs
+        - likec4-authoring
+  mcp: []
+includes: auto
+scripts: {}

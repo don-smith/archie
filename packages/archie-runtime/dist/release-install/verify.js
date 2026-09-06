@@ -6,10 +6,14 @@ import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget } from "./target-
 import { initialInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi } from "./run-npm.js";
-import { runApmChecks } from "./run-apm.js";
+import { generateApmLock, runApmChecks } from "./run-apm.js";
 function paths(targetDirectory) {
     const runtime = join(targetDirectory, ".archie", "runtime");
     return { runtime, installedPackage: (name) => join(runtime, "node_modules", name) };
+}
+function verifyDeployedSkills(targetDirectory, record, verifyApmDeployment) {
+    for (const skill of record.apm.skills)
+        verifyApmDeployment(join(targetDirectory, ".agents", "skills", skill), record);
 }
 export class ReleaseVerificationFailure extends Error {
     report;
@@ -31,7 +35,7 @@ export function verifyCurrentInstalledTarget(targetDirectory, options = {}) {
     assertInstalledNpm(pin);
     const p = paths(pin.targetDirectory);
     verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
-    verifyApmDeployment(join(pin.targetDirectory, ".agents", "skills", pin.record.apm.skill), pin.record);
+    verifyDeployedSkills(pin.targetDirectory, pin.record, verifyApmDeployment);
 }
 /** Executes the native, pinned-state-only checks in their required order. */
 export function verifyInstalledTarget(targetDirectory, options = {}) {
@@ -55,7 +59,7 @@ export function verifyInstalledTarget(targetDirectory, options = {}) {
         pin = readPinnedTarget(targetDirectory);
         phase = "apm";
         report.apm = runApmChecks(pin, run);
-        verifyApmDeployment(join(pin.targetDirectory, ".agents", "skills", pin.record.apm.skill), pin.record);
+        verifyDeployedSkills(pin.targetDirectory, pin.record, verifyApmDeployment);
         // Re-read after APM has deployed its projection and revalidate tracked bytes.
         pin = readPinnedTarget(targetDirectory);
         report.apm.content = "passed";
@@ -79,8 +83,8 @@ export class ReleaseInstallFailure extends Error {
         this.name = "ReleaseInstallFailure";
     }
 }
-function stageAndVerify(targetDirectory, skill, stage, previousPin, options) {
-    const journal = beginInstallJournal(targetDirectory, [skill]);
+function stageAndVerify(targetDirectory, skills, stage, previousPin, options) {
+    const journal = beginInstallJournal(targetDirectory, skills);
     const report = initialInstallReport();
     let phase = "staging";
     try {
@@ -88,6 +92,7 @@ function stageAndVerify(targetDirectory, skill, stage, previousPin, options) {
         const staged = stage();
         phase = "native-verification";
         updateInstallJournal(targetDirectory, journal, "native-verification");
+        generateApmLock(targetDirectory, options.run ?? nativeRun);
         const verified = verifyInstalledTarget(targetDirectory, options);
         updateInstallJournal(targetDirectory, journal, "completed");
         return { ...staged, report: verified };
@@ -114,7 +119,7 @@ function stageAndVerify(targetDirectory, skill, stage, previousPin, options) {
     }
 }
 export function bootstrapAndVerifyTarget(targetDirectory, selected, options = {}) {
-    return stageAndVerify(targetDirectory, selected.record.apm.skill, () => bootstrapTarget(targetDirectory, selected), false, options);
+    return stageAndVerify(targetDirectory, selected.record.apm.skills, () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory, selected, options = {}) {
     // Do not let staging overwrite a target whose installed runtime, HTML bytes, or deployed skill is already inconsistent.
@@ -126,6 +131,6 @@ export function upgradeAndVerifyTarget(targetDirectory, selected, options = {}) 
         report.failedPhase = "pre-upgrade-verification";
         throw new ReleaseInstallFailure("current installed target verification failed before upgrade staging", report, failure);
     }
-    return stageAndVerify(targetDirectory, selected.record.apm.skill, () => stageUpgradeTarget(targetDirectory, selected), true, options);
+    return stageAndVerify(targetDirectory, selected.record.apm.skills, () => stageUpgradeTarget(targetDirectory, selected), true, options);
 }
 //# sourceMappingURL=verify.js.map
