@@ -1,0 +1,17 @@
+{
+  "name": "@archie/context",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "README.md",
+    "product-version.json",
+    "apm.yml",
+    "apm.lock.yaml",
+    ".apm/skills",
+    "scripts/dispatch-runtime.mjs"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  }
+}
