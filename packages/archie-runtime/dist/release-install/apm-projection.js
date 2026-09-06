@@ -1,12 +1,25 @@
-import { ARCHIE_SKILLS } from "../release-record/release-record-v1.js";
 const scalar = (value, label) => {
     if (!value || /[\r\n#]/.test(value))
         throw new Error(`${label} cannot be safely represented in the supported APM projection`);
     return value;
 };
 const field = (lines, name) => lines.map(line => line.match(new RegExp(`^\\s*(?:-\\s*)?${name}:\\s*(\\S+)\\s*$`))?.[1]).find(Boolean);
-const skillSubset = (lines) => lines.filter(line => /^\s*-\s+\S+\s*$/.test(line)).map(line => line.trim().slice(2)).filter(value => ARCHIE_SKILLS.includes(value)).sort();
-const sameSkills = (lines, skills) => JSON.stringify(skillSubset(lines)) === JSON.stringify(skills);
+const skillSubset = (lines, header) => {
+    const index = lines.findIndex(line => line.trim() === `${header}:`);
+    if (index < 0)
+        return [];
+    const values = [];
+    for (const line of lines.slice(index + 1)) {
+        if (/^\s*-\s+\S+\s*$/.test(line)) {
+            values.push(line.trim().slice(2));
+            continue;
+        }
+        if (line.trim())
+            break;
+    }
+    return values.sort();
+};
+const sameSkills = (lines, skills, header) => JSON.stringify(skillSubset(lines, header)) === JSON.stringify(skills);
 const repoUrl = (locator) => {
     const match = locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/);
     if (!match)
@@ -50,7 +63,7 @@ const dependency = (record) => [
     "      skills:",
     ...record.apm.skills.map(skill => `        - ${scalar(skill, "APM skill")}`)
 ];
-const ownsDependency = (record, entry) => field(entry, "git") === record.apm.locator && sameSkills(entry, record.apm.skills);
+const ownsDependency = (record, entry) => field(entry, "git") === record.apm.locator && sameSkills(entry, record.apm.skills, "skills");
 function blankManifest(record) {
     return [
         "name: archie-private-runtime", `version: ${scalar(record.version, "Archie version")}`, "private: true", "targets:", "  - agent-skills",
@@ -80,12 +93,12 @@ function requiredEntry(lines, area, indent, owned, label) {
 export function assertPinnedApmProjection(record, projection) {
     const manifest = projection.manifest.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
     const manifestDependency = requiredEntry(manifest, nestedSection(manifest, section(manifest, "dependencies", "APM manifest"), "apm", "APM manifest"), "    ", entry => ownsDependency(record, entry), "APM manifest dependencies");
-    if (field(manifestDependency, "ref") !== record.apm.ref || !sameSkills(manifestDependency, record.apm.skills))
+    if (field(manifestDependency, "ref") !== record.apm.ref || !sameSkills(manifestDependency, record.apm.skills, "skills"))
         throw new Error("pinned Archie APM manifest has drifted");
     const lock = projection.lock.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
     const dependencies = section(lock, "dependencies", "APM lock");
     const entry = requiredEntry(lock, dependencies, "", lines => field(lines, "name") === record.apm.package && field(lines, "repo_url") === repoUrl(record.apm.locator), "APM lock dependencies");
-    if (field(entry, "resolved_ref") !== record.apm.ref || field(entry, "resolved_commit") !== record.apm.resolvedCommit || field(entry, "content_hash") !== record.apm.contentHash || !sameSkills(entry, record.apm.skills))
+    if (field(entry, "resolved_ref") !== record.apm.ref || field(entry, "resolved_commit") !== record.apm.resolvedCommit || field(entry, "content_hash") !== record.apm.contentHash || !sameSkills(entry, record.apm.skills, "skill_subset"))
         throw new Error("pinned Archie APM lock has drifted");
 }
 //# sourceMappingURL=apm-projection.js.map

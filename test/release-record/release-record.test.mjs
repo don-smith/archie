@@ -46,6 +46,10 @@ test("malformed final artifact evidence and unsupported layouts reject", () => {
     writeFileSync(join(copied.bundle, "npm", "archie-runtime.tgz"), readFileSync(join(fixture, "npm", "archie-runtime.tgz")));
     writeFileSync(join(copied.bundle, "apm", "apm.lock.yaml"), "resolved_commit: nope\n");
     assert.throws(() => finalize(copied.bundle), /exactly one|malformed/);
+    writeFileSync(join(copied.bundle, "apm", "apm.lock.yaml"), readFileSync(join(fixture, "apm", "apm.lock.yaml")));
+    const manifestPath = join(copied.bundle, "apm", "apm.yml");
+    writeFileSync(manifestPath, readFileSync(manifestPath, "utf8").replace("  mcp: []", "        - unrecorded-skill\n  mcp: []"));
+    assert.throws(() => finalize(copied.bundle), /skill subset/);
     writeFileSync(join(copied.bundle, "unexpected.txt"), "no");
     assert.throws(() => validateBundleLayout(copied.bundle), /unsupported entry/);
   } finally { rmSync(copied.root, { recursive: true, force: true }); }

@@ -134,11 +134,22 @@ function field(text: string, name: string, label: string): string {
   if (matches.length !== 1) throw new Error(`${label} must contain exactly one ${name} field`);
   return matches[0]![1]!;
 }
+function skillSubset(text: string, header: string, label: string): string[] {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const index = lines.findIndex(line => line.trim() === `${header}:`);
+  if (index < 0) throw new Error(`${label} is missing ${header}`);
+  const values: string[] = [];
+  for (const line of lines.slice(index + 1)) {
+    if (/^\s*-\s+\S+\s*$/.test(line)) { values.push(line.trim().slice(2)); continue; }
+    if (line.trim()) break;
+  }
+  return values;
+}
 
 function apmEvidence(root: string, apm: BundleInput["apm"]): ReleaseRecordV1["apm"] {
   const manifest = readFileSync(within(root, apm.manifest), "utf8");
   if (field(manifest, "git", "APM manifest") !== apm.locator || field(manifest, "ref", "APM manifest") !== apm.ref) throw new Error("APM manifest differs from bundle input");
-  if (JSON.stringify([...manifest.matchAll(/^\s*-\s+([^\s]+)\s*$/gm)].map(match => match[1]).filter(value => ARCHIE_SKILLS.includes(value as ArchieSkill)).sort()) !== JSON.stringify(ARCHIE_SKILLS)) throw new Error("APM manifest skill subset differs from bundle input");
+  if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(ARCHIE_SKILLS)) throw new Error("APM manifest skill subset differs from bundle input");
   const lock = readFileSync(within(root, apm.lockFile), "utf8");
   const resolvedCommit = field(lock, "resolved_commit", "APM lock");
   const contentHash = field(lock, "content_hash", "APM lock");

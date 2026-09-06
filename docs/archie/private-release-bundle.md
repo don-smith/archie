@@ -41,6 +41,22 @@ That is a consistency statement about bytes selected for local review. It is not
 
 `archie-release finalize` is local-only. It does not fetch artifacts, publish a package, change a target, or choose a release for bootstrap, upgrade, or verify.
 
+## Private context publication
+
+Before finalizing a version, publish the matching `packages/archie-context/` contents to the private context repository and tag it with the product version. The target's Git identity must have read access; do not put credentials in the bundle.
+
+```bash
+git clone git@github.com:don-smith/archie.git /tmp/archie-context
+git -C /tmp/archie-context checkout main
+rsync -a --delete --exclude .git packages/archie-context/ /tmp/archie-context/
+git -C /tmp/archie-context add -A
+git -C /tmp/archie-context commit -m "feat: publish Archie context <version>"
+git -C /tmp/archie-context tag -a v<version> -m "Archie context <version>"
+git -C /tmp/archie-context push origin main --tags
+```
+
+Then create the bundle's APM manifest with `git: git@github.com:don-smith/archie.git`, `ref: v<version>`, and the six Archie skills; run `apm lock` in that bundle context to obtain the matching resolved commit/content hash. Finalize only after those values and the npm tarball are final.
+
 ## Target selection and projection planning
 
 Select the reviewed local directory explicitly when staging a target:
