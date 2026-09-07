@@ -14,7 +14,16 @@ Each fixture is a Markdown manifest with these fields:
 - **Deterministic assertions.** Markers and ordering a future runner or reviewer can check.
 - **Human review rubric.** The bounded quality review for the case.
 
-The five fixtures are hermetic except for the maintained capabilities named in their manifests. A later trial records the fixture prompt, Archie output, selected route, assertion result, reviewer score, and relevant host smoke evidence under that trial's workstream or evaluation record.
+The six fixtures are hermetic except for the maintained capabilities named in their manifests. A later trial records the fixture prompt, Archie output, selected route, assertion result, reviewer score, and relevant host smoke evidence under that trial's workstream or evaluation record.
+
+## Fixtures
+
+- [Unknown repository onboarding](fixtures/unknown-repository.md)
+- [Existing architecture-assets onboarding](fixtures/existing-architecture-assets.md)
+- [Evidence-backed advisory request](fixtures/evidence-backed-advice.md)
+- [Vocabulary ambiguity](fixtures/vocabulary-ambiguity.md)
+- [Durable-change proposal](fixtures/durable-change-proposal.md)
+- [Drift Detection pressure case](fixtures/drift-detection.md)
 
 ## Deterministic assertions
 
