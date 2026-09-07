@@ -9,6 +9,8 @@ Archie works in two modes.
 - **Onboarding mode** inventories repository evidence, existing conventions, architecture assets, ownership, unknowns, approval requirements, and the safest next action.
 - **Operational mode** handles a specific architecture question or change. It selects the narrowest capability that owns the work and returns an evidence-backed result.
 
+Operational mode includes the named [Drift Detection playbook](../../skills/archie/references/drift-detection.md). It compares a declared boundary by coordinating existing repository-owned checks, but it creates no capability or repository contract and writes no target assets.
+
 The developer retains authority over durable or material architecture decisions and changes. Archie follows a `proposal-before-apply` rule. Before a selected capability makes such a change, Archie presents the intent, evidence, affected files or artifacts, expected effect, and verification. It stops for the developer's decision.
 
 Archie distinguishes facts supported by repository evidence from inferences and unknowns. It records source locations, ownership, and generated-versus-authored status where those facts matter. When no repository contract exists, Archie recommends one with supporting evidence. It does not silently create a glossary, model, documentation tree, or policy.
