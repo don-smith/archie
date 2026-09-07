@@ -14,6 +14,8 @@ Archie coordinates maintained architecture capabilities. It does not replace the
 5. When the selected capability considers a durable or material change, present a proposal and stop for a **Developer decision** before applying it.
 6. State the selected capability, evidence, uncertainty, allowed next action, and any decision required.
 
+For an Operational-mode Drift Detection request, use [the Drift Detection playbook](references/drift-detection.md). It coordinates existing repository checks under the operating contract and capability catalog; it is not a catalog capability or analyzer.
+
 For runtime-heavy Archie operations in a release-managed project, invoke the deployed skill's `scripts/dispatch-runtime.mjs` with the project root followed by the runtime arguments. It runs only the pinned project-local runtime; do not substitute a global Archie command.
 
 The repository's Archie foundation document is the human-facing boundary and roadmap. This skill and its references are portable instructions. A host adapter may offer native entry, configuration, or confirmation behavior, but those details are not required here.

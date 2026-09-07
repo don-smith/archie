@@ -22,6 +22,15 @@ test("canonical skill sources exactly match the APM context projection", () => {
   }
 });
 
+test("Archie ships the canonical Drift Detection playbook route and reference", () => {
+  const canonicalSkill = readFileSync("skills/archie/SKILL.md", "utf8");
+  const canonicalReference = readFileSync("skills/archie/references/drift-detection.md", "utf8");
+  assert.match(canonicalSkill, /\[the Drift Detection playbook\]\(references\/drift-detection\.md\)/);
+  assert.ok(canonicalReference.length > 0);
+  assert.equal(readFileSync(join(context, ".apm", "skills", "archie", "SKILL.md"), "utf8"), canonicalSkill);
+  assert.equal(readFileSync(join(context, ".apm", "skills", "archie", "references", "drift-detection.md"), "utf8"), canonicalReference);
+});
+
 test("runtime dispatcher invokes only the pinned project-local runtime", () => {
   const base = mkdtempSync(join(tmpdir(), "archie-context-dispatch-"));
   try {
