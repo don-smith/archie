@@ -43,7 +43,8 @@ export function stageSelectedRelease(targetDirectory, selected, previous) {
     const existingLock = readOptional(p.apmLock);
     if ((existingManifest === undefined) !== (existingLock === undefined))
         throw new Error("APM target projection is incomplete; cannot safely preserve shared state");
-    const npm = npmProjection(selected.record);
+    const generatedNpm = npmProjection(selected.record);
+    const npm = { manifest: generatedNpm.manifest, lock: selected.npmLockBytes };
     validateNpmProjection(npm, selected.record);
     const apm = planApmProjection(selected.record, { manifest: existingManifest, lock: existingLock }, previous);
     mkdirSync(p.release, { recursive: true });

@@ -236,7 +236,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:73a1d0a2b1996bf4f8f4cd4903928fab80d088179b61754c61b678b817b506a6
+  content_hash: sha256:0877c385f73f6c6ccc471b584ab2a1a61078e9b88e1e052d025ca481f8897cd1
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-docs/package-commands.md
@@ -245,7 +245,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:ba4721ac9f866646a4811275bbfbf8434fe2cb3b83064a3c80204c6d48b683ed
+  content_hash: sha256:b1138b2655b35cbaa53307e838c7df767b2a759b3aa980a1b44d51532b17b2b0
 - kind: project-relative
   target: agents
   value: .agents/skills/likec4-authoring
@@ -263,7 +263,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:1b2bfcd09a6312cbcbc0b1d94dcfa52348b2febfaae008aeee28166a5cf5df4c
+  content_hash: sha256:2b0689a74688f0fabefcf51715b7c38a826a51425d04eee7aa95585e865b1dea
 - kind: project-relative
   target: agents
   value: .agents/skills/likec4-authoring/c4-method.md
@@ -290,7 +290,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:335264b4ea136365325ba4367c55755fff3091a4d75f84c68b2840d7baed8f47
+  content_hash: sha256:f706748ae27640015fd369b5245be02e1c32a0594a3e894db63f9f312f2a9bbc
 local_deployed_files:
 - .agents/skills/archie
 - .agents/skills/archie/SKILL.md
@@ -345,9 +345,9 @@ local_deployed_file_hashes:
   .agents/skills/architecture-assessment/templates/inventory.md: sha256:9884119c3a3233f05ed2ec188edfa05e01e52e67f4e46eb85bbf26c1dfa689e5
   .agents/skills/architecture-conformance-onboarding/SKILL.md: sha256:358c26afd1c5f55764871c4cf86f338d10c3f2d749d182f931ddf87d95861c46
   .agents/skills/architecture-contracts/SKILL.md: sha256:a7970fb0020e962c4d4cd9df726a227e78aec57ec496dea36729a7443cb6a37e
-  .agents/skills/architecture-docs/SKILL.md: sha256:73a1d0a2b1996bf4f8f4cd4903928fab80d088179b61754c61b678b817b506a6
-  .agents/skills/architecture-docs/package-commands.md: sha256:ba4721ac9f866646a4811275bbfbf8434fe2cb3b83064a3c80204c6d48b683ed
-  .agents/skills/likec4-authoring/SKILL.md: sha256:1b2bfcd09a6312cbcbc0b1d94dcfa52348b2febfaae008aeee28166a5cf5df4c
+  .agents/skills/architecture-docs/SKILL.md: sha256:0877c385f73f6c6ccc471b584ab2a1a61078e9b88e1e052d025ca481f8897cd1
+  .agents/skills/architecture-docs/package-commands.md: sha256:b1138b2655b35cbaa53307e838c7df767b2a759b3aa980a1b44d51532b17b2b0
+  .agents/skills/likec4-authoring/SKILL.md: sha256:2b0689a74688f0fabefcf51715b7c38a826a51425d04eee7aa95585e865b1dea
   .agents/skills/likec4-authoring/c4-method.md: sha256:6227f58f9d04e4997985049c712a9aaa689c8c5c09aab7f378205ce9aaeb724b
   .agents/skills/likec4-authoring/diagram-review-checklist.md: sha256:9684aa1ba8809f1318f2fe3c3fc8cf22ef7f6d9a91c54cb57b741fec6f088670
-  .agents/skills/likec4-authoring/likec4-reference.md: sha256:335264b4ea136365325ba4367c55755fff3091a4d75f84c68b2840d7baed8f47
+  .agents/skills/likec4-authoring/likec4-reference.md: sha256:f706748ae27640015fd369b5245be02e1c32a0594a3e894db63f9f312f2a9bbc

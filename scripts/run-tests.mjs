@@ -1,9 +1,30 @@
 import { spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
-const walk = (path) => readdirSync(path, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? walk(join(path, entry.name)) : entry.name.endsWith(".test.mjs") ? [join(path, entry.name)] : []);
+import { readdirSync, statSync } from "node:fs";
+import { relative, resolve } from "node:path";
+
+function walk(source) {
+  if (statSync(source).isFile()) return source.endsWith(".test.mjs") ? [source] : [];
+  return readdirSync(source, { withFileTypes: true }).flatMap((entry) => {
+    const child = `${source}/${entry.name}`;
+    return entry.isDirectory() ? walk(child) : entry.name.endsWith(".test.mjs") ? [child] : [];
+  });
+}
+
 const requested = process.argv.slice(2);
-const files = (requested.length ? requested : ["test"]).flatMap((path) => walk(path)).sort();
-if (!files.length) throw new Error(`No tests found for: ${(requested.length ? requested : ["test"]).join(", ")}`);
-const result = spawnSync(process.execPath, ["--test", ...files], { stdio: "inherit" });
-process.exit(result.status ?? 1);
+const roots = requested.length ? requested : ["test", "packages/architecture-docs/test"];
+const files = roots.flatMap(walk).map((file) => resolve(file)).sort();
+if (!files.length) throw new Error(`No tests found for: ${roots.join(", ")}`);
+
+const architectureDocsRoot = resolve("packages/architecture-docs");
+const architectureDocsTests = files.filter((file) => file.startsWith(`${architectureDocsRoot}/`));
+const productTests = files.filter((file) => !file.startsWith(`${architectureDocsRoot}/`));
+
+function run(group, cwd) {
+  if (!group.length) return 0;
+  const paths = group.map((file) => relative(cwd, file));
+  return spawnSync(process.execPath, ["--test", ...paths], { cwd, stdio: "inherit" }).status ?? 1;
+}
+
+const productStatus = run(productTests, process.cwd());
+const architectureDocsStatus = productStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
+process.exit(productStatus || architectureDocsStatus);

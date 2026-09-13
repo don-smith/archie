@@ -10,6 +10,7 @@ export interface SelectedRelease {
   recordSha256: string;
   tarballPath: string;
   tarballName: string;
+  npmLockBytes: string;
 }
 
 type BundleInput = {
@@ -84,7 +85,9 @@ export function selectLocalRelease(directory: string): SelectedRelease {
   const tarballPath = bundleFile(root, input.npm.tarball);
   if (record.npm.locator !== `file:npm/${basename(tarballPath)}`) throw new Error("selected bundle npm locator must identify its target-owned tarball");
   const tarball = readFileSync(tarballPath);
-  const lock = object(json(bundleFile(root, input.npm.lockFile), "bundle npm lock"), "bundle npm lock");
+  const npmLockPath = bundleFile(root, input.npm.lockFile);
+  const npmLockBytes = readFileSync(npmLockPath, "utf8");
+  const lock = object(json(npmLockPath, "bundle npm lock"), "bundle npm lock");
   const packageLock = object(object(lock.packages, "bundle npm lock packages")[`node_modules/${record.npm.package}`], "bundle npm lock package");
   if (input.npm.package !== record.npm.package || input.npm.version !== record.npm.version || input.npm.locator !== record.npm.locator || input.npm.requiredPlatformPayload !== record.npm.requiredPlatformPayload || packageLock.integrity !== record.npm.lockIntegrity || sha512Integrity(tarball) !== record.npm.lockIntegrity || sha256(tarball) !== record.npm.tarballSha256) throw new Error("selected bundle npm evidence differs from its finalized record");
 
@@ -92,5 +95,5 @@ export function selectLocalRelease(directory: string): SelectedRelease {
   const apmLock = readFileSync(bundleFile(root, input.apm.lockFile), "utf8");
   if (input.apm.package !== record.apm.package || JSON.stringify(input.apm.skills) !== JSON.stringify(record.apm.skills) || input.apm.locator !== record.apm.locator || input.apm.ref !== record.apm.ref || field(manifest, "git", "bundle APM manifest") !== record.apm.locator || field(manifest, "ref", "bundle APM manifest") !== record.apm.ref || field(apmLock, "resolved_commit", "bundle APM lock") !== record.apm.resolvedCommit || field(apmLock, "resolved_ref", "bundle APM lock") !== record.apm.ref || field(apmLock, "content_hash", "bundle APM lock") !== record.apm.contentHash) throw new Error("selected bundle APM evidence differs from its finalized record");
 
-  return { bundleDirectory: root, record, recordBytes, recordSha256: sha256(recordBytes), tarballPath, tarballName: basename(tarballPath) };
+  return { bundleDirectory: root, record, recordBytes, recordSha256: sha256(recordBytes), tarballPath, tarballName: basename(tarballPath), npmLockBytes };
 }

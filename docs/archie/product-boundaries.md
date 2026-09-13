@@ -15,8 +15,10 @@ Archie is a private, lockstep product for locally reviewed trials. Its one versi
 
 Each capability is independently selectable. Routing never converts advisory results or target-owned checks into one universal architecture result. Material capabilities retain the proposal-before-apply stop.
 
+Architecture Docs is a first-class private workspace at `packages/architecture-docs/`. It owns evidence-backed pages, claims, LikeC4 compilation, preview and handoff generation, approval, and publication checks. `likec4-authoring` remains a narrower skill backed by the same module. HTML Design owns the final `site/` presentation, while Architecture Docs validates that presentation against the accepted handoff.
+
 ## Excluded first-release membership
 
 MyFlow lifecycle behavior, general development skills, Architecture Review source, named-agent dependencies, `codebase-locator`, and `codebase-analyzer` are not shipped or required. Structural inspection uses a portable task contract and may run serially. Repository-local checks remain target-owned commands with their original exits and evidence meanings.
 
-The source-import manifest records the exact sibling revisions reviewed before import. Imported Assessment instructions are adapted to remove a MyFlow runtime dependency. Signing, trusted distribution, key material, public release trust, and publication are deferred.
+The source-import manifest records exact sibling revisions for current imports and completed migrations. Architecture Docs was migrated from the former `c4archviewer` proof at `f2b7c5f1353c5e76fe8739a657632edafc66580f`; its generated example site was deliberately excluded. Imported Assessment instructions are adapted to remove a MyFlow runtime dependency. Signing, trusted distribution, key material, public release trust, and publication are deferred.

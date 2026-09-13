@@ -27,5 +27,14 @@ test("bootstrap creates a native APM lock and frozen-deploys the complete privat
     assert.match(manifest, /git@github\.com:don-smith\/archie\.git/);
     assert.match(lock, /repo_url: don-smith\/archie/);
     for (const skill of skills) assert.ok(existsSync(join(target, ".agents", "skills", skill, "SKILL.md")), `missing ${skill}`);
+
+    const architectureDocsTarget = join(target, "architecture-docs-smoke");
+    cpSync("packages/architecture-docs/test/fixtures/architecture-docs", architectureDocsTarget, { recursive: true });
+    const architectureDocs = join(target, ".archie", "runtime", "node_modules", ".bin", "architecture-docs");
+    assert.ok(existsSync(architectureDocs), "installed Archie runtime must expose architecture-docs");
+    const architectureBuild = spawnSync(architectureDocs, ["build", "--config", join(architectureDocsTarget, "architecture-docs.config.json")], { cwd: architectureDocsTarget, encoding: "utf8", timeout: 120000 });
+    assert.equal(architectureBuild.status, 0, `${architectureBuild.stdout}\n${architectureBuild.stderr}`);
+    const architectureCheck = spawnSync(architectureDocs, ["check", "--config", join(architectureDocsTarget, "architecture-docs.config.json"), "--mode", "preview"], { cwd: architectureDocsTarget, encoding: "utf8", timeout: 120000 });
+    assert.equal(architectureCheck.status, 0, `${architectureCheck.stdout}\n${architectureCheck.stderr}`);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

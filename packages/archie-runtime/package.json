@@ -5,6 +5,9 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "architecture-docs": "./dist/architecture-docs/bin/architecture-docs.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -21,7 +24,10 @@
     "node": ">=24 <25"
   },
   "dependencies": {
-    "typescript": "7.0.2",
-    "@typescript/typescript-darwin-arm64": "7.0.2"
+    "@typescript/typescript-darwin-arm64": "7.0.2",
+    "likec4": "1.59.2",
+    "marked": "15.0.7",
+    "playwright": "1.62.1",
+    "typescript": "7.0.2"
   }
 }

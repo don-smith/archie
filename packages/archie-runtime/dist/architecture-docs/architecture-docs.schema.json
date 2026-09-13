@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/architecture-docs.schema.json",
+  "title": "Architecture docs configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "repository", "root", "model", "document", "pages", "evidence", "palette", "sourceLinks"],
+  "properties": {
+    "version": { "const": 1 },
+    "repository": { "$ref": "#/$defs/repository" },
+    "root": { "$ref": "#/$defs/nonEmpty" },
+    "model": { "type": "object", "additionalProperties": false, "required": ["workspace", "initialView"], "properties": { "workspace": { "$ref": "#/$defs/nonEmpty" }, "initialView": { "$ref": "#/$defs/nonEmpty" } } },
+    "document": { "type": "object", "additionalProperties": false, "required": ["title"], "properties": { "title": { "$ref": "#/$defs/nonEmpty" } } },
+    "pages": { "type": "object", "additionalProperties": false, "required": ["home", "areas"], "properties": { "home": { "$ref": "#/$defs/page" }, "areas": { "type": "array", "items": { "$ref": "#/$defs/area" } } } },
+    "evidence": { "type": "object", "additionalProperties": false, "required": ["ledger"], "properties": { "ledger": { "$ref": "#/$defs/nonEmpty" } } },
+    "palette": { "$ref": "#/$defs/palette" },
+    "sourceLinks": { "type": "object", "additionalProperties": false, "required": ["browserRoot"], "properties": { "browserRoot": { "type": "string", "pattern": "^https?://" } } },
+    "supplementalInputs": { "type": "array", "items": { "$ref": "#/$defs/supplementalInput" } },
+    "skillCommand": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonEmpty" } }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*$" },
+    "repository": { "type": "object", "additionalProperties": false, "required": ["name"], "properties": { "name": { "$ref": "#/$defs/nonEmpty" }, "shortLabel": { "$ref": "#/$defs/nonEmpty" } } },
+    "page": { "type": "object", "additionalProperties": false, "required": ["id", "title", "summary", "markdown", "viewIds", "claimIds"], "properties": { "id": { "$ref": "#/$defs/id" }, "title": { "$ref": "#/$defs/nonEmpty" }, "summary": { "$ref": "#/$defs/nonEmpty" }, "markdown": { "$ref": "#/$defs/nonEmpty" }, "viewIds": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } }, "claimIds": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } }, "initialViewId": { "$ref": "#/$defs/nonEmpty" } } },
+    "area": { "type": "object", "additionalProperties": false, "required": ["id", "title", "summary", "markdown", "viewIds", "claimIds", "slug"], "properties": { "id": { "$ref": "#/$defs/id" }, "title": { "$ref": "#/$defs/nonEmpty" }, "summary": { "$ref": "#/$defs/nonEmpty" }, "markdown": { "$ref": "#/$defs/nonEmpty" }, "viewIds": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } }, "claimIds": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } }, "initialViewId": { "$ref": "#/$defs/nonEmpty" }, "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } } },
+    "palette": { "type": "object", "additionalProperties": false, "required": ["document", "diagram"], "properties": { "document": { "type": "object", "additionalProperties": false, "required": ["light", "dark"], "properties": { "light": { "$ref": "#/$defs/colors" }, "dark": { "$ref": "#/$defs/colors" } } }, "diagram": { "$ref": "#/$defs/diagram" } } },
+    "colors": { "type": "object", "additionalProperties": false, "required": ["canvas", "surface", "raisedSurface", "text", "mutedText", "border", "action", "warning", "focus"], "properties": { "canvas": { "$ref": "#/$defs/color" }, "surface": { "$ref": "#/$defs/color" }, "raisedSurface": { "$ref": "#/$defs/color" }, "text": { "$ref": "#/$defs/color" }, "mutedText": { "$ref": "#/$defs/color" }, "border": { "$ref": "#/$defs/color" }, "action": { "$ref": "#/$defs/color" }, "warning": { "$ref": "#/$defs/color" }, "focus": { "$ref": "#/$defs/color" } } },
+    "diagram": { "type": "object", "additionalProperties": false, "required": ["primaryFill", "primaryStroke", "primaryText", "neutralFill", "neutralStroke", "neutralText", "relationshipLine", "relationshipLabelBackground"], "properties": { "primaryFill": { "$ref": "#/$defs/color" }, "primaryStroke": { "$ref": "#/$defs/color" }, "primaryText": { "$ref": "#/$defs/color" }, "neutralFill": { "$ref": "#/$defs/color" }, "neutralStroke": { "$ref": "#/$defs/color" }, "neutralText": { "$ref": "#/$defs/color" }, "relationshipLine": { "$ref": "#/$defs/color" }, "relationshipLabelBackground": { "$ref": "#/$defs/color" } } },
+    "color": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" },
+    "supplementalInput": { "type": "object", "additionalProperties": false, "required": ["id", "source", "destination"], "properties": { "id": { "$ref": "#/$defs/id" }, "source": { "$ref": "#/$defs/nonEmpty" }, "destination": { "$ref": "#/$defs/nonEmpty" } } }
+  }
+}

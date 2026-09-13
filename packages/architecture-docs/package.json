@@ -1,0 +1,44 @@
+{
+  "name": "@archie/architecture-docs",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "description": "Build evidence-backed architecture documentation from LikeC4 models and curated Markdown pages.",
+  "type": "module",
+  "bin": {
+    "architecture-docs": "./bin/architecture-docs.mjs"
+  },
+  "pi": {
+    "skills": [
+      "./skills/architecture-docs",
+      "./skills/likec4-authoring"
+    ]
+  },
+  "files": [
+    "bin",
+    "src",
+    "scripts",
+    "skills",
+    "docs",
+    "architecture-docs.schema.json",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build-architecture-docs.mjs",
+    "check": "node scripts/check-architecture-docs.mjs",
+    "test": "npm run test:builder && npm run test:skills && npm run test:browser",
+    "test:builder": "node --test test/architecture-docs-*.test.mjs test/evidence-ledger.test.mjs test/publication.test.mjs test/package.test.mjs",
+    "test:skills": "node --test test/skill-command.test.mjs test/deployment-adapters.test.mjs test/skills/skills.test.mjs",
+    "test:browser": "node --test test/browser-overflow.test.mjs",
+    "test:consumer": "node --test test/handoff-consumer.test.mjs",
+    "verify": "npm test && npm run test:consumer"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "likec4": "1.59.2",
+    "marked": "15.0.7",
+    "playwright": "1.62.1"
+  }
+}

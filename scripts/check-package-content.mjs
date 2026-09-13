@@ -2,17 +2,22 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 const packages = [
   ["@archie/runtime", "archie-runtime"], ["@archie/cli", "archie-cli"],
-  ["@archie/context", "archie-context"], ["@archie/capabilities", "capabilities"]
+  ["@archie/context", "archie-context"], ["@archie/architecture-docs", "architecture-docs"],
+  ["@archie/capabilities", "capabilities"]
 ];
 for (const [name, directory] of packages) {
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.private !== true) throw new Error(`${name} must remain private`);
   if (manifest.publishConfig) throw new Error(`${name} must not configure publication`);
-  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !(name === "@archie/context" && file === ".apm/skills"));
+  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (name === "@archie/architecture-docs" && file === "skills")));
   if (unsafeAllowlist) throw new Error(`${name} has unsafe package file allowlist`);
 }
 const runtime = JSON.parse(readFileSync("packages/archie-runtime/package.json"));
 if (runtime.dependencies?.["@typescript/typescript-darwin-arm64"] !== "7.0.2") throw new Error("The Darwin analyzer payload must be a runtime dependency");
+if (runtime.bin?.["architecture-docs"] !== "./dist/architecture-docs/bin/architecture-docs.mjs") throw new Error("The runtime must expose the Architecture Docs command");
+for (const [dependency, version] of [["likec4", "1.59.2"], ["marked", "15.0.7"], ["playwright", "1.62.1"]]) {
+  if (runtime.dependencies?.[dependency] !== version) throw new Error(`The runtime must pin ${dependency}@${version}`);
+}
 for (const [, directory] of packages.filter(([name]) => name !== "@archie/runtime")) {
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.dependencies?.["@typescript/typescript-darwin-arm64"]) throw new Error(`${directory} must not carry the analyzer platform payload`);
@@ -28,7 +33,14 @@ for (const [name] of packages) {
       if (!packed.includes(required)) throw new Error(`Context package omits required APM asset: ${required}`);
     }
   }
-  if (name !== "@archie/context" && !packed.some((file) => file === "dist/index.js" || file === "dist/cli.js")) throw new Error(`${name} lacks prebuilt runtime code`);
+  const expectedEntry = {
+    "@archie/runtime": "dist/index.js",
+    "@archie/cli": "dist/cli.js",
+    "@archie/capabilities": "dist/index.js",
+    "@archie/architecture-docs": "bin/architecture-docs.mjs"
+  }[name];
+  if (expectedEntry && !packed.includes(expectedEntry)) throw new Error(`${name} lacks ${expectedEntry}`);
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
+  if (name === "@archie/runtime" && !packed.includes("dist/architecture-docs/scripts/check-final-site-browser.mjs")) throw new Error("Runtime package omits the complete Architecture Docs command implementation");
 }
 console.log("Private workspace publication guards and package contents passed.");

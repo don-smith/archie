@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Independent architecture composition</title>
+  <style>
+    .diagram { max-width: 100%; height: 32rem; overflow-x: auto; }
+    .stage { min-width: 44rem; height: 100%; }
+    likec4-view { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Independent architecture composition</h1>
+    <button type="button" data-theme="dark">Dark</button>
+    <label for="view-select">Architecture view</label>
+    <select id="view-select"></select>
+    <div class="diagram" tabindex="0" role="region" aria-label="Scrollable architecture diagram">
+      <div class="stage"><likec4-view view-id="systemContext" browser="true" color-scheme="light"></likec4-view></div>
+    </div>
+    <p id="status">Loading views.</p>
+  </main>
+  <script type="module" src="assets/likec4-views.js"></script>
+  <script type="module">
+    await customElements.whenDefined("likec4-view");
+    const LikeC4ViewElement = customElements.get("likec4-view");
+    const marker = Symbol.for("independent-consumer-wheel-zoom");
+    if (!LikeC4ViewElement.prototype[marker]) {
+      const original = LikeC4ViewElement.prototype.getProps;
+      Object.defineProperty(LikeC4ViewElement.prototype, marker, { value: true });
+      LikeC4ViewElement.prototype.getProps = function () {
+        const props = original.call(this);
+        const wheel = { zoomOnScroll: true, panOnScroll: false };
+        const browser = typeof props.browser === "object" ? props.browser : {};
+        return { ...props, pannable: true, zoomable: true, keepAspectRatio: false,
+          reactFlowProps: { ...(props.reactFlowProps || {}), ...wheel },
+          browser: { ...browser, reactFlowProps: { ...(browser.reactFlowProps || {}), ...wheel } } };
+      };
+    }
+    const viewer = document.querySelector("likec4-view");
+    viewer.render();
+    const select = document.querySelector("#view-select");
+    const status = document.querySelector("#status");
+    const views = await (await fetch("assets/views.json")).json();
+    for (const view of views.views) { const option = document.createElement("option"); option.value = view.id; option.textContent = view.title; select.append(option); }
+    select.addEventListener("change", () => { viewer.setAttribute("view-id", select.value); });
+    document.querySelector("button[data-theme]").addEventListener("click", () => { document.documentElement.dataset.theme = "dark"; viewer.setAttribute("color-scheme", "dark"); });
+    select.value = views.views[0].id;
+    status.textContent = `${views.views.length} views loaded.`;
+  </script>
+</body>
+</html>

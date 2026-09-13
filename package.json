@@ -13,6 +13,7 @@
   "scripts": {
     "build": "node scripts/sync-product-version.mjs && tsc -p tsconfig.build.json && node scripts/stage-package-dist.mjs",
     "test": "npm run build --silent && node scripts/run-tests.mjs",
+    "test:architecture-docs": "npm run test --workspace @archie/architecture-docs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pack:check": "node scripts/check-package-content.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",

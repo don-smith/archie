@@ -1,4 +1,12 @@
 import { createHash } from "node:crypto";
+const runtimeDependencies = {
+    "@typescript/typescript-darwin-arm64": "7.0.2",
+    likec4: "1.59.2",
+    marked: "15.0.7",
+    playwright: "1.62.1",
+    typescript: "7.0.2"
+};
+const runtimeBin = { "architecture-docs": "dist/architecture-docs/bin/architecture-docs.mjs" };
 export function npmProjection(record) {
     const manifest = {
         name: "archie-private-runtime",
@@ -13,7 +21,14 @@ export function npmProjection(record) {
         requires: true,
         packages: {
             "": { name: "archie-private-runtime", version: record.version, dependencies: { [record.npm.package]: record.npm.locator } },
-            [`node_modules/${record.npm.package}`]: { version: record.npm.version, resolved: record.npm.locator, integrity: record.npm.lockIntegrity }
+            [`node_modules/${record.npm.package}`]: {
+                version: record.npm.version,
+                resolved: record.npm.locator,
+                integrity: record.npm.lockIntegrity,
+                dependencies: runtimeDependencies,
+                bin: runtimeBin,
+                engines: { node: ">=24 <25" }
+            }
         }
     };
     return { manifest: `${JSON.stringify(manifest, null, 2)}\n`, lock: `${JSON.stringify(lock, null, 2)}\n` };
@@ -33,8 +48,14 @@ export function validateNpmProjection(projection, record) {
     const manifest = parse(projection.manifest, "runtime manifest");
     const lock = parse(projection.lock, "runtime lock");
     const dependency = manifest.dependencies?.[record.npm.package];
-    const packageLock = (lock.packages ?? {})[`node_modules/${record.npm.package}`];
-    if (manifest.name !== "archie-private-runtime" || manifest.private !== true || manifest.version !== record.version || dependency !== record.npm.locator || !packageLock || packageLock.version !== record.npm.version || packageLock.resolved !== record.npm.locator || packageLock.integrity !== record.npm.lockIntegrity)
+    const lockPackages = lock.packages ?? {};
+    const lockRoot = lockPackages[""];
+    const packageLock = lockPackages[`node_modules/${record.npm.package}`];
+    const expectedRootDependencies = { [record.npm.package]: record.npm.locator };
+    if (manifest.name !== "archie-private-runtime" || manifest.private !== true || manifest.version !== record.version || dependency !== record.npm.locator ||
+        lock.lockfileVersion !== 3 || !lockRoot || lockRoot.name !== "archie-private-runtime" || lockRoot.version !== record.version || JSON.stringify(lockRoot.dependencies) !== JSON.stringify(expectedRootDependencies) ||
+        !packageLock || packageLock.version !== record.npm.version || packageLock.resolved !== record.npm.locator || packageLock.integrity !== record.npm.lockIntegrity ||
+        JSON.stringify(packageLock.dependencies) !== JSON.stringify(runtimeDependencies) || JSON.stringify(packageLock.bin) !== JSON.stringify(runtimeBin))
         throw new Error("generated npm projection differs from the pinned release record");
 }
 export function tarballSha256(tarball) {
