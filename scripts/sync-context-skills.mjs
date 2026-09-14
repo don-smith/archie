@@ -10,7 +10,10 @@ const mappings = [
   ["packages/capabilities/assets/conformance/skills/architecture-conformance-onboarding", "packages/archie-context/.apm/skills/architecture-conformance-onboarding"],
   ["packages/capabilities/assets/conformance/skills/architecture-contracts", "packages/archie-context/.apm/skills/architecture-contracts"]
 ];
-const fileMappings = [["packages/archie-context/scripts/dispatch-runtime.mjs", "skills/archie/scripts/dispatch-runtime.mjs"]];
+const fileMappings = [
+  ["docs/archie/managed-site-guide.md", "skills/archie/references/managed-site-guide.md"],
+  ["packages/archie-context/scripts/dispatch-runtime.mjs", "skills/archie/scripts/dispatch-runtime.mjs"]
+];
 
 function digestTree(root) {
   if (!existsSync(root)) return undefined;
