@@ -53,8 +53,13 @@ Use these exact paths relative to the handoff directory:
 - \`assets/views.json\` — view metadata, parent navigation, and stable semantic digests.
 - \`assets/likec4-views.js\` — the compiled LikeC4 web component bundle.
 - \`delta.json\` and \`delta.md\` — baseline/update changes for incremental recomposition.
+- \`architecture-status.json\` — handoff v2's latest normalized deterministic-check snapshot when \`architectureStatus\` is configured; it may record an explicit missing snapshot, but it never contains raw stdout/stderr.
 
 When a final page is nested below \`site/\`, resolve handoff-derived resources into the final site's own copied \`assets/\` directory. Do not use absolute filesystem paths. Keep route-relative paths correct for every page depth.
+
+## Deterministic architecture status
+
+When configured, the generated \`architecture-status/index.html\` route is ordered after home and before area pages. Read the copied \`architecture-status.json\` as recorded evidence only: do not rerun checks, read Git, consult the current clock, or turn target-owned result codes into a universal verdict. Render the repository revision, generation time, independent incomplete states, check execution facts, result meaning, evidence links, limits, and the authority stop. A missing snapshot remains visible as absence. Build order is deterministic checks, runtime snapshot writer, existing architecture-docs build, then html-design composition.
 
 ## LikeC4 mounting adapter
 

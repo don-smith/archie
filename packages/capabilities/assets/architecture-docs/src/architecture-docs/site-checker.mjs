@@ -1,7 +1,8 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { loadArchitectureDocsConfig } from "./config.mjs";
-import { calculateHandoffDigest } from "./handoff.mjs";
+import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
+const requireDigest = (bytes) => sha256(bytes);
 
 function diagnostic(path_, message, expected, code = undefined) {
   return { path: path_, message, expected, ...(code ? { code } : {}) };
@@ -70,6 +71,15 @@ export async function checkFinalSite(configPath) {
   }
   const viewIds = new Set(views.map((view) => view.id));
   const pages = [config.pages.home, ...config.pages.areas];
+  if (config.architectureStatus) {
+    const statusRoute = path.join(siteDirectory, "architecture-status", "index.html");
+    if (!await exists(statusRoute)) add("$.site.architectureStatus", "final site architecture status route is missing", "Compose architecture-status/index.html from the handoff status record.", "SITE_STATUS_ROUTE_MISSING");
+    try {
+      const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+      if (manifest?.digests?.architectureStatus !== requireDigest(statusBytes)) add("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the status handoff before composing the final site.");
+    } catch { add("$.handoff.architectureStatus", "handoff status snapshot is missing", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_MISSING"); }
+  }
+
   for (const page of pages) {
     const route = pageRoute(config, page).split(path.sep).join("/");
     const filename = path.join(siteDirectory, route);
@@ -100,7 +110,7 @@ export async function checkFinalSite(configPath) {
   }
 
   if (manifest && receipt?.architectureHandoffDigest === manifest.digests?.handoff && calculateHandoffDigest(manifest) !== manifest.digests.handoff) add("$.handoff.manifest.digests.handoff", "handoff manifest digest is internally inconsistent", "Rebuild the handoff before composing the final site.");
-  return { ok: diagnostics.length === 0, diagnostics, pageCount: pages.length };
+  return { ok: diagnostics.length === 0, diagnostics, pageCount: pages.length + (config.architectureStatus ? 1 : 0) };
 }
 
 export function formatFinalSiteReport(report) {

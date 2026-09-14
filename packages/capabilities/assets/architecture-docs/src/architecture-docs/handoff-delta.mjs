@@ -54,10 +54,13 @@ export function buildHandoffDelta({ previous = null, current }) {
   ), (before, after) => digest(pageContent(before)) === digest(pageContent(after)) ? "markdown" : "metadata");
   const views = changeSet(previousViews, currentViews, (before, after) => digest(viewContent(before)) === digest(viewContent(after)), () => "semantic");
   const baseline = previous ? "update" : "baseline";
-  const affectedPageIds = [...new Set([...claims.added, ...claims.removed, ...claims.changed.map((entry) => entry.id), ...pages.added, ...pages.removed, ...pages.changed.map((entry) => entry.id)])];
+  const statusConfigured = Object.prototype.hasOwnProperty.call(current.manifest?.digests ?? {}, "architectureStatus");
+  const statusChanged = statusConfigured && (!previous || previous.manifest?.digests?.architectureStatus !== current.manifest.digests.architectureStatus);
+  const status = statusConfigured ? { available: current.manifest.architectureStatus?.available === true, changed: statusChanged, digestChanged: statusChanged } : undefined;
+  const affectedPageIds = [...new Set([...claims.added, ...claims.removed, ...claims.changed.map((entry) => entry.id), ...pages.added, ...pages.removed, ...pages.changed.map((entry) => entry.id), ...(statusChanged ? ["architecture-status"] : [])])];
   const affectedViewIds = [...new Set([...views.added, ...views.removed, ...views.changed.map((entry) => entry.id)])];
   return {
-    version: 1,
+    version: statusConfigured ? 2 : 1,
     kind: baseline,
     baseline: previous?.manifest?.digests?.handoff ?? null,
     current: current.manifest?.digests?.handoff ?? null,
@@ -67,7 +70,9 @@ export function buildHandoffDelta({ previous = null, current }) {
       views: { added: views.added.length, removed: views.removed.length, changed: views.changed.length },
       affectedPageIds,
       affectedViewIds,
+      ...(status ? { architectureStatus: status } : {}),
     },
+    ...(status ? { architectureStatus: status } : {}),
     claims: { ...claims, reviewChanged },
     pages,
     views,
@@ -82,7 +87,7 @@ export function deltaToMarkdown(delta) {
   const changed = (entries) => entries.length ? entries.map((entry) => typeof entry === "string" ? entry : `${entry.id} (${entry.kind})`).join(", ") : "none";
   return `# ${title}
 
-This report compares stable architecture inputs. It does not compare LikeC4 JavaScript bundle bytes.
+This report compares stable architecture inputs. It does not compare LikeC4 JavaScript bundle bytes.${delta.architectureStatus ? `\n\nArchitecture status: ${delta.architectureStatus.changed ? "availability or digest changed" : "unchanged"}; available: ${delta.architectureStatus.available}.` : ""}
 
 ## Summary
 

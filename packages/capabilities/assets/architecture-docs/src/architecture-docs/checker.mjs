@@ -10,6 +10,7 @@ import { buildCompositionGuide } from "./composition-guide.mjs";
 import { compileLikeC4 } from "./likec4-compiler.mjs";
 import { compilePalette } from "./palette.mjs";
 import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
+import { loadArchitectureStatus } from "./architecture-status.mjs";
 
 const HOME_TOPICS = ["purpose", "actors", "boundary", "runtime-unit", "flow", "domain-language", "pattern", "navigation"];
 const allPages = (config) => [config.pages.home, ...config.pages.areas];
@@ -108,6 +109,7 @@ async function receiptDiagnostics(config, handoffDirectory) {
 export async function checkArchitectureDocs(configPath, { mode = "preview" } = {}) {
   if (!["preview", "publication"].includes(mode)) throw new TypeError(`Unknown architecture docs check mode: ${mode}`);
   const config = await loadArchitectureDocsConfig(configPath);
+  const architectureStatus = await loadArchitectureStatus(config);
   const statuses = claimStatus(config.ledger.claims);
   const diagnostics = [];
   const pages = allPages(config);
@@ -136,6 +138,17 @@ export async function checkArchitectureDocs(configPath, { mode = "preview" } = {
   for (const page of pages) {
     const filename = page.id === config.pages.home.id ? path.join(config.paths.outputDirectory, "index.html") : path.join(config.paths.outputDirectory, page.slug, "index.html");
     try { await access(filename); } catch { diagnostics.push(diagnostic(`$.pages.${page.id}`, "generated preview route is missing", "Rebuild the architecture docs preview.")); }
+  }
+  if (architectureStatus.configured) {
+    try { await access(path.join(config.paths.outputDirectory, "architecture-status", "index.html")); } catch { diagnostics.push(diagnostic("$.architectureStatus", "generated architecture status route is missing", "Rebuild the architecture docs preview.")); }
+    if (mode === "publication") {
+      try {
+        const manifest = await readJson(path.join(handoffDirectory, "manifest.json"));
+        if (manifest.version !== 2 || manifest.files?.architectureStatus !== "architecture-status.json") diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff v2 status record is missing", "Rebuild the architecture docs handoff with architectureStatus configured."));
+        const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+        if (manifest.digests?.architectureStatus !== sha256(statusBytes)) diagnostics.push(diagnostic("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the architecture docs handoff."));
+      } catch { diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff status snapshot is missing", "Rebuild the architecture docs handoff.")); }
+    }
   }
   if (mode === "publication") {
     diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory));
