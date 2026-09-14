@@ -134,10 +134,14 @@ function skillSubset(text, header, label) {
     }
     return values;
 }
-export function validateApmSourceEvidence(manifest, lock, expected) {
-    const repository = expected.locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/)?.[1];
+function githubSshRepository(locator) {
+    const repository = locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/)?.[1];
     if (!repository)
         throw new Error("APM locator must be a GitHub SSH repository URL");
+    return repository;
+}
+export function validateApmSourceEvidence(manifest, lock, expected) {
+    const repository = githubSshRepository(expected.locator);
     if (field(manifest, "git", "APM manifest") !== expected.locator || field(manifest, "ref", "APM manifest") !== expected.ref)
         throw new Error("APM manifest differs from bundle input");
     if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(expected.skills))
@@ -188,7 +192,7 @@ function validateKnownRecord(record) {
         throw new Error("unsupported release record schema or product");
     if (!/^[a-f0-9]{40}$/i.test(string(record.sourceCommit, "release record sourceCommit")))
         throw new Error("release record sourceCommit is malformed");
-    string(record.version, "release record version");
+    const version = string(record.version, "release record version");
     const authorization = object(record.authorization, "release record authorization");
     exactKeys(authorization, ["kind", "claim"], "release record authorization");
     if (authorization.kind !== "none" || authorization.claim !== LOCAL_REVIEW_CLAIM)
@@ -203,6 +207,9 @@ function validateKnownRecord(record) {
     exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
     for (const key of ["package", "locator", "ref"])
         string(apm[key], `release record APM ${key}`);
+    githubSshRepository(String(apm.locator));
+    if (apm.ref !== `v${version}`)
+        throw new Error("release record APM ref must be the immutable version tag");
     skills(apm.skills, "release record APM skills");
     if (!/^[a-f0-9]{40}$/i.test(string(apm.resolvedCommit, "release record APM resolvedCommit")) || !/^sha256:[a-f0-9]{64}$/i.test(string(apm.contentHash, "release record APM contentHash")))
         throw new Error("release record APM evidence is malformed");

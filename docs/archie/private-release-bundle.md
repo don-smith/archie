@@ -43,7 +43,13 @@ That is a consistency statement about bytes selected for local review. It is not
 
 ## Private context publication
 
-Before finalizing a version, publish the matching `packages/archie-context/` contents to the private context repository and tag it with the product version. The target's Git identity must have read access; do not put credentials in the bundle.
+Before finalizing a version, confirm the target Git identity can read the private context repository:
+
+```bash
+git ls-remote git@github.com:don-smith/archie.git
+```
+
+Then publish the matching `packages/archie-context/` contents and tag them with the product version. Do not put credentials in the bundle.
 
 ```bash
 git clone git@github.com:don-smith/archie.git /tmp/archie-context

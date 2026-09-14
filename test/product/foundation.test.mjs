@@ -26,6 +26,9 @@ test("reviewed source imports and exclusions are recorded", () => {
   assert.ok(existsSync("packages/capabilities/assets/assessment/skills/architecture-assessment/SKILL.md"));
   assert.doesNotMatch(readFileSync("packages/capabilities/assets/assessment/skills/architecture-assessment/SKILL.md", "utf8"), /myflow/i);
 });
+test("private release runbook includes the SSH preflight", () => {
+  assert.match(readFileSync("docs/archie/private-release-bundle.md", "utf8"), /git ls-remote git@github\.com:don-smith\/archie\.git/);
+});
 test("no excluded runtime path is shipped", () => {
   const output = execFileSync("npm", ["run", "pack:check"], { encoding: "utf8" });
   assert.match(output, /package contents passed/);

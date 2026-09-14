@@ -148,9 +148,14 @@ function skillSubset(text: string, header: string, label: string): string[] {
 
 type ApmSourceExpectation = Pick<ReleaseRecordV1["apm"], "package" | "skills" | "locator" | "ref"> & Partial<Pick<ReleaseRecordV1["apm"], "resolvedCommit" | "contentHash">>;
 
-export function validateApmSourceEvidence(manifest: string, lock: string, expected: ApmSourceExpectation): { resolvedCommit: string; contentHash: string } {
-  const repository = expected.locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/)?.[1];
+function githubSshRepository(locator: string): string {
+  const repository = locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/)?.[1];
   if (!repository) throw new Error("APM locator must be a GitHub SSH repository URL");
+  return repository;
+}
+
+export function validateApmSourceEvidence(manifest: string, lock: string, expected: ApmSourceExpectation): { resolvedCommit: string; contentHash: string } {
+  const repository = githubSshRepository(expected.locator);
   if (field(manifest, "git", "APM manifest") !== expected.locator || field(manifest, "ref", "APM manifest") !== expected.ref) throw new Error("APM manifest differs from bundle input");
   if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(expected.skills)) throw new Error("APM manifest skill subset differs from bundle input");
   if (field(lock, "name", "APM lock") !== expected.package || field(lock, "repo_url", "APM lock") !== repository || field(lock, "host", "APM lock") !== "github.com") throw new Error("APM lock repository differs from bundle input");
@@ -192,7 +197,7 @@ function validateKnownRecord(record: Record<string, unknown>): void {
   exactKeys(record, expectedRecordKeys, "release record");
   if (record.schemaVersion !== RELEASE_RECORD_SCHEMA_VERSION || record.product !== "archie") throw new Error("unsupported release record schema or product");
   if (!/^[a-f0-9]{40}$/i.test(string(record.sourceCommit, "release record sourceCommit"))) throw new Error("release record sourceCommit is malformed");
-  string(record.version, "release record version");
+  const version = string(record.version, "release record version");
   const authorization = object(record.authorization, "release record authorization");
   exactKeys(authorization, ["kind", "claim"], "release record authorization");
   if (authorization.kind !== "none" || authorization.claim !== LOCAL_REVIEW_CLAIM) throw new Error("release record authorization must be explicit local private review only");
@@ -203,6 +208,8 @@ function validateKnownRecord(record: Record<string, unknown>): void {
   const apm = object(record.apm, "release record APM");
   exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
   for (const key of ["package", "locator", "ref"]) string(apm[key], `release record APM ${key}`);
+  githubSshRepository(String(apm.locator));
+  if (apm.ref !== `v${version}`) throw new Error("release record APM ref must be the immutable version tag");
   skills(apm.skills, "release record APM skills");
   if (!/^[a-f0-9]{40}$/i.test(string(apm.resolvedCommit, "release record APM resolvedCommit")) || !/^sha256:[a-f0-9]{64}$/i.test(string(apm.contentHash, "release record APM contentHash"))) throw new Error("release record APM evidence is malformed");
   const compatibility = object(record.analyzerCompatibility, "release record analyzer compatibility");

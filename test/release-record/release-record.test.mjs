@@ -36,6 +36,9 @@ test("noncanonical bytes, unknown fields, and authorization variants fail closed
     assert.throws(() => parseReleaseRecord(`${JSON.stringify(record, null, 2)}\n`), /not canonical/);
     assert.throws(() => parseReleaseRecord(serializeReleaseRecord({ ...record, unexpected: true })), /unsupported or missing fields/);
     assert.throws(() => parseReleaseRecord(serializeReleaseRecord({ ...record, authorization: { kind: "signature", claim: "locally-reviewed-private-trial" } })), /authorization/);
+    assert.throws(() => serializeReleaseRecord({ ...record, apm: { ...record.apm, locator: "https://github.com/don-smith/archie.git" } }), /GitHub SSH/);
+    assert.throws(() => serializeReleaseRecord({ ...record, apm: { ...record.apm, ref: "main" } }), /immutable version tag/);
+    assert.throws(() => serializeReleaseRecord({ ...record, apm: { ...record.apm, ref: "v9.9.9" } }), /immutable version tag/);
   } finally { rmSync(copied.root, { recursive: true, force: true }); }
 });
 

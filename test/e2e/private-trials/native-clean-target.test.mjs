@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -27,6 +28,12 @@ test("bootstrap creates a native APM lock and frozen-deploys the complete privat
     assert.match(manifest, /git@github\.com:don-smith\/archie\.git/);
     assert.match(lock, /repo_url: don-smith\/archie/);
     for (const skill of skills) assert.ok(existsSync(join(target, ".agents", "skills", skill, "SKILL.md")), `missing ${skill}`);
+    const deployedHashes = [...lock.matchAll(/^\s{4}(\.agents\/skills\/[^:]+): sha256:([a-f0-9]{64})$/gm)];
+    assert.ok(deployedHashes.length > skills.length, "native APM lock must bind every deployed skill file");
+    for (const [, relativePath, expected] of deployedHashes) {
+      const actual = createHash("sha256").update(readFileSync(join(target, relativePath))).digest("hex");
+      assert.equal(actual, expected, `deployed skill byte mismatch: ${relativePath}`);
+    }
 
     const architectureDocsTarget = join(target, "architecture-docs-smoke");
     cpSync("packages/architecture-docs/test/fixtures/architecture-docs", architectureDocsTarget, { recursive: true });
