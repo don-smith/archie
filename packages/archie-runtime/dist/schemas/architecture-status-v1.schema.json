@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archie.private/schemas/architecture-status-v1.schema.json",
+  "title": "Archie architecture status snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "version", "repository", "generatedAt", "freshnessPolicy", "checks"],
+  "properties": {
+    "kind": { "const": "archie-architecture-status" },
+    "version": { "const": 1 },
+    "repository": { "$ref": "#/$defs/repository" },
+    "generatedAt": { "$ref": "#/$defs/time" },
+    "freshnessPolicy": { "type": "object", "additionalProperties": false, "required": ["maxAgeSeconds"], "properties": { "maxAgeSeconds": { "type": "integer", "minimum": 0, "maximum": 31536000 } } },
+    "checks": { "type": "array", "items": { "$ref": "#/$defs/check" }, "uniqueItems": true }
+  },
+  "$defs": {
+    "time": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },
+    "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$" },
+    "revision": { "type": "object", "additionalProperties": false, "required": ["commit", "workingTree"], "properties": { "commit": { "type": "string", "minLength": 1, "maxLength": 256 }, "workingTree": { "enum": ["clean", "dirty", "unknown"] } } },
+    "repository": { "type": "object", "additionalProperties": false, "required": ["name", "revision"], "properties": { "name": { "type": "string", "minLength": 1, "maxLength": 2000 }, "revision": { "$ref": "#/$defs/revision" } } },
+    "execution": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["state", "startedAt", "finishedAt", "exitCode"], "properties": { "state": { "const": "completed" }, "startedAt": { "$ref": "#/$defs/time" }, "finishedAt": { "$ref": "#/$defs/time" }, "exitCode": { "type": "integer", "minimum": -1, "maximum": 255 } } },
+        { "type": "object", "additionalProperties": false, "required": ["state", "startedAt", "finishedAt", "reason"], "properties": { "state": { "const": "failed" }, "startedAt": { "$ref": "#/$defs/time" }, "finishedAt": { "$ref": "#/$defs/time" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2000 } } },
+        { "type": "object", "additionalProperties": false, "required": ["state", "reason"], "properties": { "state": { "const": "not-run" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
+      ]
+    },
+    "result": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["state", "code", "label", "summary"], "properties": { "state": { "const": "reported" }, "code": { "$ref": "#/$defs/id" }, "label": { "type": "string", "minLength": 1, "maxLength": 2000 }, "summary": { "type": "string", "minLength": 1, "maxLength": 2000 }, "counts": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "value"], "properties": { "id": { "$ref": "#/$defs/id" }, "value": { "type": "integer", "minimum": 0, "maximum": 1000000000 } } } }, "findingIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "maxItems": 1000 } } },
+        { "type": "object", "additionalProperties": false, "required": ["state", "reason"], "properties": { "state": { "const": "unknown" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
+      ]
+    },
+    "evidence": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["state", "source", "path", "sha256", "observedAt", "observedRevision"], "properties": { "state": { "const": "present" }, "source": { "enum": ["current", "retained"] }, "path": { "type": "string", "minLength": 1, "maxLength": 512 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "observedAt": { "$ref": "#/$defs/time" }, "observedRevision": { "type": "string", "minLength": 1, "maxLength": 256 } } },
+        { "type": "object", "additionalProperties": false, "required": ["state", "reason"], "properties": { "state": { "const": "missing" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
+      ]
+    },
+    "freshness": {
+      "type": "object", "additionalProperties": false, "required": ["state", "reasons"], "properties": { "state": { "enum": ["current", "stale", "unknown"] }, "reasons": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 2000 }, "uniqueItems": true } }
+    },
+    "check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "authority", "resultMeaning", "limits", "execution", "result", "evidence", "freshness"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "title": { "type": "string", "minLength": 1, "maxLength": 2000 }, "authority": { "type": "string", "minLength": 1, "maxLength": 2000 }, "resultMeaning": { "type": "string", "minLength": 1, "maxLength": 2000 }, "limits": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 2000 }, "uniqueItems": true }, "execution": { "$ref": "#/$defs/execution" }, "result": { "$ref": "#/$defs/result" }, "evidence": { "$ref": "#/$defs/evidence" }, "freshness": { "$ref": "#/$defs/freshness" } }
+    }
+  }
+}

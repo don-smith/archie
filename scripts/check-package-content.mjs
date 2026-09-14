@@ -30,5 +30,6 @@ for (const [name] of packages) {
   }
   if (name !== "@archie/context" && !packed.some((file) => file === "dist/index.js" || file === "dist/cli.js")) throw new Error(`${name} lacks prebuilt runtime code`);
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
+  if (name === "@archie/runtime" && !packed.includes("dist/schemas/architecture-status-v1.schema.json")) throw new Error("Runtime package must carry architecture-status-v1 schema");
 }
 console.log("Private workspace publication guards and package contents passed.");
