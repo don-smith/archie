@@ -1,4 +1,5 @@
 /dist/
+.myflow/
 node_modules/
 *.tgz
 .archie/runtime/node_modules/
