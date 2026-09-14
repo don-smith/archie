@@ -56,11 +56,16 @@ function nativeRunner(bundle, { install = true, policy = "passed" } = {}) {
     }
     if (command === "apm" && args[0] === "install" && install) {
       const record = JSON.parse(readFileSync(join(cwd, ".archie", "release", "release-record-v1.json"), "utf8"));
+      const deployedFiles = [];
       for (const skill of record.apm.skills) {
         const deployed = join(cwd, ".agents", "skills", skill);
         rmSync(deployed, { recursive: true, force: true });
         cpSync(selectedApmSkill(skill), deployed, { recursive: true });
+        deployedFiles.push(...files(deployed).map((file) => `.agents/skills/${skill}/${file}`));
       }
+      const hashes = deployedFiles.map((file) => `    ${file}: sha256:${createHash("sha256").update(readFileSync(join(cwd, file))).digest("hex")}`);
+      const lockPath = join(cwd, "apm.lock.yaml");
+      writeFileSync(lockPath, readFileSync(lockPath, "utf8").replace("  content_hash:", `  deployed_file_hashes:\n${hashes.join("\n")}\n  content_hash:`));
     }
     if (command === "apm" && args[0] === "policy") {
       return policy === "not-applied"

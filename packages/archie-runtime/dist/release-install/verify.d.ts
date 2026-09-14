@@ -11,7 +11,7 @@ export interface ReleaseInstallOptions {
         digest: string;
         fileCount: number;
     }) => void;
-    /** APM's content-hash remains authoritative; this proves its deployed projection exists before reporting it. */
+    /** Test seam for APM deployment verification. Production checks every deployed skill file against the native lock. */
     verifyApmDeployment?: (root: string, record: ReleaseRecordV1) => void;
 }
 export declare class ReleaseVerificationFailure extends Error {

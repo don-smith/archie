@@ -1,5 +1,6 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 import { verifyHtmlSnapshot } from "../html-snapshot/verify.js";
 import { assertSupportedEnvironment } from "../analysis/contracts.js";
 import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget, type StagedTarget } from "./target-state.js";
@@ -15,7 +16,7 @@ export interface ReleaseInstallOptions {
   run?: NativeCommandRunner;
   /** Test and host seam for the immutable snapshot installed by the runtime package. */
   verifyHtml?: (root: string, expected: { digest: string; fileCount: number }) => void;
-  /** APM's content-hash remains authoritative; this proves its deployed projection exists before reporting it. */
+  /** Test seam for APM deployment verification. Production checks every deployed skill file against the native lock. */
   verifyApmDeployment?: (root: string, record: ReleaseRecordV1) => void;
 }
 
@@ -23,8 +24,44 @@ function paths(targetDirectory: string) {
   const runtime = join(targetDirectory, ".archie", "runtime");
   return { runtime, installedPackage: (name: string) => join(runtime, "node_modules", name) };
 }
-function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecordV1, verifyApmDeployment: (root: string, record: ReleaseRecordV1) => void): void {
-  for (const skill of record.apm.skills) verifyApmDeployment(join(targetDirectory, ".agents", "skills", skill), record);
+function deployedFiles(targetDirectory: string, record: ReleaseRecordV1): string[] {
+  const files: string[] = [];
+  const visit = (path: string): void => {
+    for (const entry of readdirSync(path, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const child = join(path, entry.name);
+      if (entry.isDirectory()) visit(child);
+      else if (entry.isFile()) files.push(relative(targetDirectory, child).split(sep).join("/"));
+      else throw new Error(`APM deployed Archie projection contains an unsupported entry: ${child}`);
+    }
+  };
+  for (const skill of record.apm.skills) visit(join(targetDirectory, ".agents", "skills", skill));
+  return files.sort();
+}
+
+function lockedDeploymentHashes(lock: string, record: ReleaseRecordV1): Map<string, string> {
+  const hashes = new Map<string, string>();
+  const prefixes = record.apm.skills.map((skill) => `.agents/skills/${skill}/`);
+  for (const match of lock.matchAll(/^\s+(\.agents\/skills\/[^:\r\n]+):\s+sha256:([a-f0-9]{64})\s*$/gm)) {
+    const path = match[1]!;
+    if (!prefixes.some((prefix) => path.startsWith(prefix))) continue;
+    if (path.split("/").includes("..") || hashes.has(path)) throw new Error("APM deployed Archie file hashes are malformed or duplicated");
+    hashes.set(path, match[2]!);
+  }
+  return hashes;
+}
+
+function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecordV1, lock: string, override?: (root: string, record: ReleaseRecordV1) => void): void {
+  if (override) {
+    for (const skill of record.apm.skills) override(join(targetDirectory, ".agents", "skills", skill), record);
+    return;
+  }
+  const actualFiles = deployedFiles(targetDirectory, record);
+  const expectedHashes = lockedDeploymentHashes(lock, record);
+  if (JSON.stringify([...expectedHashes.keys()].sort()) !== JSON.stringify(actualFiles)) throw new Error("APM deployed Archie file coverage differs from the native lock");
+  for (const path of actualFiles) {
+    const actual = createHash("sha256").update(readFileSync(join(targetDirectory, path))).digest("hex");
+    if (actual !== expectedHashes.get(path)) throw new Error(`APM deployed Archie file differs from the native lock: ${path}`);
+  }
 }
 
 export class ReleaseVerificationFailure extends Error {
@@ -34,20 +71,18 @@ export class ReleaseVerificationFailure extends Error {
 /** Validates the installed projection without allowing a package-manager command to repair it. */
 export function verifyCurrentInstalledTarget(targetDirectory: string, options: ReleaseInstallOptions = {}): void {
   const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
-  const verifyApmDeployment = options.verifyApmDeployment ?? ((root: string) => { if (!existsSync(root)) throw new Error("APM deployed Archie projection is missing"); });
   assertSupportedEnvironment();
   const pin = readPinnedTarget(targetDirectory);
   assertInstalledNpm(pin);
   const p = paths(pin.targetDirectory);
   verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
-  verifyDeployedSkills(pin.targetDirectory, pin.record, verifyApmDeployment);
+  verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
 }
 
 /** Executes the native, pinned-state-only checks in their required order. */
 export function verifyInstalledTarget(targetDirectory: string, options: ReleaseInstallOptions = {}): ReleaseInstallReport {
   const run = options.run ?? nativeRun;
   const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
-  const verifyApmDeployment = options.verifyApmDeployment ?? ((root: string) => { if (!existsSync(root)) throw new Error("APM deployed Archie projection is missing after frozen install"); });
   const report = initialInstallReport();
   let phase = "preflight";
   try {
@@ -64,9 +99,9 @@ export function verifyInstalledTarget(targetDirectory: string, options: ReleaseI
   pin = readPinnedTarget(targetDirectory);
   phase = "apm";
   report.apm = runApmChecks(pin, run);
-  verifyDeployedSkills(pin.targetDirectory, pin.record, verifyApmDeployment);
-  // Re-read after APM has deployed its projection and revalidate tracked bytes.
+  // Re-read after APM has deployed its projection, then verify every pinned deployed file.
   pin = readPinnedTarget(targetDirectory);
+  verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
   report.apm.content = "passed"; report.replay = "passed";
   return report;
   } catch (failure) {

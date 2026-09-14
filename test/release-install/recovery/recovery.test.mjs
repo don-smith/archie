@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -38,6 +39,34 @@ test("upgrade rejects a broken installed target before it stages a replacement",
     const before = readFileSync(recordPath, "utf8");
     writeFileSync(join(target, ".archie", "runtime", "node_modules", selected.record.npm.package, "package.json"), JSON.stringify({ name: selected.record.npm.package, version: "0.0.0" }));
     assert.throws(() => upgradeAndVerifyTarget(target, selected, { verifyHtml: () => undefined, verifyApmDeployment: () => undefined }), ReleaseInstallFailure);
+    assert.equal(readFileSync(recordPath, "utf8"), before);
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});
+
+test("upgrade rejects modified deployed skill bytes before staging", () => {
+  const base = root();
+  try {
+    const target = join(base, "target"); mkdirSync(target);
+    const selected = selectLocalRelease(bundle(base));
+    bootstrapAndVerifyTarget(target, selected, { run: installedRunner, verifyHtml: () => undefined, verifyApmDeployment: () => undefined });
+    const deployedFiles = selected.record.apm.skills.map((skill) => `.agents/skills/${skill}/SKILL.md`);
+    for (const relativePath of deployedFiles) {
+      const path = join(target, relativePath); mkdirSync(join(path, ".."), { recursive: true }); writeFileSync(path, `${relativePath}\n`);
+    }
+    const deployed = [
+      "  deployed_files:",
+      ...selected.record.apm.skills.flatMap((skill) => [`  - .agents/skills/${skill}`, `  - .agents/skills/${skill}/SKILL.md`]),
+      "  deployed_file_hashes:",
+      ...deployedFiles.map((relativePath) => `    ${relativePath}: sha256:${createHash("sha256").update(readFileSync(join(target, relativePath))).digest("hex")}`)
+    ].join("\n");
+    const lockPath = join(target, "apm.lock.yaml");
+    writeFileSync(lockPath, readFileSync(join(fixture, "apm", "apm.lock.yaml"), "utf8").replace("  content_hash:", `${deployed}\n  content_hash:`));
+    writeFileSync(join(target, deployedFiles[0]), "tampered\n");
+    const recordPath = join(target, ".archie", "release", "release-record-v1.json");
+    const before = readFileSync(recordPath, "utf8");
+    let calls = 0;
+    assert.throws(() => upgradeAndVerifyTarget(target, selected, { run: () => { calls += 1; return { exitCode: 9, stdout: "", stderr: "must not run" }; }, verifyHtml: () => undefined }), ReleaseInstallFailure);
+    assert.equal(calls, 0);
     assert.equal(readFileSync(recordPath, "utf8"), before);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
