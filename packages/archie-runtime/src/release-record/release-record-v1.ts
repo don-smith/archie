@@ -157,10 +157,10 @@ function githubSshRepository(locator: string): string {
 export function validateApmSourceEvidence(manifest: string, lock: string, expected: ApmSourceExpectation): { resolvedCommit: string; contentHash: string } {
   const repository = githubSshRepository(expected.locator);
   if (field(manifest, "git", "APM manifest") !== expected.locator || field(manifest, "ref", "APM manifest") !== expected.ref) throw new Error("APM manifest differs from bundle input");
-  if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(expected.skills)) throw new Error("APM manifest skill subset differs from bundle input");
+  if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest")) !== JSON.stringify(expected.skills)) throw new Error("APM manifest skill subset differs from bundle input");
   if (field(lock, "name", "APM lock") !== expected.package || field(lock, "repo_url", "APM lock") !== repository || field(lock, "host", "APM lock") !== "github.com") throw new Error("APM lock repository differs from bundle input");
   if (field(lock, "resolved_ref", "APM lock") !== expected.ref) throw new Error("APM lock ref differs from bundle input");
-  if (JSON.stringify(skillSubset(lock, "skill_subset", "APM lock").sort()) !== JSON.stringify(expected.skills)) throw new Error("APM lock skill subset differs from bundle input");
+  if (JSON.stringify(skillSubset(lock, "skill_subset", "APM lock")) !== JSON.stringify(expected.skills)) throw new Error("APM lock skill subset differs from bundle input");
   const resolvedCommit = field(lock, "resolved_commit", "APM lock");
   const contentHash = field(lock, "content_hash", "APM lock");
   if (!/^[a-f0-9]{40}$/i.test(resolvedCommit)) throw new Error("APM resolved commit is malformed");

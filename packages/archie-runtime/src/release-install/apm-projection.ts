@@ -16,7 +16,7 @@ const skillSubset = (lines: string[], header: string): string[] => {
     if (/^\s*-\s+\S+\s*$/.test(line)) { values.push(line.trim().slice(2)); continue; }
     if (line.trim()) break;
   }
-  return values.sort();
+  return values;
 };
 const sameSkills = (lines: string[], skills: readonly ArchieSkill[], header: string) => JSON.stringify(skillSubset(lines, header)) === JSON.stringify(skills);
 const repoUrl = (locator: string): string => {

@@ -82,6 +82,26 @@ test("finalization and selection reject mismatched APM lock identity", () => {
   }
 });
 
+test("finalization and selection reject reordered APM skill subsets", () => {
+  const reorder = (contents) => contents.replace(/^(\s*)- architecture-docs\n\1- likec4-authoring$/m, "$1- likec4-authoring\n$1- architecture-docs");
+  for (const relativePath of ["apm/apm.yml", "apm/apm.lock.yaml"]) {
+    const beforeFinalization = copyFixture();
+    try {
+      const path = join(beforeFinalization.bundle, relativePath);
+      writeFileSync(path, reorder(readFileSync(path, "utf8")));
+      assert.throws(() => finalize(beforeFinalization.bundle), /skill subset/);
+    } finally { rmSync(beforeFinalization.root, { recursive: true, force: true }); }
+
+    const afterFinalization = copyFixture();
+    try {
+      finalize(afterFinalization.bundle);
+      const path = join(afterFinalization.bundle, relativePath);
+      writeFileSync(path, reorder(readFileSync(path, "utf8")));
+      assert.throws(() => selectLocalRelease(afterFinalization.bundle), /skill subset/);
+    } finally { rmSync(afterFinalization.root, { recursive: true, force: true }); }
+  }
+});
+
 test("finalization requires a GitHub SSH APM locator", () => {
   const copied = copyFixture();
   try {

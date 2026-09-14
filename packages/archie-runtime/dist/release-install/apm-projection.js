@@ -17,7 +17,7 @@ const skillSubset = (lines, header) => {
         if (line.trim())
             break;
     }
-    return values.sort();
+    return values;
 };
 const sameSkills = (lines, skills, header) => JSON.stringify(skillSubset(lines, header)) === JSON.stringify(skills);
 const repoUrl = (locator) => {
