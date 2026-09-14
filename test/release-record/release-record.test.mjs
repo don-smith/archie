@@ -3,7 +3,8 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { finalizeRelease, parseReleaseRecord, serializeReleaseRecord, validateBundleLayout } from "../../dist/packages/archie-runtime/src/release-record/release-record-v1.js";
+import { selectLocalRelease } from "../../dist/packages/archie-runtime/src/release-install/selection.js";
+import { ARCHIE_SKILLS, finalizeRelease, parseReleaseRecord, serializeReleaseRecord, validateBundleLayout } from "../../dist/packages/archie-runtime/src/release-record/release-record-v1.js";
 
 const fixture = "test/fixtures/private-bundles/valid";
 const provenance = "packages/archie-runtime/vendor/html-design.provenance.json";
@@ -53,6 +54,49 @@ test("malformed final artifact evidence and unsupported layouts reject", () => {
     writeFileSync(join(copied.bundle, "unexpected.txt"), "no");
     assert.throws(() => validateBundleLayout(copied.bundle), /unsupported entry/);
   } finally { rmSync(copied.root, { recursive: true, force: true }); }
+});
+
+test("finalization and selection reject mismatched APM lock identity", () => {
+  const cases = [
+    ["skill subset", (lock) => lock.replace("  - likec4-authoring", "  - likec4-authoring\n  - unrecorded-skill")],
+    ["repository", (lock) => lock.replace("repo_url: don-smith/archie", "repo_url: other/archie")]
+  ];
+  for (const [label, mutate] of cases) {
+    const beforeFinalization = copyFixture();
+    try {
+      const lockPath = join(beforeFinalization.bundle, "apm", "apm.lock.yaml");
+      writeFileSync(lockPath, mutate(readFileSync(lockPath, "utf8")));
+      assert.throws(() => finalize(beforeFinalization.bundle), new RegExp(label));
+    } finally { rmSync(beforeFinalization.root, { recursive: true, force: true }); }
+
+    const afterFinalization = copyFixture();
+    try {
+      finalize(afterFinalization.bundle);
+      const lockPath = join(afterFinalization.bundle, "apm", "apm.lock.yaml");
+      writeFileSync(lockPath, mutate(readFileSync(lockPath, "utf8")));
+      assert.throws(() => selectLocalRelease(afterFinalization.bundle), new RegExp(label));
+    } finally { rmSync(afterFinalization.root, { recursive: true, force: true }); }
+  }
+});
+
+test("finalization requires a GitHub SSH APM locator", () => {
+  const copied = copyFixture();
+  try {
+    const inputPath = join(copied.bundle, "bundle.json");
+    const input = JSON.parse(readFileSync(inputPath, "utf8"));
+    input.apm.locator = "https://github.com/don-smith/archie.git";
+    writeFileSync(inputPath, `${JSON.stringify(input, null, 2)}\n`);
+    const manifestPath = join(copied.bundle, "apm", "apm.yml");
+    writeFileSync(manifestPath, readFileSync(manifestPath, "utf8").replace("git@github.com:don-smith/archie.git", input.apm.locator));
+    assert.throws(() => finalize(copied.bundle), /GitHub SSH/);
+  } finally { rmSync(copied.root, { recursive: true, force: true }); }
+});
+
+test("release schema encodes the exact Archie skill set", () => {
+  const schema = JSON.parse(readFileSync("schemas/release-record-v1.schema.json", "utf8"));
+  const skills = schema.$defs.apm.properties.skills;
+  assert.deepEqual(skills.prefixItems.map((item) => item.const), ARCHIE_SKILLS);
+  assert.equal(skills.items, false);
 });
 
 test("unsupported analyzer compatibility is rejected by the parser", () => {

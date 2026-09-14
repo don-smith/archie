@@ -146,16 +146,28 @@ function skillSubset(text: string, header: string, label: string): string[] {
   return values;
 }
 
-function apmEvidence(root: string, apm: BundleInput["apm"]): ReleaseRecordV1["apm"] {
-  const manifest = readFileSync(within(root, apm.manifest), "utf8");
-  if (field(manifest, "git", "APM manifest") !== apm.locator || field(manifest, "ref", "APM manifest") !== apm.ref) throw new Error("APM manifest differs from bundle input");
-  if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(ARCHIE_SKILLS)) throw new Error("APM manifest skill subset differs from bundle input");
-  const lock = readFileSync(within(root, apm.lockFile), "utf8");
+type ApmSourceExpectation = Pick<ReleaseRecordV1["apm"], "package" | "skills" | "locator" | "ref"> & Partial<Pick<ReleaseRecordV1["apm"], "resolvedCommit" | "contentHash">>;
+
+export function validateApmSourceEvidence(manifest: string, lock: string, expected: ApmSourceExpectation): { resolvedCommit: string; contentHash: string } {
+  const repository = expected.locator.match(/^git@github\.com:([^/]+\/[^/]+)\.git$/)?.[1];
+  if (!repository) throw new Error("APM locator must be a GitHub SSH repository URL");
+  if (field(manifest, "git", "APM manifest") !== expected.locator || field(manifest, "ref", "APM manifest") !== expected.ref) throw new Error("APM manifest differs from bundle input");
+  if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest").sort()) !== JSON.stringify(expected.skills)) throw new Error("APM manifest skill subset differs from bundle input");
+  if (field(lock, "name", "APM lock") !== expected.package || field(lock, "repo_url", "APM lock") !== repository || field(lock, "host", "APM lock") !== "github.com") throw new Error("APM lock repository differs from bundle input");
+  if (field(lock, "resolved_ref", "APM lock") !== expected.ref) throw new Error("APM lock ref differs from bundle input");
+  if (JSON.stringify(skillSubset(lock, "skill_subset", "APM lock").sort()) !== JSON.stringify(expected.skills)) throw new Error("APM lock skill subset differs from bundle input");
   const resolvedCommit = field(lock, "resolved_commit", "APM lock");
   const contentHash = field(lock, "content_hash", "APM lock");
   if (!/^[a-f0-9]{40}$/i.test(resolvedCommit)) throw new Error("APM resolved commit is malformed");
   if (!/^sha256:[a-f0-9]{64}$/i.test(contentHash)) throw new Error("APM content hash is malformed");
-  if (field(lock, "resolved_ref", "APM lock") !== apm.ref) throw new Error("APM lock ref differs from bundle input");
+  if ((expected.resolvedCommit && resolvedCommit !== expected.resolvedCommit) || (expected.contentHash && contentHash !== expected.contentHash)) throw new Error("APM lock evidence differs from finalized record");
+  return { resolvedCommit, contentHash };
+}
+
+function apmEvidence(root: string, apm: BundleInput["apm"]): ReleaseRecordV1["apm"] {
+  const manifest = readFileSync(within(root, apm.manifest), "utf8");
+  const lock = readFileSync(within(root, apm.lockFile), "utf8");
+  const { resolvedCommit, contentHash } = validateApmSourceEvidence(manifest, lock, apm);
   return { package: apm.package, skills: apm.skills, locator: apm.locator, ref: apm.ref, resolvedCommit, contentHash };
 }
 

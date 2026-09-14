@@ -50,7 +50,13 @@ export interface FinalizeReleaseResult {
     receiptPath: string;
     recordSha256: string;
 }
+type ApmSourceExpectation = Pick<ReleaseRecordV1["apm"], "package" | "skills" | "locator" | "ref"> & Partial<Pick<ReleaseRecordV1["apm"], "resolvedCommit" | "contentHash">>;
+export declare function validateApmSourceEvidence(manifest: string, lock: string, expected: ApmSourceExpectation): {
+    resolvedCommit: string;
+    contentHash: string;
+};
 export declare function serializeReleaseRecord(record: ReleaseRecordV1): string;
 export declare function parseReleaseRecord(bytes: string): ReleaseRecordV1;
 export declare function validateBundleLayout(bundleDirectory: string): void;
 export declare function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleaseResult;
+export {};

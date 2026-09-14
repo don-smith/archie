@@ -33,7 +33,22 @@
       "type": "object", "additionalProperties": false,
       "required": ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"],
       "properties": {
-        "package": { "type": "string", "minLength": 1 }, "skills": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 6, "maxItems": 6 }, "locator": { "type": "string", "minLength": 1 }, "ref": { "type": "string", "minLength": 1 },
+        "package": { "type": "string", "minLength": 1 },
+        "skills": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "archie" },
+            { "const": "architecture-assessment" },
+            { "const": "architecture-conformance-onboarding" },
+            { "const": "architecture-contracts" },
+            { "const": "architecture-docs" },
+            { "const": "likec4-authoring" }
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "locator": { "type": "string", "pattern": "^git@github\\.com:[^/]+/[^/]+\\.git$" }, "ref": { "type": "string", "minLength": 1 },
         "resolvedCommit": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" }, "contentHash": { "type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$" }
       }
     },

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
-import { ARCHIE_SKILLS, parseReleaseRecord, validateBundleLayout } from "../release-record/release-record-v1.js";
+import { ARCHIE_SKILLS, parseReleaseRecord, validateApmSourceEvidence, validateBundleLayout } from "../release-record/release-record-v1.js";
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const object = (value, label) => {
@@ -54,12 +54,6 @@ function bundleInput(root) {
         apm: { package: text(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: text(apm.locator, "bundle APM locator"), ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile") }
     };
 }
-function field(contents, name, label) {
-    const matches = [...contents.matchAll(new RegExp(`^\\s*(?:-\\s*)?${name}:\\s*([^\\s]+)\\s*$`, "gm"))];
-    if (matches.length !== 1)
-        throw new Error(`${label} must contain exactly one ${name} field`);
-    return matches[0][1];
-}
 /** Selects a complete, already-finalized local bundle; it never resolves a release from a network source. */
 export function selectLocalRelease(directory) {
     if (!directory || directory === "latest" || /^[a-z][a-z0-9+.-]*:\/\//i.test(directory))
@@ -87,10 +81,11 @@ export function selectLocalRelease(directory) {
     const packageLock = object(object(lock.packages, "bundle npm lock packages")[`node_modules/${record.npm.package}`], "bundle npm lock package");
     if (input.npm.package !== record.npm.package || input.npm.version !== record.npm.version || input.npm.locator !== record.npm.locator || input.npm.requiredPlatformPayload !== record.npm.requiredPlatformPayload || packageLock.integrity !== record.npm.lockIntegrity || sha512Integrity(tarball) !== record.npm.lockIntegrity || sha256(tarball) !== record.npm.tarballSha256)
         throw new Error("selected bundle npm evidence differs from its finalized record");
+    if (input.apm.package !== record.apm.package || JSON.stringify(input.apm.skills) !== JSON.stringify(record.apm.skills) || input.apm.locator !== record.apm.locator || input.apm.ref !== record.apm.ref)
+        throw new Error("selected bundle APM evidence differs from its finalized record");
     const manifest = readFileSync(bundleFile(root, input.apm.manifest), "utf8");
     const apmLock = readFileSync(bundleFile(root, input.apm.lockFile), "utf8");
-    if (input.apm.package !== record.apm.package || JSON.stringify(input.apm.skills) !== JSON.stringify(record.apm.skills) || input.apm.locator !== record.apm.locator || input.apm.ref !== record.apm.ref || field(manifest, "git", "bundle APM manifest") !== record.apm.locator || field(manifest, "ref", "bundle APM manifest") !== record.apm.ref || field(apmLock, "resolved_commit", "bundle APM lock") !== record.apm.resolvedCommit || field(apmLock, "resolved_ref", "bundle APM lock") !== record.apm.ref || field(apmLock, "content_hash", "bundle APM lock") !== record.apm.contentHash)
-        throw new Error("selected bundle APM evidence differs from its finalized record");
+    validateApmSourceEvidence(manifest, apmLock, record.apm);
     return { bundleDirectory: root, record, recordBytes, recordSha256: sha256(recordBytes), tarballPath, tarballName: basename(tarballPath), npmLockBytes };
 }
 //# sourceMappingURL=selection.js.map
