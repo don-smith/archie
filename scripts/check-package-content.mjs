@@ -3,13 +3,13 @@ import { existsSync, readFileSync } from "node:fs";
 const packages = [
   ["@archie/runtime", "archie-runtime"], ["@archie/cli", "archie-cli"],
   ["@archie/context", "archie-context"], ["@archie/architecture-docs", "architecture-docs"],
-  ["@archie/capabilities", "capabilities"]
+  ["@archie/assessment", "assessment"], ["@archie/capabilities", "capabilities"]
 ];
 for (const [name, directory] of packages) {
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.private !== true) throw new Error(`${name} must remain private`);
   if (manifest.publishConfig) throw new Error(`${name} must not configure publication`);
-  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (name === "@archie/architecture-docs" && file === "skills")));
+  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (["@archie/architecture-docs", "@archie/assessment"].includes(name) && file === "skills")));
   if (unsafeAllowlist) throw new Error(`${name} has unsafe package file allowlist`);
 }
 const runtime = JSON.parse(readFileSync("packages/archie-runtime/package.json"));
@@ -29,8 +29,13 @@ for (const [name] of packages) {
   const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer|release-record-v1\.json)(\/|$)/i.test(file) && !(name === "@archie/context" && file.startsWith(".apm/skills/")));
   if (forbidden.length) throw new Error(`${name} would ship forbidden paths: ${forbidden.join(", ")}`);
   if (name === "@archie/context") {
-    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs"]) {
+    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs"]) {
       if (!packed.includes(required)) throw new Error(`Context package omits required APM asset: ${required}`);
+    }
+  }
+  if (name === "@archie/assessment") {
+    for (const required of ["skills/architecture-assessment/SKILL.md", "skills/architecture-assessment/schemas/architecture-model.schema.json", "skills/architecture-assessment/scripts/check-model.mjs", "skills/architecture-assessment/scripts/check-assessment.mjs"]) {
+      if (!packed.includes(required)) throw new Error(`Assessment package omits required skill asset: ${required}`);
     }
   }
   const expectedEntry = {

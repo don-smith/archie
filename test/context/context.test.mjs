@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -20,6 +20,34 @@ test("canonical skill sources exactly match the APM context projection", () => {
   for (const skill of ["archie", "architecture-assessment", "architecture-docs", "likec4-authoring", "architecture-conformance-onboarding", "architecture-contracts"]) {
     assert.ok(readFileSync(join(context, ".apm", "skills", skill, "SKILL.md"), "utf8").includes("name:"));
   }
+});
+
+test("projected Assessment validator executes representative valid and invalid models", () => {
+  const base = mkdtempSync(join(tmpdir(), "archie-context-assessment-"));
+  try {
+    const model = JSON.parse(readFileSync("packages/assessment/skills/architecture-assessment/templates/architecture-model.json", "utf8"));
+    const valid = join(base, "valid.json");
+    const invalid = join(base, "invalid.json");
+    writeFileSync(valid, `${JSON.stringify(model, null, 2)}\n`);
+    delete model.scope.drivers;
+    writeFileSync(invalid, `${JSON.stringify(model, null, 2)}\n`);
+    const checker = join(context, ".apm/skills/architecture-assessment/scripts/check-model.mjs");
+    assert.equal(spawnSync(process.execPath, [checker, valid], { encoding: "utf8" }).status, 0);
+    const result = spawnSync(process.execPath, [checker, invalid], { encoding: "utf8" });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /\$\.scope\.drivers/);
+
+    const skill = join(context, ".apm/skills/architecture-assessment");
+    const bundle = join(base, "bundle");
+    mkdirSync(join(bundle, "evidence"), { recursive: true });
+    cpSync(join(skill, "templates/architecture-model.json"), join(bundle, "architecture-model.json"));
+    cpSync(join(skill, "templates/assessment.md"), join(bundle, "assessment.md"));
+    for (const file of ["inventory.md", "flows.md", "evolution.md"]) cpSync(join(skill, "templates", file), join(bundle, "evidence", file));
+    const bundleChecker = join(skill, "scripts/check-assessment.mjs");
+    assert.equal(spawnSync(process.execPath, [bundleChecker, bundle], { encoding: "utf8" }).status, 0);
+    writeFileSync(join(bundle, "assessment.md"), "# Assessment\n\nStatus: `ready`\n\n[model:el-system]\n");
+    assert.equal(spawnSync(process.execPath, [bundleChecker, bundle], { encoding: "utf8" }).status, 1);
+  } finally { rmSync(base, { recursive: true, force: true }); }
 });
 
 test("Archie ships the canonical Drift Detection playbook route and reference", () => {

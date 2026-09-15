@@ -3,9 +3,15 @@
   "version": "0.1.0-private.0",
   "private": true,
   "type": "module",
-  "files": [],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "skills"
+  ],
   "scripts": {
-    "test": "node --test ../../test/migrations/migration-baselines.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "check:model": "node skills/architecture-assessment/scripts/check-model.mjs skills/architecture-assessment/templates/architecture-model.json",
+    "evaluate": "node evaluation/run-evals.mjs"
   },
   "engines": {
     "node": ">=24 <25"

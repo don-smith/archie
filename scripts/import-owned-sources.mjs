@@ -8,6 +8,7 @@ const workspace = new URL("..", import.meta.url).pathname;
 for (const item of manifest.imports) {
   const actual = execFileSync("git", ["-C", item.repository, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   if (actual !== item.revision) throw new Error(`${item.id} is not at recorded revision ${item.revision}; found ${actual}`);
+  if (item.id === "architecture-assessment") continue;
   const temporary = mkdtempSync(join(tmpdir(), "archie-import-"));
   const archive = join(temporary, "source.tar");
   try {
@@ -20,11 +21,11 @@ for (const item of manifest.imports) {
     }
   } finally { rmSync(temporary, { recursive: true, force: true }); }
 }
-const assessmentSkill = join(workspace, "packages/capabilities/assets/assessment/skills/architecture-assessment/SKILL.md");
+const assessmentSkill = join(workspace, "packages/assessment/skills/architecture-assessment/SKILL.md");
 const neutralizedAssessment = readFileSync(assessmentSkill, "utf8")
   .replace("without a MyFlow workstream", "without a product workstream")
   .replace(/1\. Resolve the loaded `myflow` skill directory from the available-skills metadata\. Run:\n\n   ```text\n   node <myflow-skill-dir>\/scripts\/resolve-repository-map\.mjs discover --cwd <git-root>\n   ```\n\n2\. Read the selected repository map when found, then/, "1. Inspect repository-local instructions, the supplied artifact, and its linked intent, design, research, glossary, decision, and architecture sources.\n2. Then")
   .replace("3. Read `git status --short`. Record the selected repository map and current Git state.", "3. Read `git status --short`. Record applicable repository instructions and current Git state.");
 writeFileSync(assessmentSkill, neutralizedAssessment);
 writeFileSync(join(workspace, "packages/capabilities/assets/IMPORTS.json"), `${JSON.stringify({ format: manifest.format, productVersion: manifest.productVersion, imports: manifest.imports.filter((item) => item.id !== "html-design-snapshot"), migrations: manifest.migrations ?? [], excluded: manifest.excluded }, null, 2)}\n`);
-console.log(`Imported ${manifest.imports.length} reviewed source inputs from immutable revisions.`);
+console.log(`Verified ${manifest.imports.length} reviewed source inputs at immutable revisions.`);

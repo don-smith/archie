@@ -66,17 +66,17 @@
     {
       "path": "README.md",
       "blob": "093156fdbce34b44dbd5a5b1cb8427e90112a4c7",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/README.md",
-      "reason": "Package provenance or usage documentation moves with the workspace.",
+      "reason": "Adapted to describe the Archie-owned canonical workspace and private verification commands.",
       "kind": "documentation"
     },
     {
       "path": "evals/architecture-assessment/evals.json",
       "blob": "a57918e6485fd17190d1b2324ff6001da8c02fc6",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/evaluation/evals.json",
-      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "reason": "Adapted only to address package-local controlled fixture paths; prompts and fixture bytes remain pinned.",
       "kind": "evaluation-format"
     },
     {
@@ -392,17 +392,17 @@
     {
       "path": "skills/architecture-assessment/SKILL.md",
       "blob": "fe75598fc6b7c61eacb8d756076bc03a7a2c4b73",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/SKILL.md",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted for Archie product-local workstreams and machine-readable correction, triage, and readiness rules.",
       "kind": "skill"
     },
     {
       "path": "skills/architecture-assessment/references/artifact-contract.md",
       "blob": "3c7013f759bf9194fc6d303e68d13df3716e470e",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/references/artifact-contract.md",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted to document machine-readable correction, triage, and readiness rules.",
       "kind": "skill"
     },
     {
@@ -424,50 +424,50 @@
     {
       "path": "skills/architecture-assessment/references/fact-model.md",
       "blob": "97cfc33dfb2f0770f17276bda09f21d153d87270",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/references/fact-model.md",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted to document correction, recommendation, and cross-reference records.",
       "kind": "skill"
     },
     {
       "path": "skills/architecture-assessment/schemas/architecture-model.schema.json",
       "blob": "04c8710e5d21377e3361ac2560dea56a6cdc1e39",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/schemas/architecture-model.schema.json",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted into the closed canonical schema used before semantic validation.",
       "kind": "format"
     },
     {
       "path": "skills/architecture-assessment/scripts/check-assessment.mjs",
       "blob": "e20e0d3522c86f906840ff480815880f4b2b5b62",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/scripts/check-assessment.mjs",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted to use the single model validator entry point and enforce bundle readiness.",
       "kind": "command"
     },
     {
       "path": "skills/architecture-assessment/scripts/check-model.mjs",
       "blob": "319aac82a70bcb19531899078566ac5c4f038eea",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/scripts/check-model.mjs",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted to validate schema before semantic references and readiness rules.",
       "kind": "command"
     },
     {
       "path": "skills/architecture-assessment/templates/architecture-model.json",
       "blob": "924d4b6b5b543a8b30cc803eff23fb2ebb2787d1",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/templates/architecture-model.json",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted with pending factual-correction and recommendation-triage records.",
       "fixture": "packages/assessment/test/fixtures/architecture-model.json",
       "kind": "format"
     },
     {
       "path": "skills/architecture-assessment/templates/assessment.md",
       "blob": "aa54c7085f5a398ab168a5ca44b98e474b423723",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/skills/architecture-assessment/templates/assessment.md",
-      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "reason": "Adapted to direct machine-readable recommendation triage.",
       "kind": "format"
     },
     {
@@ -497,33 +497,33 @@
     {
       "path": "tests/architecture-assessment-bundle.test.mjs",
       "blob": "faaafba132d1927eec1f84c90f8415806819d335",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/test/architecture-assessment-bundle.test.mjs",
-      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "reason": "Adapted with false-ready, status-agreement, packet, and HTML validation cases.",
       "kind": "test"
     },
     {
       "path": "tests/architecture-assessment-eval-runner.test.mjs",
       "blob": "257d264f1ed1e9c8e46d9e113276a9e964d46be9",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/test/architecture-assessment-eval-runner.test.mjs",
-      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "reason": "Adapted to package-local paths and frozen controlled-fixture hash checks.",
       "kind": "test"
     },
     {
       "path": "tests/architecture-assessment-model.test.mjs",
       "blob": "851f2d04512708e34f60271ff8b9d2c59e3872ff",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/test/architecture-assessment-model.test.mjs",
-      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "reason": "Adapted with schema-ordering, reference, completeness, and readiness cases.",
       "kind": "test"
     },
     {
       "path": "tests/architecture-assessment-skill-contract.test.mjs",
       "blob": "72cb4a4087b3804946ee11343c7c6e488bab5322",
-      "disposition": "included",
+      "disposition": "adapted",
       "destination": "packages/assessment/test/architecture-assessment-skill-contract.test.mjs",
-      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "reason": "Adapted to the Archie product-local policy boundary.",
       "kind": "test"
     }
   ]

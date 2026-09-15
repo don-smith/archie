@@ -11,13 +11,15 @@ function walk(source) {
 }
 
 const requested = process.argv.slice(2);
-const roots = requested.length ? requested : ["test", "packages/architecture-docs/test"];
+const roots = requested.length ? requested : ["test", "packages/assessment/test", "packages/architecture-docs/test"];
 const files = roots.flatMap(walk).map((file) => resolve(file)).sort();
 if (!files.length) throw new Error(`No tests found for: ${roots.join(", ")}`);
 
+const assessmentRoot = resolve("packages/assessment");
 const architectureDocsRoot = resolve("packages/architecture-docs");
+const assessmentTests = files.filter((file) => file.startsWith(`${assessmentRoot}/`));
 const architectureDocsTests = files.filter((file) => file.startsWith(`${architectureDocsRoot}/`));
-const productTests = files.filter((file) => !file.startsWith(`${architectureDocsRoot}/`));
+const productTests = files.filter((file) => !file.startsWith(`${assessmentRoot}/`) && !file.startsWith(`${architectureDocsRoot}/`));
 
 function run(group, cwd) {
   if (!group.length) return 0;
@@ -26,5 +28,6 @@ function run(group, cwd) {
 }
 
 const productStatus = run(productTests, process.cwd());
-const architectureDocsStatus = productStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
-process.exit(productStatus || architectureDocsStatus);
+const assessmentStatus = productStatus === 0 ? run(assessmentTests, assessmentRoot) : 1;
+const architectureDocsStatus = productStatus === 0 && assessmentStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
+process.exit(productStatus || assessmentStatus || architectureDocsStatus);

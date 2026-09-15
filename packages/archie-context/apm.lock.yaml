@@ -74,7 +74,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:82335ae2e8077965f79f97d3441b263a725fdb649706b014b896c260e15e22d6
+  content_hash: sha256:15ec3ef7f4e1538cb63a99a6c3b093161a7ebdfd257a9e4eaa3586bfc76a4578
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/references/artifact-contract.md
@@ -83,7 +83,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:8b6de4b24af23ddf8cd31421f5f4d60feb5302f949f8c6276dab35cc2b1bf86a
+  content_hash: sha256:875b24afd32d09805771333a0c593b70a7beb630014ef7362f248b2966d6c13a
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/references/assessment-lenses.md
@@ -110,7 +110,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:77a8f465ced96a79c271f6772ea84940836e549ba150bdb992cdbcced4a025c1
+  content_hash: sha256:d90ef65aa63cfb2cac4c66c40c4169336ba4f56650c6f7f2be615f0c4f77bf58
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/schemas/architecture-model.schema.json
@@ -119,7 +119,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:10bb7b420b710419a79cf64e496963ff64d14f067ee472f2965cc547c1f6cc2e
+  content_hash: sha256:5183fccba326c706361ffaadf39885f7ec30d2ac9569ec6f7d8d47ca612a04d1
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/scripts/check-assessment.mjs
@@ -128,7 +128,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:ce57eb00db854b17c0ad08605fa7723a431a55a13dd84c968f6315ee77d67e0a
+  content_hash: sha256:7b2a92d98aebcd604acd607674e11f954b202323310576551866248963c4d1c7
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/scripts/check-model.mjs
@@ -137,7 +137,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:bde98ad2e81c947e332d58b159806ce1d92a730d6848a79a70aa6065d737043f
+  content_hash: sha256:7d2edff5ae19a9084bb94f59de9f7bca4bc69ba7ae21d7f2233162d37a632a31
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/templates/architecture-model.json
@@ -146,7 +146,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:4cc681957bd78c636b53b6730147969227965c89263a2f24e3f2b846332e9475
+  content_hash: sha256:1650b4d5097dcd78db793854cdc4eeab2d6306342d12ec3755abb2b16109c9f6
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/templates/assessment.md
@@ -155,7 +155,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:c307695f2d2c337311221ae9d0562922fd574cd494c8573a60a24e549a33c392
+  content_hash: sha256:caeac2c44d635833111655907de12b4658619fc7fa4b6309d1f177dbe34eda0e
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment/templates/evolution.md
@@ -330,16 +330,16 @@ local_deployed_file_hashes:
   .agents/skills/archie/references/drift-detection.md: sha256:04f8030956dd23ab8a4fa9e02a8ecc84732a84aa200183f6b96f5f33a24a5214
   .agents/skills/archie/references/operating-contract.md: sha256:6d3b47cd940568e00f87f588e54c5f3c6e4ef81dcd4895bd36ebd85adbb0ee7b
   .agents/skills/archie/scripts/dispatch-runtime.mjs: sha256:98dfbf4add81a93528e4e3b6d1df021e4fb13eb4d7be5b0a8993fdbee6078805
-  .agents/skills/architecture-assessment/SKILL.md: sha256:82335ae2e8077965f79f97d3441b263a725fdb649706b014b896c260e15e22d6
-  .agents/skills/architecture-assessment/references/artifact-contract.md: sha256:8b6de4b24af23ddf8cd31421f5f4d60feb5302f949f8c6276dab35cc2b1bf86a
+  .agents/skills/architecture-assessment/SKILL.md: sha256:15ec3ef7f4e1538cb63a99a6c3b093161a7ebdfd257a9e4eaa3586bfc76a4578
+  .agents/skills/architecture-assessment/references/artifact-contract.md: sha256:875b24afd32d09805771333a0c593b70a7beb630014ef7362f248b2966d6c13a
   .agents/skills/architecture-assessment/references/assessment-lenses.md: sha256:a6db4f407ebc2fdeea926b0663772ab7954bdcee38e82bcac64557c70f4a5d89
   .agents/skills/architecture-assessment/references/evaluation.md: sha256:bdedd3615e509c0b53ed73739370e528dcc2f12d32d2750bfc2d60d3639e2198
-  .agents/skills/architecture-assessment/references/fact-model.md: sha256:77a8f465ced96a79c271f6772ea84940836e549ba150bdb992cdbcced4a025c1
-  .agents/skills/architecture-assessment/schemas/architecture-model.schema.json: sha256:10bb7b420b710419a79cf64e496963ff64d14f067ee472f2965cc547c1f6cc2e
-  .agents/skills/architecture-assessment/scripts/check-assessment.mjs: sha256:ce57eb00db854b17c0ad08605fa7723a431a55a13dd84c968f6315ee77d67e0a
-  .agents/skills/architecture-assessment/scripts/check-model.mjs: sha256:bde98ad2e81c947e332d58b159806ce1d92a730d6848a79a70aa6065d737043f
-  .agents/skills/architecture-assessment/templates/architecture-model.json: sha256:4cc681957bd78c636b53b6730147969227965c89263a2f24e3f2b846332e9475
-  .agents/skills/architecture-assessment/templates/assessment.md: sha256:c307695f2d2c337311221ae9d0562922fd574cd494c8573a60a24e549a33c392
+  .agents/skills/architecture-assessment/references/fact-model.md: sha256:d90ef65aa63cfb2cac4c66c40c4169336ba4f56650c6f7f2be615f0c4f77bf58
+  .agents/skills/architecture-assessment/schemas/architecture-model.schema.json: sha256:5183fccba326c706361ffaadf39885f7ec30d2ac9569ec6f7d8d47ca612a04d1
+  .agents/skills/architecture-assessment/scripts/check-assessment.mjs: sha256:7b2a92d98aebcd604acd607674e11f954b202323310576551866248963c4d1c7
+  .agents/skills/architecture-assessment/scripts/check-model.mjs: sha256:7d2edff5ae19a9084bb94f59de9f7bca4bc69ba7ae21d7f2233162d37a632a31
+  .agents/skills/architecture-assessment/templates/architecture-model.json: sha256:1650b4d5097dcd78db793854cdc4eeab2d6306342d12ec3755abb2b16109c9f6
+  .agents/skills/architecture-assessment/templates/assessment.md: sha256:caeac2c44d635833111655907de12b4658619fc7fa4b6309d1f177dbe34eda0e
   .agents/skills/architecture-assessment/templates/evolution.md: sha256:392a120a38c73ebf84e31a50662ac66e230c3828da8256e97c56964481c37ead
   .agents/skills/architecture-assessment/templates/flows.md: sha256:686806d7a25ed454b72212a9b25971ec2a498ecc7aeed4c2bd5c656ace1febde
   .agents/skills/architecture-assessment/templates/inventory.md: sha256:9884119c3a3233f05ed2ec188edfa05e01e52e67f4e46eb85bbf26c1dfa689e5

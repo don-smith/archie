@@ -6,7 +6,7 @@ import { capabilityContracts, selectCapability } from "../../dist/packages/capab
 import { PRODUCT_VERSION } from "../../dist/packages/archie-runtime/src/index.js";
 
 const root = JSON.parse(readFileSync("package.json"));
-const packages = ["archie-runtime", "archie-cli", "archie-context", "architecture-docs", "capabilities"];
+const packages = ["archie-runtime", "archie-cli", "archie-context", "architecture-docs", "assessment", "capabilities"];
 test("all workspaces use the product version and stay private", () => {
   for (const packageName of packages) { const manifest = JSON.parse(readFileSync(`packages/${packageName}/package.json`)); assert.equal(manifest.version, root.version); assert.equal(manifest.private, true); }
   assert.equal(PRODUCT_VERSION, root.version);
@@ -23,8 +23,9 @@ test("reviewed source imports and exclusions are recorded", () => {
   assert.ok(manifest.excluded.some((item) => item.path.includes("architecture-review")));
   assert.ok(manifest.migrations.some((item) => item.id === "architecture-docs-and-likec4" && item.destination === "packages/architecture-docs"));
   assert.ok(existsSync("packages/architecture-docs/test/architecture-docs-builder.test.mjs"));
-  assert.ok(existsSync("packages/capabilities/assets/assessment/skills/architecture-assessment/SKILL.md"));
-  assert.doesNotMatch(readFileSync("packages/capabilities/assets/assessment/skills/architecture-assessment/SKILL.md", "utf8"), /myflow/i);
+  assert.ok(existsSync("packages/assessment/skills/architecture-assessment/SKILL.md"));
+  assert.equal(existsSync("packages/capabilities/assets/assessment"), false);
+  assert.doesNotMatch(readFileSync("packages/assessment/skills/architecture-assessment/SKILL.md", "utf8"), /myflow/i);
 });
 test("private release runbook includes the SSH preflight", () => {
   assert.match(readFileSync("docs/archie/private-release-bundle.md", "utf8"), /git ls-remote git@github\.com:don-smith\/archie\.git/);

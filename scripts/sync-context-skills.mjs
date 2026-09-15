@@ -4,7 +4,7 @@ import { dirname, join, relative } from "node:path";
 
 const mappings = [
   ["skills/archie", "packages/archie-context/.apm/skills/archie"],
-  ["packages/capabilities/assets/assessment/skills/architecture-assessment", "packages/archie-context/.apm/skills/architecture-assessment"],
+  ["packages/assessment/skills/architecture-assessment", "packages/archie-context/.apm/skills/architecture-assessment"],
   ["packages/architecture-docs/skills/architecture-docs", "packages/archie-context/.apm/skills/architecture-docs"],
   ["packages/architecture-docs/skills/likec4-authoring", "packages/archie-context/.apm/skills/likec4-authoring"],
   ["packages/capabilities/assets/conformance/skills/architecture-conformance-onboarding", "packages/archie-context/.apm/skills/architecture-conformance-onboarding"],
