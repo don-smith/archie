@@ -252,6 +252,6 @@ test("configured missing snapshot remains an explicit v2 absence", async () => {
     assert.match(html, /No architecture status snapshot/);
     assert.equal(manifest.version, 2);
     assert.equal(manifest.architectureStatus.available, false);
-    assert.equal(manifest.files.architectureStatus, "architecture-status.json");
+    assert.equal(manifest.files.architectureStatus, undefined);
   } finally { await rm(temporary.directory, { recursive: true, force: true }); }
 });
