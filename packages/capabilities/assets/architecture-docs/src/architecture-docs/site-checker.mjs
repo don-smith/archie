@@ -74,10 +74,15 @@ export async function checkFinalSite(configPath) {
   if (config.architectureStatus) {
     const statusRoute = path.join(siteDirectory, "architecture-status", "index.html");
     if (!await exists(statusRoute)) add("$.site.architectureStatus", "final site architecture status route is missing", "Compose architecture-status/index.html from the handoff status record.", "SITE_STATUS_ROUTE_MISSING");
-    try {
-      const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
-      if (manifest?.digests?.architectureStatus !== requireDigest(statusBytes)) add("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the status handoff before composing the final site.");
-    } catch { add("$.handoff.architectureStatus", "handoff status snapshot is missing", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_MISSING"); }
+    const snapshotAvailable = await exists(config.paths.architectureStatusSnapshot);
+    if (snapshotAvailable) {
+      try {
+        const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+        if (manifest?.digests?.architectureStatus !== requireDigest(statusBytes)) add("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the status handoff before composing the final site.");
+      } catch { add("$.handoff.architectureStatus", "handoff status snapshot is missing", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_MISSING"); }
+    } else if (manifest?.files?.architectureStatus || manifest?.digests?.architectureStatus) {
+      add("$.handoff.architectureStatus", "missing status snapshots must not be copied into the handoff", "Rebuild the architecture docs handoff without architecture-status.json.", "SITE_STATUS_HANDOFF_UNEXPECTED");
+    }
   }
 
   for (const page of pages) {

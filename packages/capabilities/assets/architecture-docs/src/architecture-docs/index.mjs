@@ -87,7 +87,7 @@ export async function buildArchitectureDocs(configPath, { handoffOnly = false } 
     }
     await publishDirectory(handoffStage, handoffDirectory, handoffOptions);
     handoffStage = undefined;
-    return { outputDirectory: config.paths.outputDirectory, handoffDirectory, handoffOnly, pageCount: pages.length + (architectureStatus.configured ? 1 : 0), compiledViewCount: compiled.views.length, initialView: config.model.initialView, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, generatedFiles: handoffOnly ? ["manifest.json", "composition-guide.md", "claims.json", "page-map.json", "delta.json", "delta.md", ...(architectureStatus.configured ? ["architecture-status.json"] : [])] : generatedFiles };
+    return { outputDirectory: config.paths.outputDirectory, handoffDirectory, handoffOnly, pageCount: pages.length + (architectureStatus.configured ? 1 : 0), compiledViewCount: compiled.views.length, initialView: config.model.initialView, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, generatedFiles: handoffOnly ? ["manifest.json", "composition-guide.md", "claims.json", "page-map.json", "delta.json", "delta.md", ...(architectureStatus.configured && architectureStatus.snapshot ? ["architecture-status.json"] : [])] : generatedFiles };
   } catch (error) {
     if (error instanceof ArchitectureDocsBuildError) throw error;
     throw new ArchitectureDocsBuildError("Architecture docs build failed.", { cause: error, issues: [{ path: "$", message: error.message, expected: "Fix the authored architecture docs inputs and run the build again." }] });

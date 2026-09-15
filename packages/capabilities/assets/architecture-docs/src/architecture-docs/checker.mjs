@@ -20,10 +20,15 @@ function requiredClaimDiagnostics(page, claims, topics, path_) {
   return topics.filter((topic) => !attached.some((claim) => claim.topics.includes(topic))).map((topic) => diagnostic(path_, `has no approved claim for topic ${JSON.stringify(topic)}`, "Add an evidence-backed claim, explicitly review it, and attach it to this page."));
 }
 function jsonBytes(value) { return Buffer.from(`${JSON.stringify(value, null, 2)}\n`); }
-function handoffPageMap(config) {
+function handoffPageMap(config, architectureStatus = { configured: false }) {
   const pages = allPages(config);
   const record = (page) => ({ id: page.id, title: page.title, summary: page.summary, markdown: `pages/${page.id}.md`, viewIds: page.viewIds, claimIds: page.claimIds, initialViewId: page.initialViewId ?? page.viewIds[0] ?? null, ...(page.slug ? { slug: page.slug } : {}) });
-  return { version: 1, home: record(pages[0]), areas: pages.slice(1).map(record) };
+  return {
+    version: architectureStatus.configured ? 2 : 1,
+    home: record(pages[0]),
+    areas: pages.slice(1).map(record),
+    ...(architectureStatus.configured ? { status: { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability: architectureStatus.snapshot ? "present" : "missing" } } : {}),
+  };
 }
 function handoffClaims(config) {
   return { version: config.ledger.version, inventory: config.ledger.inventory, claims: config.ledger.claims, pageMapReview: config.ledger.pageMapReview };
@@ -31,14 +36,14 @@ function handoffClaims(config) {
 async function readJson(filename) { return JSON.parse(await readFile(filename, "utf8")); }
 async function exists(filename) { try { await stat(filename); return true; } catch (error) { if (error.code === "ENOENT") return false; throw error; } }
 
-async function freshnessDiagnostics(config, handoffDirectory) {
+async function freshnessDiagnostics(config, handoffDirectory, architectureStatus) {
   const diagnostics = [];
   let manifest;
   try { manifest = await readJson(path.join(handoffDirectory, "manifest.json")); }
   catch { return [diagnostic("$.handoff.manifest", "handoff manifest could not be read", "Run the architecture docs build before checking publication.", "HANDOFF_STALE")]; }
   const stale = (field, message) => diagnostics.push(diagnostic(`$.handoff.${field}`, message, "Rebuild the handoff from the current authored architecture inputs.", "HANDOFF_STALE"));
   const expectedClaims = handoffClaims(config);
-  const expectedPageMap = handoffPageMap(config);
+  const expectedPageMap = handoffPageMap(config, architectureStatus);
   if (manifest.digests?.claims !== sha256(jsonBytes(expectedClaims))) stale("digests.claims", "claims digest does not match the current evidence ledger");
   if (manifest.digests?.pageMap !== sha256(jsonBytes(expectedPageMap))) stale("digests.pageMap", "page-map digest does not match the current configuration");
   const guideBytes = Buffer.from(buildCompositionGuide());
@@ -144,14 +149,19 @@ export async function checkArchitectureDocs(configPath, { mode = "preview" } = {
     if (mode === "publication") {
       try {
         const manifest = await readJson(path.join(handoffDirectory, "manifest.json"));
-        if (manifest.version !== 2 || manifest.files?.architectureStatus !== "architecture-status.json") diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff v2 status record is missing", "Rebuild the architecture docs handoff with architectureStatus configured."));
-        const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
-        if (manifest.digests?.architectureStatus !== sha256(statusBytes)) diagnostics.push(diagnostic("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the architecture docs handoff."));
-      } catch { diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff status snapshot is missing", "Rebuild the architecture docs handoff.")); }
+        if (manifest.version !== 2) diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff v2 status record is missing", "Rebuild the architecture docs handoff with architectureStatus configured."));
+        if (architectureStatus.snapshot) {
+          if (manifest.files?.architectureStatus !== "architecture-status.json") diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff status snapshot path is missing", "Rebuild the architecture docs handoff."));
+          const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+          if (manifest.digests?.architectureStatus !== sha256(statusBytes)) diagnostics.push(diagnostic("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the architecture docs handoff."));
+        } else if (manifest.files?.architectureStatus || manifest.digests?.architectureStatus) {
+          diagnostics.push(diagnostic("$.handoff.architectureStatus", "missing status snapshots must not be copied into the handoff", "Rebuild the architecture docs handoff without architecture-status.json."));
+        }
+      } catch { diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff manifest could not be read", "Rebuild the architecture docs handoff.")); }
     }
   }
   if (mode === "publication") {
-    diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory));
+    diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory, architectureStatus));
     diagnostics.push(...await receiptDiagnostics(config, handoffDirectory));
   }
   return { mode, ok: diagnostics.length === 0, diagnostics, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, pageMapDigest: pageMapDigest(pages), claimDigests: Object.fromEntries(statuses.map((claim) => [claim.id, claimDigest(claim)])) };

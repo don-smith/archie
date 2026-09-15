@@ -68,7 +68,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
     version: architectureStatus.configured ? HANDOFF_STATUS_VERSION : HANDOFF_VERSION,
     home: pageRecord(pages[0], `pages/${pages[0].id}.md`),
     areas: pages.slice(1).map((page) => pageRecord(page, `pages/${page.id}.md`)),
-    ...(architectureStatus.configured ? { status: { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated" } } : {}),
+    ...(architectureStatus.configured ? { status: { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability: architectureStatus.snapshot ? "present" : "missing" } } : {}),
   };
   const claims = {
     version: config.ledger.version,
@@ -105,8 +105,8 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
   const likec4Destination = path.join(destination, "assets", "likec4-views.js");
   await copyFile(compiled.bundlePath, likec4Destination);
   let architectureStatusDigest;
-  if (architectureStatus.configured) {
-    const statusBytes = jsonBytes(architectureStatus.snapshot ?? { state: "absent" });
+  if (architectureStatus.configured && architectureStatus.snapshot) {
+    const statusBytes = jsonBytes(architectureStatus.snapshot);
     await writeFile(path.join(destination, "architecture-status.json"), statusBytes);
     architectureStatusDigest = sha256(statusBytes);
   }
@@ -145,10 +145,12 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       likec4: "assets/likec4-views.js",
       delta: "delta.json",
       deltaMarkdown: "delta.md",
-      ...(architectureStatus.configured ? { architectureStatus: "architecture-status.json" } : {}),
+      ...(architectureStatus.configured && architectureStatus.snapshot ? { architectureStatus: "architecture-status.json" } : {}),
     },
     ...(supplementalInputs.length ? { supplementalInputs } : {}),
-    ...(architectureStatus.configured ? { architectureStatus: { source: config.publicConfig.architectureStatus.snapshot, destination: "architecture-status.json", sha256: architectureStatusDigest, available: architectureStatus.snapshot !== null } } : {}),
+    ...(architectureStatus.configured ? { architectureStatus: architectureStatus.snapshot
+      ? { source: config.publicConfig.architectureStatus.snapshot, destination: "architecture-status.json", sha256: architectureStatusDigest, available: true }
+      : { source: config.publicConfig.architectureStatus.snapshot, available: false } } : {}),
     digests: {
       guide: sha256(guideBytes),
       claims: claimsDigest,
@@ -157,7 +159,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       model: compiled.semanticData.modelDigest,
       workspace: compiled.semanticData.workspaceDigest,
       pages: pageDigests,
-      ...(architectureStatus.configured ? { architectureStatus: architectureStatusDigest } : {}),
+      ...(architectureStatus.configured && architectureStatus.snapshot ? { architectureStatus: architectureStatusDigest } : {}),
     },
   };
   manifest.digests.handoff = calculateHandoffDigest(manifest);
@@ -180,7 +182,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       ...supplementalInputs.map((input) => input.destination),
       "assets/views.json",
       "assets/likec4-views.js",
-      ...(architectureStatus.configured ? ["architecture-status.json"] : []),
+      ...(architectureStatus.configured && architectureStatus.snapshot ? ["architecture-status.json"] : []),
       "delta.json",
       "delta.md",
     ],

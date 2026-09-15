@@ -54,9 +54,11 @@ export function buildHandoffDelta({ previous = null, current }) {
   ), (before, after) => digest(pageContent(before)) === digest(pageContent(after)) ? "markdown" : "metadata");
   const views = changeSet(previousViews, currentViews, (before, after) => digest(viewContent(before)) === digest(viewContent(after)), () => "semantic");
   const baseline = previous ? "update" : "baseline";
-  const statusConfigured = Object.prototype.hasOwnProperty.call(current.manifest?.digests ?? {}, "architectureStatus");
-  const statusChanged = statusConfigured && (!previous || previous.manifest?.digests?.architectureStatus !== current.manifest.digests.architectureStatus);
-  const status = statusConfigured ? { available: current.manifest.architectureStatus?.available === true, changed: statusChanged, digestChanged: statusChanged } : undefined;
+  const statusConfigured = current.manifest?.version === 2;
+  const availabilityChanged = statusConfigured && (!previous || previous.manifest?.architectureStatus?.available !== current.manifest.architectureStatus?.available);
+  const digestChanged = statusConfigured && (!previous || previous.manifest?.digests?.architectureStatus !== current.manifest.digests?.architectureStatus);
+  const statusChanged = availabilityChanged || digestChanged;
+  const status = statusConfigured ? { available: current.manifest.architectureStatus?.available === true, changed: statusChanged, digestChanged } : undefined;
   const affectedPageIds = [...new Set([...claims.added, ...claims.removed, ...claims.changed.map((entry) => entry.id), ...pages.added, ...pages.removed, ...pages.changed.map((entry) => entry.id), ...(statusChanged ? ["architecture-status"] : [])])];
   const affectedViewIds = [...new Set([...views.added, ...views.removed, ...views.changed.map((entry) => entry.id)])];
   return {
