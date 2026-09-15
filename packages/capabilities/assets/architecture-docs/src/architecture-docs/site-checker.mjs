@@ -31,6 +31,10 @@ function pageRoute(config, page) {
   return page.id === config.pages.home.id ? "index.html" : path.join(page.slug, "index.html");
 }
 
+function generatedStatusPageRecord(availability) {
+  return { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability };
+}
+
 export async function checkFinalSite(configPath) {
   const config = await loadArchitectureDocsConfig(configPath);
   const siteDirectory = path.join(config.paths.rootDirectory, "site");
@@ -75,6 +79,17 @@ export async function checkFinalSite(configPath) {
     const statusRoute = path.join(siteDirectory, "architecture-status", "index.html");
     if (!await exists(statusRoute)) add("$.site.architectureStatus", "final site architecture status route is missing", "Compose architecture-status/index.html from the handoff status record.", "SITE_STATUS_ROUTE_MISSING");
     const snapshotAvailable = await exists(config.paths.architectureStatusSnapshot);
+    if (manifest?.version !== 2) add("$.handoff.version", "configured architecture status requires handoff version 2", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_VERSION_MISMATCH");
+    let pageMap;
+    try {
+      pageMap = JSON.parse(await readFile(path.join(handoffDirectory, "page-map.json"), "utf8"));
+    } catch {
+      add("$.handoff.pageMap", "handoff page map could not be read", "Build handoff v2 with the generated architecture status page record.", "SITE_STATUS_PAGE_MAP_MISSING");
+    }
+    const expectedStatus = generatedStatusPageRecord(snapshotAvailable ? "present" : "missing");
+    if (pageMap && (pageMap.version !== 2 || JSON.stringify(pageMap.status) !== JSON.stringify(expectedStatus))) {
+      add("$.handoff.pageMap.status", "handoff page map is missing the matching generated architecture status record", "Build handoff v2 with the generated architecture-status page record and current availability.", "SITE_STATUS_PAGE_MAP_MISMATCH");
+    }
     if (snapshotAvailable) {
       try {
         const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));

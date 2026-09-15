@@ -4,6 +4,7 @@ import path from "node:path";
 import { ArchitectureDocsBuildError } from "./errors.mjs";
 
 const ID = /^[A-Za-z][A-Za-z0-9._-]{0,63}$/;
+const REVISION = /^[A-Za-z0-9._:/@+-]+$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const MAX_STRING = 2000;
@@ -33,6 +34,7 @@ function normalizeCounts(value, name) {
 }
 function normalizeFindingIds(value, name) {
   if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > 1000) fail(`${name} is invalid`);
   const result = ordered(value, name, (entry, field) => id(entry, field));
   if (result.some((entry, index) => index && entry.localeCompare(result[index - 1]) < 0)) fail(`${name} must be lexically ordered`);
   return result;
@@ -80,7 +82,7 @@ export function validateArchitectureStatusSnapshot(value, { repositoryName, root
   noOutputFields(value);
   const input = object(value, "snapshot"); rejectUnknown(input, new Set(["kind", "version", "repository", "generatedAt", "freshnessPolicy", "checks"]), "snapshot"); if (input.kind !== "archie-architecture-status" || input.version !== 1) fail("kind/version is unsupported");
   const repository = object(input.repository, "repository"); rejectUnknown(repository, new Set(["name", "revision"]), "repository"); const name = string(repository.name, "repository.name"); if (repositoryName !== undefined && name !== repositoryName) fail("repository.name does not match architecture-docs configuration", "$.repository.name");
-  const revisionObject = object(repository.revision, "repository.revision"); rejectUnknown(revisionObject, new Set(["commit", "workingTree"]), "repository.revision"); const revision = { commit: string(revisionObject.commit, "repository.revision.commit", 256), workingTree: revisionObject.workingTree }; if (!["clean", "dirty", "unknown"].includes(revision.workingTree)) fail("repository.revision.workingTree is unsupported");
+  const revisionObject = object(repository.revision, "repository.revision"); rejectUnknown(revisionObject, new Set(["commit", "workingTree"]), "repository.revision"); const commit = string(revisionObject.commit, "repository.revision.commit", 256); if (!REVISION.test(commit)) fail("repository.revision.commit is unsafe"); const revision = { commit, workingTree: revisionObject.workingTree }; if (!["clean", "dirty", "unknown"].includes(revision.workingTree)) fail("repository.revision.workingTree is unsupported");
   const generatedAt = timestamp(input.generatedAt, "generatedAt"); const policy = object(input.freshnessPolicy, "freshnessPolicy"); rejectUnknown(policy, new Set(["maxAgeSeconds"]), "freshnessPolicy"); if (!Number.isSafeInteger(policy.maxAgeSeconds) || policy.maxAgeSeconds < 0 || policy.maxAgeSeconds > 31_536_000) fail("freshnessPolicy.maxAgeSeconds is invalid");
   if (!Array.isArray(input.checks)) fail("checks must be an array"); const checks = input.checks.map((entry, index) => { const check = object(entry, `checks[${index}]`); rejectUnknown(check, new Set(["id", "title", "authority", "resultMeaning", "limits", "execution", "result", "evidence", "freshness"]), `checks[${index}]`); const normalized = { id: id(check.id, `checks[${index}].id`), title: string(check.title, `checks[${index}].title`), authority: string(check.authority, `checks[${index}].authority`), resultMeaning: string(check.resultMeaning, `checks[${index}].resultMeaning`), limits: ordered(check.limits, `checks[${index}].limits`), execution: normalizeExecution(check.execution, `checks[${index}].execution`), result: normalizeResult(check.result, `checks[${index}].result`), evidence: normalizeEvidence(check.evidence, `checks[${index}].evidence`), freshness: normalizeFreshness(check.freshness, `checks[${index}].freshness`) };
     if (normalized.execution.state !== "not-run" && Date.parse(normalized.execution.startedAt) > Date.parse(generatedAt)) fail(`checks[${index}] starts after generatedAt`); if (normalized.execution.state !== "not-run" && Date.parse(normalized.execution.finishedAt) > Date.parse(generatedAt)) fail(`checks[${index}] finishes after generatedAt`); if (normalized.evidence.state === "present" && Date.parse(normalized.evidence.observedAt) > Date.parse(generatedAt)) fail(`checks[${index}].evidence is after generatedAt`); if (normalized.execution.state !== "completed" && normalized.result.state === "reported") fail(`checks[${index}] cannot report a result without completed execution`);

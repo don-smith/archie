@@ -209,7 +209,7 @@ export async function loadArchitectureDocsConfig(configPath) {
   const handoffDirectory = rootDirectory ? path.join(rootDirectory, "handoff") : null;
   const siteDirectory = rootDirectory ? path.join(rootDirectory, "site") : null;
   const ledgerPath = rootDirectory && normalized.evidence?.ledger ? resolveUnderRoot(configDirectory, normalized.root, normalized.evidence.ledger) : null;
-  const architectureStatusSnapshot = rootDirectory && normalized.architectureStatus?.snapshot ? resolveUnderRoot(configDirectory, normalized.root, normalized.architectureStatus.snapshot) : null;
+  const architectureStatusSnapshot = normalized.architectureStatus?.snapshot ? path.resolve(configDirectory, normalized.architectureStatus.snapshot) : null;
   const pages = normalized.pages;
   const pagePaths = [];
   if (pages) {
@@ -255,7 +255,7 @@ export async function loadArchitectureDocsConfig(configPath) {
       const canonicalSnapshot = await canonicalPath(architectureStatusSnapshot);
       if (!overlaps(canonicalConfigDirectory, canonicalSnapshot)) addIssue(issues, "$.architectureStatus.snapshot", "must resolve below the configuration directory", "Use a repository-relative snapshot path that does not escape through a symlink.");
       const generatedDirectories = await Promise.all([outputDirectory, handoffDirectory, siteDirectory].map(canonicalPath));
-      if (generatedDirectories.some((directory) => overlaps(directory, canonicalSnapshot))) addIssue(issues, "$.architectureStatus.snapshot", "must not overlap preview/, handoff/, or site/", "Choose an authored snapshot path outside generated directories.");
+      if (generatedDirectories.some((directory) => overlaps(directory, canonicalSnapshot) || overlaps(canonicalSnapshot, directory))) addIssue(issues, "$.architectureStatus.snapshot", "must not overlap preview/, handoff/, or site/", "Choose an authored snapshot path outside generated directories.");
     }
     // The configuration may live beside the authored root or inside it (root: ".").
     if (modelWorkspace) {
@@ -270,7 +270,7 @@ export async function loadArchitectureDocsConfig(configPath) {
         const source = supplementalInputPaths[index];
         if (!source?.sourcePath) continue;
         const canonicalSource = await canonicalPath(source.sourcePath);
-        if (generatedDirectories.some((directory) => overlaps(directory, canonicalSource))) addIssue(issues, `$.supplementalInputs[${index}].source`, "must not read from a generated or html-design-owned directory", "Choose an authored source outside preview/, handoff/, and site/.");
+        if (generatedDirectories.some((directory) => overlaps(directory, canonicalSource) || overlaps(canonicalSource, directory))) addIssue(issues, `$.supplementalInputs[${index}].source`, "must not read from a generated or html-design-owned directory", "Choose an authored source outside preview/, handoff/, and site/.");
       }
     }
   }
