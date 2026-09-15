@@ -55,6 +55,8 @@ npx --no-install architecture-docs check \
 
 A composed final site must also contain `site/assets/architecture-handoff.json` whose `architectureHandoffDigest` matches the current handoff manifest. `check:site` validates every final route's page ID and receipt; pages with declared views must also provide their ordered views, initial view, selector, and accessible diagram frame, while pages with `viewIds: []` must omit that interactive surface. `check:site:browser` exercises each applicable initial render, selector, zoom, theme, narrow layout, and print fallback. Run the independently installed html-design artifact checker and visual review against `site/` as well.
 
+For an Archie-managed target, identified by `.archie/version` beside the configuration, the reports also include warning-only documentation findings. The deployed guide under `.agents/skills/archie/references/managed-site-guide.md` defines the required guide and content markers. Commands print each warning as `warning <code>:`; warnings do not affect `ok`, publication assertions, or exit status. A warning-only check therefore exits zero, while any existing diagnostic still exits nonzero.
+
 Run `npx --no-install architecture-docs --help` from `TARGET_DIR` for the command list.
 
 ## Install from a local checkout

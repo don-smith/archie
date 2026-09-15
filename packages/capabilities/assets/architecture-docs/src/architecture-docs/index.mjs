@@ -52,7 +52,7 @@ export async function buildArchitectureDocs(configPath, { handoffOnly = false } 
     if (viewIssues.length || targetIssues.length) throw new ArchitectureDocsBuildError("Configured architecture docs references are missing.", { code: viewIssues.length ? "CONFIGURED_VIEW_NOT_FOUND" : "CONFIGURED_TARGET_NOT_FOUND", issues: [...viewIssues, ...targetIssues] });
     const statuses = claimStatus(config.ledger.claims);
     const pages = [config.pages.home, ...config.pages.areas];
-    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id]) })));
+    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id], { preserveArchieMarkers: page.id === "archie" }) })));
     const generatedFiles = ["index.html", ...config.pages.areas.map((page) => `${page.slug}/index.html`), "assets/likec4-views.js", "assets/views.json", "assets/preview.json"];
     const previewMetadata = {
       ownership: { product: "architecture-docs", artifact: "preview", generated: true, markerVersion: 1 },

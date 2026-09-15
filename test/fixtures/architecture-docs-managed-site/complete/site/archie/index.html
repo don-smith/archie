@@ -1,33 +1,91 @@
-<!doctype html><html lang="en"><body><main>
-<!-- archie-guide:v1 -->
-<!-- archie-topic:overview -->
-<!-- archie-topic:working-relationship -->
-<!-- archie-topic:stewardship -->
-<!-- archie-topic:observed-import-graph -->
-<!-- archie-topic:c4-view-selection -->
-<!-- archie-capability:assessment:problem -->
-<!-- archie-capability:assessment:when-to-use -->
-<!-- archie-capability:assessment:result -->
-<!-- archie-capability:assessment:start -->
-<!-- archie-capability:architecture-docs:problem -->
-<!-- archie-capability:architecture-docs:when-to-use -->
-<!-- archie-capability:architecture-docs:result -->
-<!-- archie-capability:architecture-docs:start -->
-<!-- archie-capability:likec4-authoring:problem -->
-<!-- archie-capability:likec4-authoring:when-to-use -->
-<!-- archie-capability:likec4-authoring:result -->
-<!-- archie-capability:likec4-authoring:start -->
-<!-- archie-capability:conformance-onboarding:problem -->
-<!-- archie-capability:conformance-onboarding:when-to-use -->
-<!-- archie-capability:conformance-onboarding:result -->
-<!-- archie-capability:conformance-onboarding:start -->
-<!-- archie-capability:architecture-contracts:problem -->
-<!-- archie-capability:architecture-contracts:when-to-use -->
-<!-- archie-capability:architecture-contracts:result -->
-<!-- archie-capability:architecture-contracts:start -->
-<!-- archie-capability:structural-inspection:problem -->
-<!-- archie-capability:structural-inspection:when-to-use -->
-<!-- archie-capability:structural-inspection:result -->
-<!-- archie-capability:structural-inspection:start -->
-<h1>Working with Archie</h1><p>Repository guidance.</p>
-</main></body></html>
+<!doctype html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Archie · Managed fixture architecture docs</title>
+  <style>
+    :root { color-scheme: light dark; --canvas:#f7f5ef; --surface:#fffdf8; --text:#17211d; --muted:#4f6059; --border:#c7d2cc; --action:#205c49; --focus:#06c; }
+    @media (prefers-color-scheme:dark) { :root { --canvas:#111713; --surface:#17211d; --text:#f4f1e8; --muted:#bdc8c1; --border:#4f6059; --action:#8fc9ae; --focus:#70b7ff; } }
+    * { box-sizing:border-box; } body { margin:0; background:var(--canvas); color:var(--text); font:1rem/1.6 system-ui,sans-serif; }
+    a { color:var(--action); } a:focus-visible, button:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .skip { position:absolute; left:-9999px; } .skip:focus { left:1rem; top:1rem; z-index:2; padding:.5rem 1rem; background:var(--surface); }
+    header { border-bottom:1px solid var(--border); background:var(--surface); } .chrome, nav, main { max-width:72rem; margin:auto; padding-inline:clamp(1rem,4vw,4rem); }
+    .chrome { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-block:1rem; } nav { display:flex; gap:.8rem 1.25rem; flex-wrap:wrap; padding-block:.75rem; } nav a[aria-current="page"] { font-weight:700; text-decoration-thickness:3px; text-underline-offset:.25rem; }
+    .theme { display:flex; gap:.4rem; } button { border:1px solid var(--border); border-radius:999px; background:transparent; color:inherit; padding:.35rem .65rem; cursor:pointer; }
+    main { padding-block:clamp(2rem,6vw,5rem); } .eyebrow { color:var(--muted); font-size:.8rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; } h1 { max-width:12ch; margin:.25rem 0 1rem; font-size:clamp(2.6rem,7vw,5.5rem); line-height:.98; } h2 { margin-top:3rem; font-size:clamp(1.6rem,3vw,2.4rem); } h3 { margin-bottom:.25rem; } .lede { max-width:52rem; color:var(--muted); font-size:clamp(1.1rem,2vw,1.35rem); }
+    article { max-width:58rem; } section { border-top:1px solid var(--border); margin-top:2rem; padding-top:1.5rem; } dl { display:grid; grid-template-columns:minmax(8rem,13rem) 1fr; gap:.5rem 1rem; } dt { color:var(--muted); font-weight:700; } dd { margin:0; } .note { border-left:4px solid var(--action); padding:.75rem 1rem; background:color-mix(in srgb,var(--surface) 85%,var(--action)); }
+    @media (max-width:42rem) { .chrome { align-items:flex-start; flex-direction:column; } dl { display:block; } dt { margin-top:.75rem; } } @media print { header { border:0; } .theme { display:none; } a { color:inherit; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header>
+    <div class="chrome"><strong>Architecture docs · Managed Fixture</strong><div class="theme" aria-label="Theme"><button type="button" data-theme-choice="system">System</button><button type="button" data-theme-choice="light">Light</button><button type="button" data-theme-choice="dark">Dark</button></div></div>
+    <nav aria-label="Architecture documentation pages"><a href="../index.html">Orientation</a><a href="../repository/index.html">Repository</a><a href="index.html" aria-current="page">Archie</a></nav>
+  </header>
+  <main id="main">
+    <p class="eyebrow">Managed-site guidance</p>
+    <h1>Working with Archie</h1>
+    <p class="lede">Archie coordinates evidence-led architecture work in this repository. It helps developers choose the right workflow, keeps authority with maintainers, and turns reviewed results into durable architecture stewardship.</p>
+    <article>
+      <!-- archie-guide:v1 -->
+      <!-- archie-topic:overview -->
+      <section><h2>What Archie is</h2><p>Archie is a coordinating agent, not a replacement for repository owners or the tools that produce architecture evidence. Start with <code>/skill:archie</code>, describe the decision or change, and let Archie route the request to the capability that owns the next step.</p><p class="note">The developer remains the authority for intent, boundaries, approvals, and adoption. Archie proposes; the repository's maintainers decide what becomes true.</p></section>
+      <!-- archie-topic:working-relationship -->
+      <section><h2>How developers work with Archie</h2><p>Bring a concrete question, the relevant repository context, and any planning artifact the workflow requires. Archie explains the selected capability, records evidence and uncertainty, and pauses for developer decisions instead of silently applying architectural changes.</p></section>
+      <!-- archie-topic:stewardship -->
+      <section><h2>After onboarding: ongoing stewardship</h2><p>Keep the architecture model, claims, contracts, and documentation close to the code they describe. Re-run the owning workflow when boundaries change, review the resulting evidence, and use the managed site as the durable record of current intent rather than a one-time report.</p></section>
+      <!-- archie-topic:observed-import-graph -->
+      <section><h2>Observed import graph</h2><p>Conformance onboarding can produce an observed TypeScript import graph to make current relationships visible. It is evidence for a maintainer conversation, not an architectural truth claim and not a standalone Archie command. The target must provide the exact local <code>architecture-conformance</code> dependency before analysis can run.</p></section>
+      <!-- archie-topic:c4-view-selection -->
+      <section><h2>Choosing and reading C4 views</h2><p>Use a view whose scope matches the decision: context for boundaries, containers for responsibilities, and components only when a bounded implementation detail matters. LikeC4 compilation proves syntax and references; it does not prove that the architecture is correct. Read each view alongside its claims and evidence.</p></section>
+
+      <h2>Capabilities</h2>
+      <section>
+        <!-- archie-capability:assessment:problem -->
+        <!-- archie-capability:assessment:when-to-use -->
+        <!-- archie-capability:assessment:result -->
+        <!-- archie-capability:assessment:start -->
+        <h3>Assessment</h3><dl><dt>Problem</dt><dd>Whole-system architecture questions need evidence, not a quick opinion.</dd><dt>When to use</dt><dd>Use it when the decision spans the repository or several system boundaries.</dd><dt>Result</dt><dd>An evidence-led assessment with findings, uncertainty, and developer checkpoints.</dd><dt>Start</dt><dd>Start Archie with the Architecture Assessment skill and provide a planning artifact.</dd></dl>
+      </section>
+      <section>
+        <!-- archie-capability:architecture-docs:problem -->
+        <!-- archie-capability:architecture-docs:when-to-use -->
+        <!-- archie-capability:architecture-docs:result -->
+        <!-- archie-capability:architecture-docs:start -->
+        <h3>Architecture Docs</h3><dl><dt>Problem</dt><dd>Architecture knowledge drifts when prose, models, and evidence are maintained separately.</dd><dt>When to use</dt><dd>Use it to curate the model, claims ledger, page map, and handoff for this site.</dd><dt>Result</dt><dd>Reviewed Markdown, LikeC4 views, provenance, and an HTML Design handoff.</dd><dt>Start</dt><dd>Use the target-local Architecture Docs commands; HTML Design owns the final <code>site/</code> presentation.</dd></dl>
+      </section>
+      <section>
+        <!-- archie-capability:likec4-authoring:problem -->
+        <!-- archie-capability:likec4-authoring:when-to-use -->
+        <!-- archie-capability:likec4-authoring:result -->
+        <!-- archie-capability:likec4-authoring:start -->
+        <h3>LikeC4 authoring</h3><dl><dt>Problem</dt><dd>Readers need stable, named views of system relationships at the right level.</dd><dt>When to use</dt><dd>Use it when model structure or a view needs to be created or changed.</dd><dt>Result</dt><dd>A compilable model and selected views that support the authored explanation.</dd><dt>Start</dt><dd>Start the LikeC4 authoring workflow and validate references before relying on a view.</dd></dl>
+      </section>
+      <section>
+        <!-- archie-capability:conformance-onboarding:problem -->
+        <!-- archie-capability:conformance-onboarding:when-to-use -->
+        <!-- archie-capability:conformance-onboarding:result -->
+        <!-- archie-capability:conformance-onboarding:start -->
+        <h3>Conformance onboarding</h3><dl><dt>Problem</dt><dd>Existing code relationships and intended boundaries are often not recorded together.</dd><dt>When to use</dt><dd>Use it when a repository is adopting conformance checks or needs current relationship evidence.</dd><dt>Result</dt><dd>An observed import graph and a setup proposal for maintainer review.</dd><dt>Start</dt><dd>Install the exact target-local <code>architecture-conformance</code> dependency first; Archie does not substitute a different package.</dd></dl>
+      </section>
+      <section>
+        <!-- archie-capability:architecture-contracts:problem -->
+        <!-- archie-capability:architecture-contracts:when-to-use -->
+        <!-- archie-capability:architecture-contracts:result -->
+        <!-- archie-capability:architecture-contracts:start -->
+        <h3>Architecture Contracts</h3><dl><dt>Problem</dt><dd>Maintainer-approved boundaries need deterministic checks that stay close to the code.</dd><dt>When to use</dt><dd>Use it after intent and evidence have been reviewed and a realization map is ready.</dd><dt>Result</dt><dd>Contracts, exceptions, and strict checks for the approved architecture.</dd><dt>Start</dt><dd>Begin with the maintainer-approved map and contract; the strict check belongs to Architecture Contracts.</dd></dl>
+      </section>
+      <section>
+        <!-- archie-capability:structural-inspection:problem -->
+        <!-- archie-capability:structural-inspection:when-to-use -->
+        <!-- archie-capability:structural-inspection:result -->
+        <!-- archie-capability:structural-inspection:start -->
+        <h3>Structural inspection</h3><dl><dt>Problem</dt><dd>A bounded module question may need focused structural evidence without a whole-system assessment.</dd><dt>When to use</dt><dd>Use it for advisory inspection of a defined module or seam.</dd><dt>Result</dt><dd>A bounded finding set with evidence and clear limits.</dd><dt>Start</dt><dd>Ask Archie to route the inspection. If its owner is unavailable, Archie reports that boundary rather than promising a standalone command.</dd></dl>
+      </section>
+    </article>
+  </main>
+</body>
+</html>
