@@ -14,16 +14,15 @@
     },
     {
       "id": "architecture-docs-and-likec4",
-      "repository": "/Users/don/projects/c4archviewer",
-      "revision": "f2b7c5f1353c5e76fe8739a657632edafc66580f",
+      "repository": "/Users/don/projects/c4archviewer-worktrees/archie-documentation",
+      "revision": "3868bd6ce1862b9afcfa3b2919be6b0f2f9239c7",
       "owner": "developer-owned",
       "paths": [
         "skills/architecture-docs",
         "skills/likec4-authoring",
         "src/architecture-docs",
         "bin/architecture-docs.mjs",
-        "scripts/build-architecture-docs.mjs",
-        "scripts/check-architecture-docs.mjs",
+        "scripts",
         "architecture-docs.schema.json"
       ],
       "destination": "packages/capabilities/assets/architecture-docs"

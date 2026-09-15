@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { ArchitectureDocsBuildError } from "./errors.mjs";
 
 const escapeHtml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+const ARCHIE_MARKER_COMMENT = /^<!--\s*archie-(?:guide:[a-z0-9][a-z0-9._-]*|topic:[a-z0-9][a-z0-9-]*|capability:[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*)\s*-->$/;
 
 function invalid(filename, message) {
   return new ArchitectureDocsBuildError("Markdown source is invalid.", { code: "MARKDOWN_INVALID", issues: [{ path: filename, message, expected: "Use safe CommonMark Markdown and HTTP(S), mailto, or repository-relative links." }] });
@@ -26,7 +27,7 @@ export function markdownToHtml(source, { filename = "page.md" } = {}) {
   };
   renderer.link = ({ href, title, text }) => `<a href="${escapeHtml(safeUrl(href, filename))}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
   renderer.image = ({ href, title, text }) => `<img src="${escapeHtml(safeUrl(href, filename, true))}" alt="${escapeHtml(text ?? "")}"${title ? ` title="${escapeHtml(title)}"` : ""}>`;
-  renderer.html = ({ text }) => escapeHtml(text);
+  renderer.html = ({ text }) => ARCHIE_MARKER_COMMENT.test(text.trim()) ? `${text.trim()}\n` : escapeHtml(text);
   try {
     return marked.parse(source.replaceAll("\r\n", "\n"), {
       renderer,

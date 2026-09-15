@@ -10,6 +10,7 @@ import { buildCompositionGuide } from "./composition-guide.mjs";
 import { compileLikeC4 } from "./likec4-compiler.mjs";
 import { compilePalette } from "./palette.mjs";
 import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
+import { evaluateArchieDocumentation } from "./archie-documentation.mjs";
 
 const HOME_TOPICS = ["purpose", "actors", "boundary", "runtime-unit", "flow", "domain-language", "pattern", "navigation"];
 const allPages = (config) => [config.pages.home, ...config.pages.areas];
@@ -29,6 +30,15 @@ function handoffClaims(config) {
 }
 async function readJson(filename) { return JSON.parse(await readFile(filename, "utf8")); }
 async function exists(filename) { try { await stat(filename); return true; } catch (error) { if (error.code === "ENOENT") return false; throw error; } }
+async function archiePreviewWarnings(config) {
+  let pageText;
+  try { pageText = await readFile(path.join(config.paths.outputDirectory, "archie", "index.html"), "utf8"); } catch {}
+  return evaluateArchieDocumentation({
+    configDirectory: path.dirname(config.configPath),
+    areas: config.pages.areas,
+    pageText,
+  });
+}
 
 async function freshnessDiagnostics(config, handoffDirectory) {
   const diagnostics = [];
@@ -141,9 +151,10 @@ export async function checkArchitectureDocs(configPath, { mode = "preview" } = {
     diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory));
     diagnostics.push(...await receiptDiagnostics(config, handoffDirectory));
   }
-  return { mode, ok: diagnostics.length === 0, diagnostics, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, pageMapDigest: pageMapDigest(pages), claimDigests: Object.fromEntries(statuses.map((claim) => [claim.id, claimDigest(claim)])) };
+  const warnings = await archiePreviewWarnings(config);
+  return { mode, ok: diagnostics.length === 0, diagnostics, warnings, warningCount: warnings.length, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, pageMapDigest: pageMapDigest(pages), claimDigests: Object.fromEntries(statuses.map((claim) => [claim.id, claimDigest(claim)])) };
 }
 export function assertPublication(report) {
-  if (!report.ok) throw new ArchitectureDocsBuildError("Architecture docs publication checks failed.", { code: "PUBLICATION_CHECK_FAILED", issues: report.diagnostics });
+  if (report.diagnostics.length > 0) throw new ArchitectureDocsBuildError("Architecture docs publication checks failed.", { code: "PUBLICATION_CHECK_FAILED", issues: report.diagnostics });
   return report;
 }

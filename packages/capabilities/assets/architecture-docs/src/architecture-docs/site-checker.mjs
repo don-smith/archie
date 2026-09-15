@@ -2,6 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { loadArchitectureDocsConfig } from "./config.mjs";
 import { calculateHandoffDigest } from "./handoff.mjs";
+import { evaluateArchieDocumentation } from "./archie-documentation.mjs";
 
 function diagnostic(path_, message, expected, code = undefined) {
   return { path: path_, message, expected, ...(code ? { code } : {}) };
@@ -30,6 +31,16 @@ function pageRoute(config, page) {
   return page.id === config.pages.home.id ? "index.html" : path.join(page.slug, "index.html");
 }
 
+async function archieFinalSiteWarnings(config, siteDirectory) {
+  let pageText;
+  try { pageText = await readFile(path.join(siteDirectory, "archie", "index.html"), "utf8"); } catch {}
+  return evaluateArchieDocumentation({
+    configDirectory: path.dirname(config.configPath),
+    areas: config.pages.areas,
+    pageText,
+  });
+}
+
 export async function checkFinalSite(configPath) {
   const config = await loadArchitectureDocsConfig(configPath);
   const siteDirectory = path.join(config.paths.rootDirectory, "site");
@@ -39,7 +50,8 @@ export async function checkFinalSite(configPath) {
 
   if (!await exists(siteDirectory)) {
     add("$.site", "final site does not exist", "Compose site/ with html-design before running the final-site check.", "SITE_MISSING");
-    return { ok: false, diagnostics, pageCount: 0 };
+    const warnings = await archieFinalSiteWarnings(config, siteDirectory);
+    return { ok: false, diagnostics, warnings, warningCount: warnings.length, pageCount: 0 };
   }
 
   let manifest;
@@ -100,7 +112,8 @@ export async function checkFinalSite(configPath) {
   }
 
   if (manifest && receipt?.architectureHandoffDigest === manifest.digests?.handoff && calculateHandoffDigest(manifest) !== manifest.digests.handoff) add("$.handoff.manifest.digests.handoff", "handoff manifest digest is internally inconsistent", "Rebuild the handoff before composing the final site.");
-  return { ok: diagnostics.length === 0, diagnostics, pageCount: pages.length };
+  const warnings = await archieFinalSiteWarnings(config, siteDirectory);
+  return { ok: diagnostics.length === 0, diagnostics, warnings, warningCount: warnings.length, pageCount: pages.length };
 }
 
 export function formatFinalSiteReport(report) {
