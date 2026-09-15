@@ -42,6 +42,12 @@ async function freshnessDiagnostics(config, handoffDirectory, architectureStatus
   try { manifest = await readJson(path.join(handoffDirectory, "manifest.json")); }
   catch { return [diagnostic("$.handoff.manifest", "handoff manifest could not be read", "Run the architecture docs build before checking publication.", "HANDOFF_STALE")]; }
   const stale = (field, message) => diagnostics.push(diagnostic(`$.handoff.${field}`, message, "Rebuild the handoff from the current authored architecture inputs.", "HANDOFF_STALE"));
+  if (architectureStatus.snapshot) {
+    const currentStatusDigest = sha256(jsonBytes(architectureStatus.snapshot));
+    if (manifest.digests?.architectureStatus !== currentStatusDigest) stale("digests.architectureStatus", "status digest does not match the current configured snapshot");
+  } else if (manifest.digests?.architectureStatus) {
+    stale("digests.architectureStatus", "handoff contains a status digest but the configured snapshot is unavailable");
+  }
   const expectedClaims = handoffClaims(config);
   const expectedPageMap = handoffPageMap(config, architectureStatus);
   if (manifest.digests?.claims !== sha256(jsonBytes(expectedClaims))) stale("digests.claims", "claims digest does not match the current evidence ledger");

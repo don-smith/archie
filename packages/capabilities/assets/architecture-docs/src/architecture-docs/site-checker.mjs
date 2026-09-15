@@ -1,6 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { loadArchitectureDocsConfig } from "./config.mjs";
+import { loadArchitectureStatus } from "./architecture-status.mjs";
 import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
 const requireDigest = (bytes) => sha256(bytes);
 
@@ -37,6 +38,7 @@ function generatedStatusPageRecord(availability) {
 
 export async function checkFinalSite(configPath) {
   const config = await loadArchitectureDocsConfig(configPath);
+  const architectureStatus = await loadArchitectureStatus(config);
   const siteDirectory = path.join(config.paths.rootDirectory, "site");
   const handoffDirectory = path.join(config.paths.rootDirectory, "handoff");
   const diagnostics = [];
@@ -78,8 +80,14 @@ export async function checkFinalSite(configPath) {
   if (config.architectureStatus) {
     const statusRoute = path.join(siteDirectory, "architecture-status", "index.html");
     if (!await exists(statusRoute)) add("$.site.architectureStatus", "final site architecture status route is missing", "Compose architecture-status/index.html from the handoff status record.", "SITE_STATUS_ROUTE_MISSING");
-    const snapshotAvailable = await exists(config.paths.architectureStatusSnapshot);
+    const snapshotAvailable = Boolean(architectureStatus.snapshot);
     if (manifest?.version !== 2) add("$.handoff.version", "configured architecture status requires handoff version 2", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_VERSION_MISMATCH");
+    if (snapshotAvailable) {
+      const currentStatusDigest = requireDigest(Buffer.from(`${JSON.stringify(architectureStatus.snapshot, null, 2)}\n`));
+      if (manifest?.digests?.architectureStatus !== currentStatusDigest) add("$.handoff.digests.architectureStatus", "handoff status digest does not match the current configured snapshot", "Rebuild the handoff from the current architecture status snapshot.", "SITE_STALE");
+    } else if (manifest?.digests?.architectureStatus) {
+      add("$.handoff.digests.architectureStatus", "handoff contains a status digest but the configured snapshot is unavailable", "Rebuild the handoff without a status snapshot.", "SITE_STALE");
+    }
     let pageMap;
     try {
       pageMap = JSON.parse(await readFile(path.join(handoffDirectory, "page-map.json"), "utf8"));
