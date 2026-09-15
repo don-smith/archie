@@ -1,0 +1,767 @@
+{
+  "format": "archie-migration-inventory/v1",
+  "id": "conformance",
+  "source": {
+    "repository": "/Users/don/projects/arch-conformance",
+    "revision": "361b4259a405113deaf777a38dea12f229b5b461"
+  },
+  "entries": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "blob": "092140bd0ff97b5e4b628b622954a2615a4b0520",
+      "disposition": "excluded",
+      "reason": "Archie owns repository CI; sibling workflow configuration is not migrated.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".gitignore",
+      "blob": "d8a4cae8ea47f82db92f6ffa4c5e74a7f327af39",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/design/2026-08-27T23-28-19Z_agent-first-onboarding.md",
+      "blob": "d31bcf1affd7c0cdca57f25dcd415c7c79530965",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/handoffs/2026-08-28T00-19-49Z_node24-verify-review.md",
+      "blob": "1404157e34d8393504b13660909a6d502b54dfff",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/plan/2026-08-27T23-49-01Z_agent-first-onboarding.md",
+      "blob": "039f98cc8f7fac0d5edd5b5598bee7ea9535a595",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/scope/2026-08-27T22-54-07Z_agent-first-onboarding.md",
+      "blob": "40646c21fdc8b659f730ce76df250e7be85f87b5",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/verify/2026-08-28T00-06-08Z_agent-first-onboarding.md",
+      "blob": "874ed0fb1105000cbe5c4853cc4ccf6de12a9f0b",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/agent-first-onboarding/workstream.md",
+      "blob": "66a895320254eeaad731d000ee66be8e5f1bafef",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/design/2026-08-27T03-58-43Z_typescript-conformance-v0.md",
+      "blob": "83a2335ebb09463c76e3cbc0bc2e3f5c72f17b52",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/implement/2026-08-27T05-00-00Z_typescript-conformance-v0.md",
+      "blob": "dd6fdcd8eeb458d3390a975cd76a7717457d6e42",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/plan/2026-08-27T04-03-29Z_typescript-conformance-v0.md",
+      "blob": "307e8dde6695fcbcbc9d457e236e0a79dbf5ccaf",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/research/2026-08-27T03-15-34Z_first-ecosystem.md",
+      "blob": "05f81991086565d8cab1469e67ebac6b0ea127d5",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/scope/2026-08-27T03-05-43Z_end-to-end-v0.md",
+      "blob": "6afbd58b450352d310113c72bbf85f734eecb880",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/scope/2026-08-27T03-23-09Z_typescript-selection.md",
+      "blob": "176dd73e638d400369368604152b09a97f0fbac7",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-conformance-v0/workstream.md",
+      "blob": "18a34fbdc05bd6460ef0e90d1429e22d61653270",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/close/2026-09-04T225000+1200_owner-delivery.md",
+      "blob": "af663c8ffb08b78a0a9c3fe4ed5c6a0bb0fd5156",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/design/2026-09-04T221000+1200_replay-and-reconciliation.md",
+      "blob": "30a20e52aac844b52d8acead0f4cbe2f6207d00d",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/implement/2026-09-04T223231+1200_phase-1.md",
+      "blob": "3c63fd5f18a3400d5b7084cbff8a38c6911c9b71",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/plan/2026-09-04T222000+1200_portable-replay-and-reconciliation.md",
+      "blob": "aba8e7816512268c1da2a30a4b4e7d4745b2f9d0",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/scope/2026-09-04T215639+1200_portable-replay-and-reconciliation.md",
+      "blob": "a6dae114ef90e70c3c357b7f46a148b07d943779",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/verify/2026-09-04T223500+1200_portable-replay-and-reconciliation.md",
+      "blob": "e45a2a30bcd209b202a813d4a0e600e0ac29585f",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/portable-replay-and-reconciliation/workstream.md",
+      "blob": "d3ea45eac4cff2fac989a67d503dfc450bfcb2ea",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/design/2026-08-28T01-48-10Z_typescript-adapter-coverage.md",
+      "blob": "63c843375733363c1287b9de7b77c41435e3af13",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/diagnose/2026-08-28T01-48-10Z_representative-workspace-coverage.md",
+      "blob": "8f2f295943cc54d131ba8cc2d00275393dd3a048",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/implement/2026-08-28T01-48-10Z_typescript-adapter-coverage.md",
+      "blob": "6efc5e14297a2018cdae116f30dddf53b120a9e8",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/plan/2026-08-28T01-48-10Z_typescript-adapter-coverage.md",
+      "blob": "80df6872b7b08dd87980fe4763251b97c71fa017",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/scope/2026-08-28T01-48-10Z_typescript-adapter-coverage.md",
+      "blob": "794dbeeb96a061ca4fc117a45dfbb0f8c86e7492",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/typescript-adapter-coverage/workstream.md",
+      "blob": "cace00e9ebd189dd4f4ebc559bdd3edaa083df92",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": "ARCHITECTURE_CONFORMANCE.md",
+      "blob": "3898982e9ff45a18d04a7f178ab9345564b2e45e",
+      "disposition": "included",
+      "destination": "packages/conformance/ARCHITECTURE_CONFORMANCE.md",
+      "reason": "Conformance package contract or support documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "README.md",
+      "blob": "8f52aa3d8147d7a2ca8b5e9e94e0c4d97cc43417",
+      "disposition": "included",
+      "destination": "packages/conformance/README.md",
+      "reason": "Conformance package contract or support documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "docs/compiler-upgrade-policy.md",
+      "blob": "900f6366817da17cd3d8797d667fba2666fb58c0",
+      "disposition": "included",
+      "destination": "packages/conformance/docs/compiler-upgrade-policy.md",
+      "reason": "Conformance package contract or support documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "docs/typescript-support.md",
+      "blob": "cd0b5271851904f0a44404b086af09cb3d7be959",
+      "disposition": "included",
+      "destination": "packages/conformance/docs/typescript-support.md",
+      "reason": "Conformance package contract or support documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "package-lock.json",
+      "blob": "688f4b8be535fbda2f9a1bfc81af3c7463ae7019",
+      "disposition": "generated",
+      "destination": "package-lock.json",
+      "reason": "The root npm workspace lock generates dependency state.",
+      "kind": "package"
+    },
+    {
+      "path": "package.json",
+      "blob": "fb51cf27ee1b6c2f041e6ef1b790b9be11bb5afb",
+      "disposition": "adapted",
+      "destination": "packages/conformance/package.json",
+      "reason": "Adapted to the private lockstep workspace manifest.",
+      "kind": "package"
+    },
+    {
+      "path": "skills/architecture-conformance-onboarding/SKILL.md",
+      "blob": "987b0c4f86697ad90a1d20296bca85fc1f54381f",
+      "disposition": "included",
+      "destination": "packages/conformance/skills/architecture-conformance-onboarding/SKILL.md",
+      "reason": "Conformance skill source moves with the package after parity.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-contracts/SKILL.md",
+      "blob": "fb6d6987f1570285bc8bc140d627a4a923200b87",
+      "disposition": "included",
+      "destination": "packages/conformance/skills/architecture-contracts/SKILL.md",
+      "reason": "Conformance skill source moves with the package after parity.",
+      "kind": "skill"
+    },
+    {
+      "path": "src/analyzer/repository-paths.ts",
+      "blob": "c82057522ba99c4efd3f5262e1537c38a62a0628",
+      "disposition": "adapted",
+      "destination": "packages/archie-runtime/src/analysis/repository-paths.ts",
+      "reason": "Conformance consumes the public Runtime analysis contract instead of copying analyzer ownership.",
+      "kind": "production"
+    },
+    {
+      "path": "src/analyzer/types.ts",
+      "blob": "ec7e3edf6f9f256b0c0bd324d54ce1c233fe9904",
+      "disposition": "adapted",
+      "destination": "packages/archie-runtime/src/analysis/graph-types.ts",
+      "reason": "Conformance consumes the public Runtime analysis contract instead of copying analyzer ownership.",
+      "kind": "production"
+    },
+    {
+      "path": "src/analyzer/typescript-program-v1.ts",
+      "blob": "83b7f8a6ca35f423e3332d618acad998b55747d3",
+      "disposition": "adapted",
+      "destination": "packages/archie-runtime/src/analysis/typescript-program-v1-core.ts",
+      "reason": "Conformance consumes the public Runtime analysis contract instead of copying analyzer ownership.",
+      "kind": "production"
+    },
+    {
+      "path": "src/artifacts/canonical-json.ts",
+      "blob": "4111a78a7352fc716e5bfcacb74d6f7a4627301f",
+      "disposition": "included",
+      "destination": "packages/conformance/src/artifacts/canonical-json.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/artifacts/digest.ts",
+      "blob": "60b6547f2b3279aa649cb2729769216f9b39b82a",
+      "disposition": "included",
+      "destination": "packages/conformance/src/artifacts/digest.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/artifacts/stable-sort.ts",
+      "blob": "16cef535806618a54060b97aeeab0bbf96e12ae8",
+      "disposition": "included",
+      "destination": "packages/conformance/src/artifacts/stable-sort.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/baseline/compare.ts",
+      "blob": "6f6fffa8b1ec09bee480e79b95da5a24980bd118",
+      "disposition": "included",
+      "destination": "packages/conformance/src/baseline/compare.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/baseline/update.ts",
+      "blob": "01a7348822938bf18de3aafd195ca140f2002f66",
+      "disposition": "included",
+      "destination": "packages/conformance/src/baseline/update.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/checker/acyclic.ts",
+      "blob": "16cb443dc69d4a6db8fcd0e10efa2e625458301a",
+      "disposition": "included",
+      "destination": "packages/conformance/src/checker/acyclic.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/checker/coverage.ts",
+      "blob": "1ffea00e6e5c6845295202dcd44d04a4887760a2",
+      "disposition": "included",
+      "destination": "packages/conformance/src/checker/coverage.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/checker/dependency-policy.ts",
+      "blob": "324ebe2ee1be0651c59cacb73a6e415669b47f5c",
+      "disposition": "included",
+      "destination": "packages/conformance/src/checker/dependency-policy.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/checker/evaluate.ts",
+      "blob": "47bca80f7fb6882a7eb8e217df343ae2e65baaa1",
+      "disposition": "included",
+      "destination": "packages/conformance/src/checker/evaluate.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/checker/types.ts",
+      "blob": "ce244b4108973096f02ec3bab9a5988af864ea82",
+      "disposition": "included",
+      "destination": "packages/conformance/src/checker/types.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/cli.ts",
+      "blob": "8a84ece11eef022b56d1906a318b98b71b054ab6",
+      "disposition": "included",
+      "destination": "packages/conformance/src/cli.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "command"
+    },
+    {
+      "path": "src/commands/run.ts",
+      "blob": "69f21f5ad966b062426e8cdf75e5cc55a450b648",
+      "disposition": "included",
+      "destination": "packages/conformance/src/commands/run.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "command"
+    },
+    {
+      "path": "src/exceptions/apply.ts",
+      "blob": "4202232c70a0fbe8e31167776969d05faf517f81",
+      "disposition": "included",
+      "destination": "packages/conformance/src/exceptions/apply.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/exceptions/fingerprint.ts",
+      "blob": "9892698793edf9193f08403c70110dcba22493e6",
+      "disposition": "included",
+      "destination": "packages/conformance/src/exceptions/fingerprint.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/formats/architecture-contract-v1.ts",
+      "blob": "1c061d68a45eae13f3e66335967754fd4e697d54",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/architecture-contract-v1.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/baseline-v1.ts",
+      "blob": "e0c177231ae06f27240db76f5e5d05a06d3c4ca2",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/baseline-v1.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/conformance-report-v1.ts",
+      "blob": "8c177fc8c2e3e271ded0a8ac1c3c6eb4e9e3afcb",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/conformance-report-v1.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/normalized-graph-v1.ts",
+      "blob": "a756fe2625cf1abd03d5ca9d8c3f0b796c72c593",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/normalized-graph-v1.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/realization-map-v1.ts",
+      "blob": "573d7ea25eb769cac63e59da08f404f4333d811a",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/realization-map-v1.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/types.ts",
+      "blob": "477bba2877a0922e19d1ea214b723b87879658cc",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/types.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/formats/validate.ts",
+      "blob": "703cf9cac9d04eb0856812e220639e8d20304e8f",
+      "disposition": "included",
+      "destination": "packages/conformance/src/formats/validate.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "format"
+    },
+    {
+      "path": "src/onboarding-state/defaults.ts",
+      "blob": "c9a44ec67bfb7bb8cea32c2cce08c927c36eee4c",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-state/defaults.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/onboarding-state/setup.ts",
+      "blob": "0985b6be9537eeb0d5e01f3318c1f7d00e7dbc82",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-state/setup.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/onboarding-state/types.ts",
+      "blob": "30e4f2cbbee3d097f5184aa7197380194237a987",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-state/types.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/onboarding-state/update.ts",
+      "blob": "ef8d894ba54183ea1b1bd12450152aa678b82c52",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-state/update.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/onboarding-state/validate.ts",
+      "blob": "0c2aadb8d5b4c9fa428518ea20461697cc22f53e",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-state/validate.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/onboarding-summary/build.ts",
+      "blob": "9b45417a2c879a9fabed710e59a8e069cae174f9",
+      "disposition": "included",
+      "destination": "packages/conformance/src/onboarding-summary/build.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/realization/selectors.ts",
+      "blob": "7fa93830856847e72511ec1fa1bb7d4eebbf0781",
+      "disposition": "included",
+      "destination": "packages/conformance/src/realization/selectors.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/realization/validate-map.ts",
+      "blob": "8f6cdbbe4afde9ac548940fb3fdf8199338e68d7",
+      "disposition": "included",
+      "destination": "packages/conformance/src/realization/validate-map.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/reconciliation/compare.ts",
+      "blob": "8576b2fb33e5a2381195088a6d1a005b7ab2bf69",
+      "disposition": "included",
+      "destination": "packages/conformance/src/reconciliation/compare.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/replay/run.ts",
+      "blob": "fca89511f4cb4627bb4262bca870df20ea23f0d4",
+      "disposition": "included",
+      "destination": "packages/conformance/src/replay/run.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/report/build.ts",
+      "blob": "d6897a0d8affce1414dfb72da03fe10606b60d40",
+      "disposition": "included",
+      "destination": "packages/conformance/src/report/build.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/report/json.ts",
+      "blob": "57a12913f98294db51c403344726c58179fdf922",
+      "disposition": "included",
+      "destination": "packages/conformance/src/report/json.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "src/report/text.ts",
+      "blob": "5fdcf2da08b01bcc690fb62f6c78e3a4730bff54",
+      "disposition": "included",
+      "destination": "packages/conformance/src/report/text.ts",
+      "reason": "Conformance production source moves into its dedicated workspace.",
+      "kind": "production"
+    },
+    {
+      "path": "test/analyzer/typescript-program-v1.test.ts",
+      "blob": "4a81c030a7da2e78fd5572bc968367a974539328",
+      "disposition": "adapted",
+      "destination": "test/analysis/contracts.test.mjs",
+      "reason": "Analyzer and compiler-isolation behavior remains owned by Runtime contract coverage.",
+      "kind": "test"
+    },
+    {
+      "path": "test/architecture/compiler-isolation.test.ts",
+      "blob": "522ae8d106d282324b4a61dff7c477467f5596d3",
+      "disposition": "adapted",
+      "destination": "test/analysis/compiler-isolation.test.mjs",
+      "reason": "Analyzer and compiler-isolation behavior remains owned by Runtime contract coverage.",
+      "kind": "test"
+    },
+    {
+      "path": "test/artifacts/canonical-json.test.ts",
+      "blob": "25292158790fe2a8a984c0c09e453714972d7b9a",
+      "disposition": "included",
+      "destination": "packages/conformance/test/artifacts/canonical-json.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/baseline/compare.test.ts",
+      "blob": "6b5eb53b6bfeb799a5baa60d03a6d06d11cf1f3c",
+      "disposition": "included",
+      "destination": "packages/conformance/test/baseline/compare.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/checker/acyclic.test.ts",
+      "blob": "9dcb85afc08df353bffd3610df564bd230e2f199",
+      "disposition": "included",
+      "destination": "packages/conformance/test/checker/acyclic.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/checker/evaluate.test.ts",
+      "blob": "e05878c51fa237acf24f16c701ac07148d6ddbce",
+      "disposition": "included",
+      "destination": "packages/conformance/test/checker/evaluate.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/cli/onboarding-e2e.test.ts",
+      "blob": "f6f9f076479937212995d0dc0f537c52e269a62f",
+      "disposition": "included",
+      "destination": "packages/conformance/test/cli/onboarding-e2e.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/cli/onboarding.test.ts",
+      "blob": "d7b0942cc0f7a8266b48498f1d579102204b03f5",
+      "disposition": "included",
+      "destination": "packages/conformance/test/cli/onboarding.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/cli/replay-reconcile.test.ts",
+      "blob": "e9ffc187c0437d666d605c54b704c7b6195bbd98",
+      "disposition": "included",
+      "destination": "packages/conformance/test/cli/replay-reconcile.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/cli/run.test.ts",
+      "blob": "290bcb61fa982431a5775e53d835f302ff4205e0",
+      "disposition": "included",
+      "destination": "packages/conformance/test/cli/run.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/docs/documentation.test.ts",
+      "blob": "10bf753956fa4dd74731c9ac7d33371574ae72f4",
+      "disposition": "included",
+      "destination": "packages/conformance/test/docs/documentation.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/exceptions/fingerprint.test.ts",
+      "blob": "4107b179b1a62eba6236b859d5b651bf0c27ff57",
+      "disposition": "included",
+      "destination": "packages/conformance/test/exceptions/fingerprint.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/fixtures/acceptance-matrix/README.md",
+      "blob": "7ec12493439bf2f50cb022525b6014203756f70d",
+      "disposition": "included",
+      "destination": "packages/conformance/test/fixtures/acceptance-matrix/README.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "fixture": "packages/conformance/test/fixtures/acceptance-matrix.md",
+      "kind": "test-fixture"
+    },
+    {
+      "path": "test/formats/validate.test.ts",
+      "blob": "4ccf339d5fc62f86024543ffbb649c05be8dd59d",
+      "disposition": "included",
+      "destination": "packages/conformance/test/formats/validate.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/onboarding-state/state.test.ts",
+      "blob": "c3ecae5d56dbaa80149a2ea8734fa4054fd57c6d",
+      "disposition": "included",
+      "destination": "packages/conformance/test/onboarding-state/state.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/onboarding-summary/build.test.ts",
+      "blob": "58cb2d5da61f3d70afbeedb739f23c496b15caa8",
+      "disposition": "included",
+      "destination": "packages/conformance/test/onboarding-summary/build.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/package-delivery.test.ts",
+      "blob": "ef86d82cf7cc2d9f39978121b1b72d35209b18ff",
+      "disposition": "included",
+      "destination": "packages/conformance/test/package-delivery.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-conformance-onboarding/baseline.md",
+      "blob": "d2bbbc6edd6f2f46fb76ddda3e3f69454d2792d7",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-conformance-onboarding/baseline.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-conformance-onboarding/refactor.md",
+      "blob": "b39018bf27fef4315d7b4298e749ff8b4e9d579b",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-conformance-onboarding/refactor.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-conformance-onboarding/skill-content.test.ts",
+      "blob": "89dc8a4ceb7b1a8668423cc3d1c2ab553bf99d89",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-conformance-onboarding/skill-content.test.ts",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-conformance-onboarding/with-skill.md",
+      "blob": "4bbe3d56860882943ca90dbdb969d53c5ac2c2d0",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-conformance-onboarding/with-skill.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-contracts/baseline.md",
+      "blob": "7ccdd1fbf375d4038fcf0068ddef01772fbdc264",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-contracts/baseline.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "test/skill-scenarios/architecture-contracts/with-skill.md",
+      "blob": "baa4a00af21af0c508dc7f1aeb755e618854f0cf",
+      "disposition": "included",
+      "destination": "packages/conformance/test/skill-scenarios/architecture-contracts/with-skill.md",
+      "reason": "Conformance deterministic coverage or fixture moves with the workspace.",
+      "kind": "skill-test"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "blob": "7c9600e0c57012dbcc9445d96dc99b3960f61c60",
+      "disposition": "adapted",
+      "destination": "tsconfig.build.json",
+      "reason": "The workspace uses the Archie root TypeScript configuration.",
+      "kind": "package"
+    },
+    {
+      "path": "tsconfig.json",
+      "blob": "20e0a4cba29edc5ca1007052375a2762eefe5e87",
+      "disposition": "adapted",
+      "destination": "tsconfig.json",
+      "reason": "The workspace uses the Archie root TypeScript configuration.",
+      "kind": "package"
+    }
+  ]
+}

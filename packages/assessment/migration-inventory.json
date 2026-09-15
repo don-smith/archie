@@ -1,0 +1,530 @@
+{
+  "format": "archie-migration-inventory/v1",
+  "id": "assessment",
+  "source": {
+    "repository": "/Users/don/projects/architecture-assessment",
+    "revision": "a281d5e4f7ac286279b1aac1c3ce45cda0d59f2e"
+  },
+  "entries": [
+    {
+      "path": ".gitignore",
+      "blob": "183e1ccfff8acb538e02f4d3ea608a231d71a52c",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/design/20260825T033725Z_architecture-assessment-skill.md",
+      "blob": "83f1ccc885e1eda2e749b1e505abec5f2a1d6a7c",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/implement/checkpoint.md",
+      "blob": "6b7e14a319a4a31b4ef16e60fe4b3d7fa93bd4b7",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/plan/20260825T035207Z_architecture-assessment-skill.md",
+      "blob": "0faf6afffe9b3e20c639ba863df9c15c43f61229",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/research/20260825T033304Z_assessment-method-and-evaluation.md",
+      "blob": "f8fe1595696c866d46533dcb65d068a5fb2abb32",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/scope/20260825T033053Z_architecture-assessment-skill.md",
+      "blob": "9efc3724c822da0ba598ba3d036c6a306c1a5539",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": ".myflow/workstreams/architecture-assessment-skill/workstream.md",
+      "blob": "bb39c4ac2652cadd426767afdf2dcdf876100389",
+      "disposition": "excluded",
+      "reason": "Repository-local workflow or ignore state is not product source.",
+      "kind": "repository-metadata"
+    },
+    {
+      "path": "LICENSE",
+      "blob": "4ac627694542f7742b0ae247e72e8929b07c2ddd",
+      "disposition": "included",
+      "destination": "packages/assessment/LICENSE",
+      "reason": "Package provenance or usage documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "README.md",
+      "blob": "093156fdbce34b44dbd5a5b1cb8427e90112a4c7",
+      "disposition": "included",
+      "destination": "packages/assessment/README.md",
+      "reason": "Package provenance or usage documentation moves with the workspace.",
+      "kind": "documentation"
+    },
+    {
+      "path": "evals/architecture-assessment/evals.json",
+      "blob": "a57918e6485fd17190d1b2324ff6001da8c02fc6",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/evals.json",
+      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "kind": "evaluation-format"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/README.md",
+      "blob": "a693e47339d03301d13a2d306a51601e89c23948",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/README.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/README.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/package.json",
+      "blob": "5af454fa7ea1159c19a34c0c0640d9dbe41602a6",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/package.json",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/package.json",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/analytics/analytics-projector.ts",
+      "blob": "3facf97a6aeeb79e69679b31fb5f77166bfdd479",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/analytics/analytics-projector.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/analytics/analytics-projector.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/contracts/order-events.ts",
+      "blob": "909ef04953bfe9a47a4df3c226a641c35f1ca37b",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/contracts/order-events.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/contracts/order-events.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/runtime/event-bus.ts",
+      "blob": "c99430f8d548d4c103669f2239b41a0095628c7d",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/runtime/event-bus.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/runtime/event-bus.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/runtime/order-runtime.ts",
+      "blob": "861e79d8050a73d0a1229da68692104aaf3d395d",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/runtime/order-runtime.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/runtime/order-runtime.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/runtime/startup.ts",
+      "blob": "0218e7e9b77635e3624be481da65ec2e495a8c0f",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/runtime/startup.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/runtime/startup.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/dependency-semantics/src/scheduling/scheduler.ts",
+      "blob": "aba2303369e8d378bbb9e3f42db5bbe68eb895a5",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/dependency-semantics/src/scheduling/scheduler.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/dependency-semantics/src/scheduling/scheduler.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/Cargo.toml",
+      "blob": "79716dcd60e66a20038c4f28228c004702f11335",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/Cargo.toml",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/Cargo.toml",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/README.md",
+      "blob": "bd01aaa349ea0d17b69749b80db1c35fe9a0ad06",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/README.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/README.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/crates/plugin-host/Cargo.toml",
+      "blob": "e05e2a0b7ca1617b73bc135f75f5098432949421",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/crates/plugin-host/Cargo.toml",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/crates/plugin-host/Cargo.toml",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/crates/plugin-host/src/lib.rs",
+      "blob": "63c0ad4629712be4b30b5117afc551c4cecc5c86",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/crates/plugin-host/src/lib.rs",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/crates/plugin-host/src/lib.rs",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/docs/plugins.md",
+      "blob": "5a5d2882e1e57eefc5779ca19c553d5c55a8d48d",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/docs/plugins.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/docs/plugins.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/package.json",
+      "blob": "41e355d548e6c3e3dc5d7bc94b3564c362e27754",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/package.json",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/package.json",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugin-registry/package.json",
+      "blob": "d927f2e94fec6ed50ba30a6cd4881a8127b30d2a",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugin-registry/package.json",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugin-registry/package.json",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugin-registry/src/capabilities.ts",
+      "blob": "bb9b6aa8d14ec08e33668d6d2d0592fb5e0b19b6",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugin-registry/src/capabilities.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugin-registry/src/capabilities.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugin-registry/src/registry.ts",
+      "blob": "d7bdc2d9c2f16a6bdba6c3bab7a59035c67fd08c",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugin-registry/src/registry.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugin-registry/src/registry.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugin-registry/src/types.ts",
+      "blob": "a06773bc72a6eaebaf91a2fae78e3a1eb999acbb",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugin-registry/src/types.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugin-registry/src/types.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugins/notes/package.json",
+      "blob": "8ad6921789d45f0df55715a432773041d4a8ecad",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugins/notes/package.json",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugins/notes/package.json",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/packages/plugins/notes/src/index.ts",
+      "blob": "2dd2c0f107225a93918b1eee59891880c817d0ff",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/packages/plugins/notes/src/index.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/packages/plugins/notes/src/index.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/expected-extension/tests/plugin-contract.test.ts",
+      "blob": "767079d70aa6417f9539141bee5772af56135e6e",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/expected-extension/tests/plugin-contract.test.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/expected-extension/tests/plugin-contract.test.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/.eval/setup-history.mjs",
+      "blob": "8a2e00726ac389a57a1ca2cbd1aa01c4cf5bd5c2",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/.eval/setup-history.mjs",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/.eval/setup-history.mjs",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/README.md",
+      "blob": "c42afb2f17c4872295df3b95123ce3b46c96746b",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/README.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/README.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/context/architecture.md",
+      "blob": "a41c9ca3c0566e69d1f9aef4941ae7a1c55f953c",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/context/architecture.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/context/architecture.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/context/glossary.md",
+      "blob": "73be76ffc5b9644744e0c0bdf6b9a3742f3e1d0f",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/context/glossary.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/context/glossary.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/docs/operations.md",
+      "blob": "f0057a4f8b949ea8e0869e3ee8bec215f0006f35",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/docs/operations.md",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/docs/operations.md",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/package.json",
+      "blob": "53758cb1a6c8c61b79164bfb487d1e982c10bfc8",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/package.json",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/package.json",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/src/billing/invoice.ts",
+      "blob": "b78bd6c130faf92a6f234ccf74db420d7036d18e",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/src/billing/invoice.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/src/billing/invoice.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/src/fulfillment/shipment.ts",
+      "blob": "6b7b4aef8c176397914c94305816c48d74a053f1",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/src/fulfillment/shipment.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/src/fulfillment/shipment.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/fixtures/intent-language-history/src/shared/ledger.ts",
+      "blob": "66ae76710e28524d5312c954aaa4345401d55a40",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/intent-language-history/src/shared/ledger.ts",
+      "fixture": "packages/assessment/test/fixtures/evaluations/intent-language-history/src/shared/ledger.ts",
+      "reason": "Controlled evaluation input remains canonical in the package and is frozen as a Phase 1 fixture.",
+      "kind": "evaluation-fixture"
+    },
+    {
+      "path": "evals/architecture-assessment/prompts/dependency-semantics.md",
+      "blob": "5c8a8651c6d51fabd0e51d07feebbc949642319e",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/prompts/dependency-semantics.md",
+      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "kind": "evaluation-prompt"
+    },
+    {
+      "path": "evals/architecture-assessment/prompts/expected-extension.md",
+      "blob": "9726adcdae1a411842fa7b83de300753ff8a8f0c",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/prompts/expected-extension.md",
+      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "kind": "evaluation-prompt"
+    },
+    {
+      "path": "evals/architecture-assessment/prompts/intent-language-history.md",
+      "blob": "3b4fefb92faf14831fae1a8a7ee0f27ef0f43511",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/prompts/intent-language-history.md",
+      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "kind": "evaluation-prompt"
+    },
+    {
+      "path": "evals/architecture-assessment/run-evals.mjs",
+      "blob": "22121056e17770e0b5978999dbc72990237413d5",
+      "disposition": "included",
+      "destination": "packages/assessment/evaluation/run-evals.mjs",
+      "reason": "Controlled evaluation definition or runner moves into the Assessment workspace.",
+      "kind": "evaluation-command"
+    },
+    {
+      "path": "package.json",
+      "blob": "45dcc3ef716820db9444a8965c0861bd3e9f056f",
+      "disposition": "adapted",
+      "destination": "packages/assessment/package.json",
+      "reason": "Adapted to the private lockstep workspace manifest.",
+      "kind": "package"
+    },
+    {
+      "path": "skills/architecture-assessment/SKILL.md",
+      "blob": "fe75598fc6b7c61eacb8d756076bc03a7a2c4b73",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/SKILL.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-assessment/references/artifact-contract.md",
+      "blob": "3c7013f759bf9194fc6d303e68d13df3716e470e",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/references/artifact-contract.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-assessment/references/assessment-lenses.md",
+      "blob": "d2fc85c43f727ac475f71f23ffed89836d675ddd",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/references/assessment-lenses.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-assessment/references/evaluation.md",
+      "blob": "e3fe6ea1f6c81f3ea4c7a6245df35b0c630778d3",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/references/evaluation.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-assessment/references/fact-model.md",
+      "blob": "97cfc33dfb2f0770f17276bda09f21d153d87270",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/references/fact-model.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "skill"
+    },
+    {
+      "path": "skills/architecture-assessment/schemas/architecture-model.schema.json",
+      "blob": "04c8710e5d21377e3361ac2560dea56a6cdc1e39",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/schemas/architecture-model.schema.json",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "format"
+    },
+    {
+      "path": "skills/architecture-assessment/scripts/check-assessment.mjs",
+      "blob": "e20e0d3522c86f906840ff480815880f4b2b5b62",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/scripts/check-assessment.mjs",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "command"
+    },
+    {
+      "path": "skills/architecture-assessment/scripts/check-model.mjs",
+      "blob": "319aac82a70bcb19531899078566ac5c4f038eea",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/scripts/check-model.mjs",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "command"
+    },
+    {
+      "path": "skills/architecture-assessment/templates/architecture-model.json",
+      "blob": "924d4b6b5b543a8b30cc803eff23fb2ebb2787d1",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/templates/architecture-model.json",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "fixture": "packages/assessment/test/fixtures/architecture-model.json",
+      "kind": "format"
+    },
+    {
+      "path": "skills/architecture-assessment/templates/assessment.md",
+      "blob": "aa54c7085f5a398ab168a5ca44b98e474b423723",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/templates/assessment.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "format"
+    },
+    {
+      "path": "skills/architecture-assessment/templates/evolution.md",
+      "blob": "8b02fe04937d14007a9f1ea70e5bd0c14126176f",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/templates/evolution.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "format"
+    },
+    {
+      "path": "skills/architecture-assessment/templates/flows.md",
+      "blob": "0034529aef465482953da7a7342741bc439d8a55",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/templates/flows.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "format"
+    },
+    {
+      "path": "skills/architecture-assessment/templates/inventory.md",
+      "blob": "6c4a3fdf6972934bd2996255fa4e01b62225de98",
+      "disposition": "included",
+      "destination": "packages/assessment/skills/architecture-assessment/templates/inventory.md",
+      "reason": "Portable Assessment skill source moves without changing its contract in Phase 1.",
+      "kind": "format"
+    },
+    {
+      "path": "tests/architecture-assessment-bundle.test.mjs",
+      "blob": "faaafba132d1927eec1f84c90f8415806819d335",
+      "disposition": "included",
+      "destination": "packages/assessment/test/architecture-assessment-bundle.test.mjs",
+      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "tests/architecture-assessment-eval-runner.test.mjs",
+      "blob": "257d264f1ed1e9c8e46d9e113276a9e964d46be9",
+      "disposition": "included",
+      "destination": "packages/assessment/test/architecture-assessment-eval-runner.test.mjs",
+      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "tests/architecture-assessment-model.test.mjs",
+      "blob": "851f2d04512708e34f60271ff8b9d2c59e3872ff",
+      "disposition": "included",
+      "destination": "packages/assessment/test/architecture-assessment-model.test.mjs",
+      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "kind": "test"
+    },
+    {
+      "path": "tests/architecture-assessment-skill-contract.test.mjs",
+      "blob": "72cb4a4087b3804946ee11343c7c6e488bab5322",
+      "disposition": "included",
+      "destination": "packages/assessment/test/architecture-assessment-skill-contract.test.mjs",
+      "reason": "Deterministic upstream coverage moves into the Assessment workspace.",
+      "kind": "test"
+    }
+  ]
+}

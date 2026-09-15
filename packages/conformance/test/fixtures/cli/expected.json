@@ -1,0 +1,33 @@
+{
+  "sourceRevision": "361b4259a405113deaf777a38dea12f229b5b461",
+  "allowedUnstableFields": [
+    "cases.usageError.stderr.absoluteFixtureRoot"
+  ],
+  "cases": {
+    "valid": {
+      "exit": 0,
+      "stdout": "{\"digests\":{\"contract\":\"fa0d9e6c9a66aa3cd93474766ee4d930ecfbce02e2623ab737c51410f3c81dec\",\"graph\":\"8445b9a29ed58c87604616f44e1f6acbe0dbb28651e085d8dd2d02277a928158\",\"output\":\"554fe374e7c642a100bdac22e1a9f53e5bee767dbabbe657e1eecc14b420f97f\",\"provenance\":\"4d9c10cb261623cafc8a6ccdbe46e479a43eceb818b6dcdea22085fe5aeebe54\",\"realizationMap\":\"e69ddd906da3fb0f5c231c966437f06ae92d52453f0208003e9b83c46c555ec0\"},\"gaps\":[],\"graph\":{\"edges\":[{\"id\":\"490fc0fbdd4318e639371d4b2e44efc7896c1305483c71c5dcc5830a66fb12bd\",\"kind\":\"runtime\",\"source\":\"module:src/a\",\"span\":{\"end\":{\"column\":34,\"line\":1},\"file\":\"src/a.ts\",\"start\":{\"column\":18,\"line\":1}},\"specifier\":\"./b.js\",\"status\":\"resolved\",\"target\":\"module:src/b\"}],\"exclusions\":[],\"gaps\":[],\"nodes\":[{\"file\":\"src/a.ts\",\"id\":\"module:src/a\",\"kind\":\"source-module\",\"module\":\"src/a\"},{\"file\":\"src/b.ts\",\"id\":\"module:src/b\",\"kind\":\"source-module\",\"module\":\"src/b\"}],\"provenance\":{\"adapter\":\"typescript-program-v1\",\"compilerOptions\":{\"configFilePath\":\"tsconfig.json\",\"module\":199,\"moduleResolution\":99},\"compilerVersion\":\"7.0.2\",\"resolutionInputs\":[],\"rootConfigs\":[\"tsconfig.json\"],\"sourceFiles\":[\"src/a.ts\",\"src/b.ts\"]},\"scope\":{\"exclusions\":[],\"include\":[\"src/**/*.ts\"],\"rootConfigs\":[\"tsconfig.json\"]},\"version\":\"normalized-graph/v1\"},\"results\":[],\"version\":\"conformance-report/v1\"}\n",
+      "stderr": ""
+    },
+    "violationJson": {
+      "exit": 1,
+      "stdout": "{\"digests\":{\"contract\":\"ccd19e1b1339db1513c85f3633e15e0aff2e7a14dad3c67d8cfc4a5128d2b449\",\"graph\":\"8445b9a29ed58c87604616f44e1f6acbe0dbb28651e085d8dd2d02277a928158\",\"output\":\"a9bc032c6ef4a1959ab1137a0f7c657b61614115172f677187b27b3718404a87\",\"provenance\":\"4d9c10cb261623cafc8a6ccdbe46e479a43eceb818b6dcdea22085fe5aeebe54\",\"realizationMap\":\"e69ddd906da3fb0f5c231c966437f06ae92d52453f0208003e9b83c46c555ec0\"},\"gaps\":[],\"graph\":{\"edges\":[{\"id\":\"490fc0fbdd4318e639371d4b2e44efc7896c1305483c71c5dcc5830a66fb12bd\",\"kind\":\"runtime\",\"source\":\"module:src/a\",\"span\":{\"end\":{\"column\":34,\"line\":1},\"file\":\"src/a.ts\",\"start\":{\"column\":18,\"line\":1}},\"specifier\":\"./b.js\",\"status\":\"resolved\",\"target\":\"module:src/b\"}],\"exclusions\":[],\"gaps\":[],\"nodes\":[{\"file\":\"src/a.ts\",\"id\":\"module:src/a\",\"kind\":\"source-module\",\"module\":\"src/a\"},{\"file\":\"src/b.ts\",\"id\":\"module:src/b\",\"kind\":\"source-module\",\"module\":\"src/b\"}],\"provenance\":{\"adapter\":\"typescript-program-v1\",\"compilerOptions\":{\"configFilePath\":\"tsconfig.json\",\"module\":199,\"moduleResolution\":99},\"compilerVersion\":\"7.0.2\",\"resolutionInputs\":[],\"rootConfigs\":[\"tsconfig.json\"],\"sourceFiles\":[\"src/a.ts\",\"src/b.ts\"]},\"scope\":{\"exclusions\":[],\"include\":[\"src/**/*.ts\"],\"rootConfigs\":[\"tsconfig.json\"]},\"version\":\"normalized-graph/v1\"},\"results\":[{\"category\":\"implementation\",\"edge\":{\"id\":\"490fc0fbdd4318e639371d4b2e44efc7896c1305483c71c5dcc5830a66fb12bd\",\"kind\":\"runtime\",\"source\":\"module:src/a\",\"span\":{\"end\":{\"column\":34,\"line\":1},\"file\":\"src/a.ts\",\"start\":{\"column\":18,\"line\":1}},\"specifier\":\"./b.js\",\"status\":\"resolved\",\"target\":\"module:src/b\"},\"fingerprint\":\"5ea585a56e6ffb66dec53b2acc31ffd152574d137e5a77d10adb0118b38a6cc4\",\"message\":\"core may not depend on infra\",\"ruleId\":\"no-core-infra\",\"sourceArchitectureId\":\"core\",\"status\":\"new\",\"targetArchitectureId\":\"infra\"}],\"version\":\"conformance-report/v1\"}\n",
+      "stderr": ""
+    },
+    "violationText": {
+      "exit": 1,
+      "stdout": "Architecture conformance: 1 result(s), 0 gap(s)\n[new] implementation no-core-infra: core may not depend on infra (src/a.ts:1:18)\n",
+      "stderr": ""
+    },
+    "strictGap": {
+      "exit": 2,
+      "stdout": "{\"digests\":{\"contract\":\"ccd19e1b1339db1513c85f3633e15e0aff2e7a14dad3c67d8cfc4a5128d2b449\",\"graph\":\"8445b9a29ed58c87604616f44e1f6acbe0dbb28651e085d8dd2d02277a928158\",\"output\":\"2a9324d15e358a38f89d91be8269b6ec74b3b2483ebcb761d9d2319b32fb0957\",\"provenance\":\"4d9c10cb261623cafc8a6ccdbe46e479a43eceb818b6dcdea22085fe5aeebe54\",\"realizationMap\":\"68ebdabb2d2c4d334a1c63e6c61f8fe9f03725be14467914f7d9422e8e140f4e\"},\"gaps\":[],\"graph\":{\"edges\":[{\"id\":\"490fc0fbdd4318e639371d4b2e44efc7896c1305483c71c5dcc5830a66fb12bd\",\"kind\":\"runtime\",\"source\":\"module:src/a\",\"span\":{\"end\":{\"column\":34,\"line\":1},\"file\":\"src/a.ts\",\"start\":{\"column\":18,\"line\":1}},\"specifier\":\"./b.js\",\"status\":\"resolved\",\"target\":\"module:src/b\"}],\"exclusions\":[],\"gaps\":[],\"nodes\":[{\"file\":\"src/a.ts\",\"id\":\"module:src/a\",\"kind\":\"source-module\",\"module\":\"src/a\"},{\"file\":\"src/b.ts\",\"id\":\"module:src/b\",\"kind\":\"source-module\",\"module\":\"src/b\"}],\"provenance\":{\"adapter\":\"typescript-program-v1\",\"compilerOptions\":{\"configFilePath\":\"tsconfig.json\",\"module\":199,\"moduleResolution\":99},\"compilerVersion\":\"7.0.2\",\"resolutionInputs\":[],\"rootConfigs\":[\"tsconfig.json\"],\"sourceFiles\":[\"src/a.ts\",\"src/b.ts\"]},\"scope\":{\"exclusions\":[],\"include\":[\"src/**/*.ts\"],\"rootConfigs\":[\"tsconfig.json\"]},\"version\":\"normalized-graph/v1\"},\"results\":[{\"category\":\"coverage\",\"fingerprint\":\"fdfa516f882c3a8ab8018668e4d28c4b03938ae0af83b10b87d57790b405aa43\",\"message\":\"no realization mapping for src/b.ts\",\"status\":\"new\"}],\"version\":\"conformance-report/v1\"}\n",
+      "stderr": ""
+    },
+    "usageError": {
+      "exit": 3,
+      "stdout": "",
+      "stderr": "ENOENT: no such file or directory, open '<FIXTURE_ROOT>/missing.json'\n"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@archie/assessment",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "type": "module",
+  "files": [],
+  "scripts": {
+    "test": "node --test ../../test/migrations/migration-baselines.test.mjs"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}
