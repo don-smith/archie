@@ -10,6 +10,8 @@ import {
   writeArchitectureStatusSnapshotV1
 } from "../../dist/packages/archie-runtime/src/repository-checks/architecture-status-v1.js";
 
+const schema = JSON.parse(readFileSync("schemas/architecture-status-v1.schema.json", "utf8"));
+
 const revision = { commit: "fixture-revision", workingTree: "clean" };
 const baseCheck = (overrides = {}) => ({ id: "fixture-check", command: "unused", authority: "fixture owner", evidencePath: "evidence.json", resultMeaning: "target-owned meaning", adapter: "declared-exit-map-v1", exitMap: { "0": { code: "observed", label: "Observed", summary: "Target-owned result" } }, run: { state: "completed", startedAt: "2026-01-01T00:00:00.000Z", finishedAt: "2026-01-01T00:00:01.000Z", exitCode: 0 }, ...overrides });
 const options = (root, checks, generatedAt = "2026-01-01T00:01:00.000Z") => ({ outputPath: join(root, "latest.json"), repositoryRoot: root, repository: { name: "fixture-repository", revision }, generatedAt, checks });
@@ -18,6 +20,30 @@ function evidence(root, value = "evidence") {
   writeFileSync(join(root, "evidence.json"), value);
   return createHash("sha256").update(value).digest("hex");
 }
+
+test("schema declares executable revision and collection constraints", () => {
+  assert.equal(schema.$defs.revision.properties.commit.pattern, "^[A-Za-z0-9._:/@+-]+$");
+  const reportedResult = schema.$defs.result.oneOf.find((variant) => variant.properties.state.const === "reported");
+  assert.equal(reportedResult.properties.counts.maxItems, 100);
+  assert.equal(reportedResult.properties.counts.uniqueItems, true);
+  assert.equal(reportedResult.properties.findingIds.maxItems, 1000);
+  assert.equal(reportedResult.properties.findingIds.uniqueItems, true);
+  assert.equal(schema.$defs.check.properties.limits.uniqueItems, true);
+  assert.equal(schema.$defs.freshness.properties.reasons.uniqueItems, true);
+});
+
+test("runtime bounds and lexical ordering reject invalid result collections", () => {
+  const result = (fields) => adaptDeclaredExitMapV1(0, { "0": { code: "observed", label: "Observed", summary: "Target-owned result", ...fields } });
+  assert.throws(() => result({ counts: Array.from({ length: 101 }, (_, index) => ({ id: `count-${index}`, value: index })) }), /bounded/);
+  assert.throws(() => result({ findingIds: Array.from({ length: 1001 }, (_, index) => `finding-${index}`) }), /bounded/);
+  assert.throws(() => result({ counts: [{ id: "same", value: 1 }, { id: "same", value: 2 }] }), /unique/);
+  assert.throws(() => result({ counts: [{ id: "z", value: 1 }, { id: "a", value: 2 }] }), /ordered/);
+  assert.throws(() => result({ findingIds: ["finding-b", "finding-a"] }), /ordered/);
+  assert.throws(() => result({ findingIds: ["finding-a", "finding-a"] }), /unique/);
+  const invalidRevision = JSON.parse(readFileSync("test/fixtures/architecture-status/valid-snapshot.json", "utf8"));
+  invalidRevision.repository.revision.commit = "fixture revision";
+  assert.throws(() => validateArchitectureStatusSnapshotV1(invalidRevision), /unsafe/);
+});
 
 test("canonical serialization has stable bytes and validates the shared fixture", () => {
   const fixture = JSON.parse(readFileSync("test/fixtures/architecture-status/valid-snapshot.json", "utf8"));

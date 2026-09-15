@@ -16,7 +16,7 @@
   "$defs": {
     "time": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },
     "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$" },
-    "revision": { "type": "object", "additionalProperties": false, "required": ["commit", "workingTree"], "properties": { "commit": { "type": "string", "minLength": 1, "maxLength": 256 }, "workingTree": { "enum": ["clean", "dirty", "unknown"] } } },
+    "revision": { "type": "object", "additionalProperties": false, "required": ["commit", "workingTree"], "properties": { "commit": { "type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[A-Za-z0-9._:/@+-]+$" }, "workingTree": { "enum": ["clean", "dirty", "unknown"] } } },
     "repository": { "type": "object", "additionalProperties": false, "required": ["name", "revision"], "properties": { "name": { "type": "string", "minLength": 1, "maxLength": 2000 }, "revision": { "$ref": "#/$defs/revision" } } },
     "execution": {
       "oneOf": [
@@ -27,7 +27,7 @@
     },
     "result": {
       "oneOf": [
-        { "type": "object", "additionalProperties": false, "required": ["state", "code", "label", "summary"], "properties": { "state": { "const": "reported" }, "code": { "$ref": "#/$defs/id" }, "label": { "type": "string", "minLength": 1, "maxLength": 2000 }, "summary": { "type": "string", "minLength": 1, "maxLength": 2000 }, "counts": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "value"], "properties": { "id": { "$ref": "#/$defs/id" }, "value": { "type": "integer", "minimum": 0, "maximum": 1000000000 } } } }, "findingIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "maxItems": 1000 } } },
+        { "type": "object", "additionalProperties": false, "required": ["state", "code", "label", "summary"], "properties": { "state": { "const": "reported" }, "code": { "$ref": "#/$defs/id" }, "label": { "type": "string", "minLength": 1, "maxLength": 2000 }, "summary": { "type": "string", "minLength": 1, "maxLength": 2000 }, "counts": { "type": "array", "maxItems": 100, "uniqueItems": true, "items": { "type": "object", "additionalProperties": false, "required": ["id", "value"], "properties": { "id": { "$ref": "#/$defs/id" }, "value": { "type": "integer", "minimum": 0, "maximum": 1000000000 } } } }, "findingIds": { "type": "array", "maxItems": 1000, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } } } },
         { "type": "object", "additionalProperties": false, "required": ["state", "reason"], "properties": { "state": { "const": "unknown" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
       ]
     },
