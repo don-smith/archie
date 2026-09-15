@@ -74,18 +74,24 @@ test("managed fixture preserves configured Archie handoff order and authored con
     initialViewId: null,
     slug: "archie",
   });
-  assert.equal(
-    readFileSync(path.join(managedFixture, "complete/handoff/pages/archie.md"), "utf8"),
-    readFileSync(path.join(managedFixture, "complete/pages/archie.md"), "utf8"),
-  );
+  const authoredArchie = readFileSync(path.join(managedFixture, "complete/pages/archie.md"), "utf8");
+  const handoffArchie = readFileSync(path.join(managedFixture, "complete/handoff/pages/archie.md"), "utf8");
+  assert.equal(handoffArchie, authoredArchie);
+  assert.match(authoredArchie, /Conformance onboarding can produce an observed TypeScript import graph/);
+  const previewArchie = readFileSync(path.join(managedFixture, "complete/preview/archie/index.html"), "utf8");
+  assert.match(previewArchie, /Conformance onboarding can produce an observed TypeScript import graph/);
   assert.ok(existsSync(path.join(managedFixture, "complete/preview/archie/index.html")));
   const finalArchie = readFileSync(path.join(managedFixture, "complete/site/archie/index.html"), "utf8");
   assert.match(finalArchie, /<nav aria-label="Architecture documentation pages">/);
+  assert.match(finalArchie, /Conformance onboarding can produce an observed TypeScript import graph/);
   assert.match(finalArchie, /<h3>Assessment<\/h3>/);
   assert.match(finalArchie, /Conformance onboarding/);
   assert.match(finalArchie, /Structural inspection/);
   assert.match(finalArchie, /target-local <code>architecture-conformance<\/code>/);
   assert.match(finalArchie, /@media print/);
+  assert.match(finalArchie, /data-theme-choice="dark" aria-pressed="false"/);
+  assert.match(finalArchie, /root\.dataset\.theme = choice/);
+  assert.match(finalArchie, /--text:#111/);
   for (const scenario of ["complete", "missing-marker", "warning-diagnostic"]) {
     const receipt = JSON.parse(readFileSync(path.join(managedFixture, scenario, "site/assets/architecture-handoff.json"), "utf8"));
     assert.deepEqual(receipt.ownership, { product: "html-design", generated: true });

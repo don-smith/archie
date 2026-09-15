@@ -32,8 +32,11 @@ function pageRoute(config, page) {
 }
 
 async function archieFinalSiteWarnings(config, siteDirectory) {
+  const archieAreas = config.pages.areas.filter((area) => area.id === "archie");
   let pageText;
-  try { pageText = await readFile(path.join(siteDirectory, "archie", "index.html"), "utf8"); } catch {}
+  if (archieAreas.length === 1) {
+    try { pageText = await readFile(path.join(siteDirectory, archieAreas[0].slug, "index.html"), "utf8"); } catch {}
+  }
   return evaluateArchieDocumentation({
     configDirectory: path.dirname(config.configPath),
     areas: config.pages.areas,

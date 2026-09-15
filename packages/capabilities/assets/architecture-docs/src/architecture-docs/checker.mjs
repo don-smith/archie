@@ -31,8 +31,11 @@ function handoffClaims(config) {
 async function readJson(filename) { return JSON.parse(await readFile(filename, "utf8")); }
 async function exists(filename) { try { await stat(filename); return true; } catch (error) { if (error.code === "ENOENT") return false; throw error; } }
 async function archiePreviewWarnings(config) {
+  const archieAreas = config.pages.areas.filter((area) => area.id === "archie");
   let pageText;
-  try { pageText = await readFile(path.join(config.paths.outputDirectory, "archie", "index.html"), "utf8"); } catch {}
+  if (archieAreas.length === 1) {
+    try { pageText = await readFile(path.join(config.paths.outputDirectory, archieAreas[0].slug, "index.html"), "utf8"); } catch {}
+  }
   return evaluateArchieDocumentation({
     configDirectory: path.dirname(config.configPath),
     areas: config.pages.areas,
