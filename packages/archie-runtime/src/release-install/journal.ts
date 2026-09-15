@@ -13,7 +13,7 @@ function files(root: string): string[] {
 function tracked(targetDirectory: string, restoreRoots: string[]): string[] {
   const target = resolve(targetDirectory), archie = join(target, ".archie");
   return [
-    join(archie, "version"), join(archie, "release", "release-record-v1.json"), join(archie, "release", "selection-receipt.json"),
+    join(archie, "version"), join(archie, "release", "release-record-v1.json"), join(archie, "release", "release-record-v2.json"), join(archie, "release", "selection-receipt.json"),
     join(archie, "runtime", "package.json"), join(archie, "runtime", "package-lock.json"), join(target, "apm.yml"), join(target, "apm.lock.yaml"),
     ...restoreRoots.flatMap(files)
   ];

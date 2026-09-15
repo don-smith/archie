@@ -1,5 +1,6 @@
 import { assertPinnedApmProjection } from "./apm-projection.js";
 import type { PinnedTarget } from "./target-state.js";
+import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
 import type { CheckStatus } from "./report.js";
 import { requireNative, type NativeCommandResult, type NativeCommandRunner } from "./run-npm.js";
 
@@ -24,6 +25,6 @@ export function runApmChecks(pin: PinnedTarget, run: NativeCommandRunner): ApmCh
     const audit = run({ command: "apm", args: ["audit", "--ci"], cwd: pin.targetDirectory });
     policy = audit.exitCode === 0 ? "passed" : "blocked";
   }
-  assertPinnedApmProjection(pin.record, pin.apm);
+  assertPinnedApmProjection(pin.record as ReleaseRecordV1, pin.apm);
   return { frozen: "passed", baseline: "passed", policy, content: "passed" };
 }

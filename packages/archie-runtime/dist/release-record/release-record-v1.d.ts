@@ -1,4 +1,5 @@
 import { type HtmlSnapshotProvenance } from "../html-snapshot/verify.js";
+import { type FinalizeReleaseV2Result } from "./release-record-v2.js";
 export declare const RELEASE_RECORD_SCHEMA_VERSION: 1;
 export declare const LOCAL_REVIEW_CLAIM: "locally-reviewed-private-trial";
 export declare const ARCHIE_SKILLS: readonly ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "likec4-authoring"];
@@ -58,5 +59,5 @@ export declare function validateApmSourceEvidence(manifest: string, lock: string
 export declare function serializeReleaseRecord(record: ReleaseRecordV1): string;
 export declare function parseReleaseRecord(bytes: string): ReleaseRecordV1;
 export declare function validateBundleLayout(bundleDirectory: string): void;
-export declare function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleaseResult;
+export declare function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleaseResult | FinalizeReleaseV2Result;
 export {};

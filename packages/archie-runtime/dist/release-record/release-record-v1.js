@@ -6,6 +6,7 @@ import { canonicalize } from "../analysis/canonical-json.js";
 import { SUPPORTED_ANALYZER } from "../analysis/contracts.js";
 import { PRODUCT_VERSION } from "../product-version.js";
 import { validateHtmlSnapshotProvenance } from "../html-snapshot/verify.js";
+import { finalizeReleaseV2 } from "./release-record-v2.js";
 export const RELEASE_RECORD_SCHEMA_VERSION = 1;
 export const LOCAL_REVIEW_CLAIM = "locally-reviewed-private-trial";
 export const ARCHIE_SKILLS = ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "likec4-authoring"];
@@ -244,6 +245,15 @@ export function validateBundleLayout(bundleDirectory) {
 }
 export function finalizeRelease(request) {
     const root = resolve(request.bundleDirectory);
+    let bundleFormat;
+    try {
+        bundleFormat = JSON.parse(readFileSync(join(root, "bundle.json"), "utf8")).format;
+    }
+    catch {
+        bundleFormat = undefined;
+    }
+    if (bundleFormat === "archie-private-bundle-input-v2")
+        return finalizeReleaseV2(request);
     validateBundleLayout(root);
     if (!/^[a-f0-9]{40}$/i.test(request.sourceCommit))
         throw new Error("sourceCommit must be a 40-character Git commit");

@@ -2,8 +2,10 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 import { ARCHIE_SKILLS, parseReleaseRecord, type ArchieSkill, type ReleaseRecordV1, validateApmSourceEvidence, validateBundleLayout } from "../release-record/release-record-v1.js";
+import { selectLocalReleaseV2, type SelectedReleaseV2 } from "../release-record/release-record-v2.js";
+import type { ReleaseRecordV2 } from "../release-record/release-record-v2.js";
 
-export interface SelectedRelease {
+export interface SelectedReleaseV1 {
   bundleDirectory: string;
   record: ReleaseRecordV1;
   recordBytes: string;
@@ -12,6 +14,7 @@ export interface SelectedRelease {
   tarballName: string;
   npmLockBytes: string;
 }
+export type SelectedRelease = SelectedReleaseV1 | SelectedReleaseV2;
 
 type BundleInput = {
   format: "archie-private-bundle-input-v1";
@@ -63,8 +66,14 @@ function bundleInput(root: string): BundleInput {
 }
 
 /** Selects a complete, already-finalized local bundle; it never resolves a release from a network source. */
-export function selectLocalRelease(directory: string): SelectedRelease {
+export function selectLocalRelease(directory: string): SelectedRelease | SelectedReleaseV2 {
   if (!directory || directory === "latest" || /^[a-z][a-z0-9+.-]*:\/\//i.test(directory)) throw new Error("release selection must be an explicit local directory");
+  const candidate = resolve(directory);
+  if (existsSync(join(candidate, "bundle.json"))) {
+    let format: unknown;
+    try { format = JSON.parse(readFileSync(join(candidate, "bundle.json"), "utf8")).format; } catch { format = undefined; }
+    if (format === "archie-private-bundle-input-v2") return selectLocalReleaseV2(directory);
+  }
   const root = resolve(directory);
   if (!existsSync(root) || !statSync(root).isDirectory()) throw new Error("release selection must be an existing local directory");
   validateBundleLayout(root);

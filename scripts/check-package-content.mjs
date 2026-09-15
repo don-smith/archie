@@ -29,7 +29,7 @@ if (!existsSync("dist")) execFileSync("npm", ["run", "build"], { stdio: "inherit
 for (const [name] of packages) {
   const output = execFileSync("npm", ["pack", "--dry-run", "--json", "--workspace", name], { encoding: "utf8" });
   const packed = JSON.parse(output)[0].files.map((file) => file.path);
-  const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer|release-record-v1\.json)(\/|$)/i.test(file) && !(name === "@archie/context" && file.startsWith(".apm/skills/")));
+  const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer|release-record-v[12]\.json)(\/|$)/i.test(file) && !(name === "@archie/context" && file.startsWith(".apm/skills/")));
   if (forbidden.length) throw new Error(`${name} would ship forbidden paths: ${forbidden.join(", ")}`);
   if (name === "@archie/context") {
     for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs"]) {

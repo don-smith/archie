@@ -12,6 +12,7 @@ function paths(targetDirectory) {
     const runtime = join(targetDirectory, ".archie", "runtime");
     return { runtime, installedPackage: (name) => join(runtime, "node_modules", name) };
 }
+function runtimePackage(record) { return record.schemaVersion === 2 ? "@archie/runtime" : record.npm.package; }
 function deployedFiles(targetDirectory, record) {
     const files = [];
     const visit = (path) => {
@@ -75,7 +76,7 @@ export function verifyCurrentInstalledTarget(targetDirectory, options = {}) {
     const pin = readPinnedTarget(targetDirectory);
     assertInstalledNpm(pin);
     const p = paths(pin.targetDirectory);
-    verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
+    verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
     verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
 }
 /** Executes the native, pinned-state-only checks in their required order. */
@@ -92,7 +93,7 @@ export function verifyInstalledTarget(targetDirectory, options = {}) {
         const p = paths(pin.targetDirectory);
         phase = "npm";
         runNpmCi(pin, run);
-        verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
+        verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
         report.npm = "passed";
         report.html = "passed";
         pin = readPinnedTarget(targetDirectory);

@@ -4,17 +4,18 @@ import { spawnSync } from "node:child_process";
 
 const [targetArgument, ...runtimeArgs] = process.argv.slice(2);
 const target = resolve(targetArgument ?? process.cwd());
-const recordPath = join(target, ".archie", "release", "release-record-v1.json");
+const recordPaths = [join(target, ".archie", "release", "release-record-v2.json"), join(target, ".archie", "release", "release-record-v1.json")];
 const runtimePath = join(target, ".archie", "runtime");
+const recordPath = recordPaths.find(existsSync);
 
-if (!existsSync(recordPath) || !existsSync(join(runtimePath, "package-lock.json"))) {
+if (!recordPath || !existsSync(join(runtimePath, "package-lock.json"))) {
   throw new Error("Archie runtime is not pinned and verified in this project; run archie bootstrap or archie verify before dispatching it");
 }
 
 let packageName;
 try {
   const record = JSON.parse(readFileSync(recordPath, "utf8"));
-  packageName = record?.npm?.package;
+  packageName = record?.schemaVersion === 2 ? "@archie/runtime" : record?.npm?.package;
 } catch {
   throw new Error("Pinned Archie release record is unreadable");
 }

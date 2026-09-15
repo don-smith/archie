@@ -6,6 +6,7 @@ import { canonicalize } from "../analysis/canonical-json.js";
 import { SUPPORTED_ANALYZER } from "../analysis/contracts.js";
 import { PRODUCT_VERSION } from "../product-version.js";
 import { validateHtmlSnapshotProvenance, type HtmlSnapshotProvenance } from "../html-snapshot/verify.js";
+import { finalizeReleaseV2, type FinalizeReleaseV2Result } from "./release-record-v2.js";
 
 export const RELEASE_RECORD_SCHEMA_VERSION = 1 as const;
 export const LOCAL_REVIEW_CLAIM = "locally-reviewed-private-trial" as const;
@@ -238,8 +239,11 @@ export function validateBundleLayout(bundleDirectory: string): void {
   if (!statSync(join(root, "npm")).isDirectory() || !statSync(join(root, "apm")).isDirectory()) throw new Error("bundle npm and APM entries must be directories");
 }
 
-export function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleaseResult {
+export function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleaseResult | FinalizeReleaseV2Result {
   const root = resolve(request.bundleDirectory);
+  let bundleFormat: unknown;
+  try { bundleFormat = JSON.parse(readFileSync(join(root, "bundle.json"), "utf8")).format; } catch { bundleFormat = undefined; }
+  if (bundleFormat === "archie-private-bundle-input-v2") return finalizeReleaseV2(request);
   validateBundleLayout(root);
   if (!/^[a-f0-9]{40}$/i.test(request.sourceCommit)) throw new Error("sourceCommit must be a 40-character Git commit");
   const input = readBundleInput(join(root, "bundle.json"));

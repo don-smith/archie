@@ -6,6 +6,7 @@ import { assertSupportedEnvironment } from "../analysis/contracts.js";
 import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget, type StagedTarget } from "./target-state.js";
 import type { SelectedRelease } from "./selection.js";
 import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
+import type { ReleaseRecordV2 } from "../release-record/release-record-v2.js";
 import { initialInstallReport, type ReleaseInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
@@ -17,13 +18,14 @@ export interface ReleaseInstallOptions {
   /** Test and host seam for the immutable snapshot installed by the runtime package. */
   verifyHtml?: (root: string, expected: { digest: string; fileCount: number }) => void;
   /** Test seam for APM deployment verification. Production checks every deployed skill file against the native lock. */
-  verifyApmDeployment?: (root: string, record: ReleaseRecordV1) => void;
+  verifyApmDeployment?: (root: string, record: ReleaseRecordV1 | ReleaseRecordV2) => void;
 }
 
 function paths(targetDirectory: string) {
   const runtime = join(targetDirectory, ".archie", "runtime");
   return { runtime, installedPackage: (name: string) => join(runtime, "node_modules", name) };
 }
+function runtimePackage(record: ReleaseRecordV1 | ReleaseRecordV2): string { return record.schemaVersion === 2 ? "@archie/runtime" : record.npm.package; }
 function deployedFiles(targetDirectory: string, record: ReleaseRecordV1): string[] {
   const files: string[] = [];
   const visit = (path: string): void => {
@@ -50,13 +52,13 @@ function lockedDeploymentHashes(lock: string, record: ReleaseRecordV1): Map<stri
   return hashes;
 }
 
-function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecordV1, lock: string, override?: (root: string, record: ReleaseRecordV1) => void): void {
+function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecordV1 | ReleaseRecordV2, lock: string, override?: (root: string, record: ReleaseRecordV1 | ReleaseRecordV2) => void): void {
   if (override) {
     for (const skill of record.apm.skills) override(join(targetDirectory, ".agents", "skills", skill), record);
     return;
   }
-  const actualFiles = deployedFiles(targetDirectory, record);
-  const expectedHashes = lockedDeploymentHashes(lock, record);
+  const actualFiles = deployedFiles(targetDirectory, record as ReleaseRecordV1);
+  const expectedHashes = lockedDeploymentHashes(lock, record as ReleaseRecordV1);
   if (JSON.stringify([...expectedHashes.keys()].sort()) !== JSON.stringify(actualFiles)) throw new Error("APM deployed Archie file coverage differs from the native lock");
   for (const path of actualFiles) {
     const actual = createHash("sha256").update(readFileSync(join(targetDirectory, path))).digest("hex");
@@ -75,7 +77,7 @@ export function verifyCurrentInstalledTarget(targetDirectory: string, options: R
   const pin = readPinnedTarget(targetDirectory);
   assertInstalledNpm(pin);
   const p = paths(pin.targetDirectory);
-  verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
+  verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
   verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
 }
 
@@ -93,7 +95,7 @@ export function verifyInstalledTarget(targetDirectory: string, options: ReleaseI
   const p = paths(pin.targetDirectory);
   phase = "npm";
   runNpmCi(pin, run);
-  verifyHtml(join(p.installedPackage(pin.record.npm.package), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
+  verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
   report.npm = "passed"; report.html = "passed";
 
   pin = readPinnedTarget(targetDirectory);
