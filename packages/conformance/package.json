@@ -3,11 +3,24 @@
   "version": "0.1.0-private.0",
   "private": true,
   "type": "module",
-  "files": [],
+  "bin": {
+    "architecture-conformance": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "README.md",
+    "ARCHITECTURE_CONFORMANCE.md",
+    "docs"
+  ],
   "scripts": {
-    "test": "node --test ../../test/migrations/migration-baselines.test.mjs"
+    "test": "npm run build --silent --prefix ../.. && npm run test:compiled",
+    "test:compiled": "rm -rf .test-dist && tsc -p tsconfig.test.json && node --test $(find .test-dist/test -name '*.test.js' -print)"
   },
   "engines": {
     "node": ">=24 <25"
+  },
+  "dependencies": {
+    "@archie/runtime": "0.1.0-private.0"
   }
 }

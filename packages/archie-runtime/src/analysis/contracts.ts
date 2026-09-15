@@ -24,6 +24,17 @@ export interface AnalysisResponse {
   complete: boolean;
 }
 
+export type { NormalizedGraphV1 } from "./graph-types.js";
+import type { NormalizedGraphV1 } from "./graph-types.js";
+
+/** Full-fidelity analyzer evidence for consumers that require graph identity, spans, and provenance. */
+export interface AnalysisResponseV2 {
+  contractVersion: "analysis-response-v2";
+  adapter: typeof ANALYZER_ID;
+  graph: NormalizedGraphV1;
+  complete: boolean;
+}
+
 export function assertSupportedEnvironment(environment = { node: process.versions.node, platform: process.platform, architecture: process.arch }): void {
   if (!environment.node.startsWith("24.") || environment.platform !== "darwin" || environment.architecture !== "arm64") {
     throw new Error("Unsupported analyzer environment: requires Darwin arm64 with Node 24 and TypeScript 7.0.2");

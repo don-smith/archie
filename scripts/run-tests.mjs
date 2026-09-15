@@ -16,6 +16,7 @@ const files = roots.flatMap(walk).map((file) => resolve(file)).sort();
 if (!files.length) throw new Error(`No tests found for: ${roots.join(", ")}`);
 
 const assessmentRoot = resolve("packages/assessment");
+const conformanceRoot = resolve("packages/conformance");
 const architectureDocsRoot = resolve("packages/architecture-docs");
 const assessmentTests = files.filter((file) => file.startsWith(`${assessmentRoot}/`));
 const architectureDocsTests = files.filter((file) => file.startsWith(`${architectureDocsRoot}/`));
@@ -29,5 +30,8 @@ function run(group, cwd) {
 
 const productStatus = run(productTests, process.cwd());
 const assessmentStatus = productStatus === 0 ? run(assessmentTests, assessmentRoot) : 1;
-const architectureDocsStatus = productStatus === 0 && assessmentStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
-process.exit(productStatus || assessmentStatus || architectureDocsStatus);
+const conformanceStatus = productStatus === 0 && assessmentStatus === 0
+  ? spawnSync("npm", ["run", "test:compiled"], { cwd: conformanceRoot, stdio: "inherit" }).status ?? 1
+  : 1;
+const architectureDocsStatus = productStatus === 0 && assessmentStatus === 0 && conformanceStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
+process.exit(productStatus || assessmentStatus || conformanceStatus || architectureDocsStatus);

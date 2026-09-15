@@ -3,18 +3,21 @@ import { existsSync, readFileSync } from "node:fs";
 const packages = [
   ["@archie/runtime", "archie-runtime"], ["@archie/cli", "archie-cli"],
   ["@archie/context", "archie-context"], ["@archie/architecture-docs", "architecture-docs"],
-  ["@archie/assessment", "assessment"], ["@archie/capabilities", "capabilities"]
+  ["@archie/assessment", "assessment"], ["@archie/conformance", "conformance"], ["@archie/capabilities", "capabilities"]
 ];
 for (const [name, directory] of packages) {
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.private !== true) throw new Error(`${name} must remain private`);
   if (manifest.publishConfig) throw new Error(`${name} must not configure publication`);
-  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (["@archie/architecture-docs", "@archie/assessment"].includes(name) && file === "skills")));
+  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (["@archie/architecture-docs", "@archie/assessment", "@archie/conformance"].includes(name) && file === "skills")));
   if (unsafeAllowlist) throw new Error(`${name} has unsafe package file allowlist`);
 }
 const runtime = JSON.parse(readFileSync("packages/archie-runtime/package.json"));
 if (runtime.dependencies?.["@typescript/typescript-darwin-arm64"] !== "7.0.2") throw new Error("The Darwin analyzer payload must be a runtime dependency");
 if (runtime.bin?.["architecture-docs"] !== "./dist/architecture-docs/bin/architecture-docs.mjs") throw new Error("The runtime must expose the Architecture Docs command");
+if (runtime.bin?.["architecture-conformance"]) throw new Error("Only @archie/conformance may expose architecture-conformance");
+const conformance = JSON.parse(readFileSync("packages/conformance/package.json"));
+if (conformance.bin?.["architecture-conformance"] !== "./dist/cli.js") throw new Error("@archie/conformance must expose architecture-conformance");
 for (const [dependency, version] of [["likec4", "1.59.2"], ["marked", "15.0.7"], ["playwright", "1.62.1"]]) {
   if (runtime.dependencies?.[dependency] !== version) throw new Error(`The runtime must pin ${dependency}@${version}`);
 }
@@ -38,11 +41,17 @@ for (const [name] of packages) {
       if (!packed.includes(required)) throw new Error(`Assessment package omits required skill asset: ${required}`);
     }
   }
+  if (name === "@archie/conformance") {
+    for (const required of ["skills/architecture-conformance-onboarding/SKILL.md", "skills/architecture-contracts/SKILL.md", "dist/formats/conformance-report-v1.js", "dist/replay/run.js", "dist/reconciliation/compare.js"]) {
+      if (!packed.includes(required)) throw new Error(`Conformance package omits required asset: ${required}`);
+    }
+  }
   const expectedEntry = {
     "@archie/runtime": "dist/index.js",
     "@archie/cli": "dist/cli.js",
     "@archie/capabilities": "dist/index.js",
-    "@archie/architecture-docs": "bin/architecture-docs.mjs"
+    "@archie/architecture-docs": "bin/architecture-docs.mjs",
+    "@archie/conformance": "dist/cli.js"
   }[name];
   if (expectedEntry && !packed.includes(expectedEntry)) throw new Error(`${name} lacks ${expectedEntry}`);
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");

@@ -1,0 +1,1 @@
+{"version":3,"file":"defaults.js","sourceRoot":"","sources":["../../../../../packages/conformance/src/onboarding-state/defaults.ts"],"names":[],"mappings":"AAEA,MAAM,CAAC,MAAM,sBAAsB,GAAoB;IACrD,KAAK,EAAE,2CAA2C;IAClD,KAAK,EAAE,wDAAwD;IAC/D,OAAO,EAAE,0DAA0D;IACnE,GAAG,EAAE,gDAAgD;IACrD,QAAQ,EAAE,sDAAsD;IAChE,MAAM,EAAE,gDAAgD;IACxD,QAAQ,EAAE,yCAAyC;CACpD,CAAC"}

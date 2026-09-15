@@ -1,7 +1,7 @@
 import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
 
-const packages = ["archie-runtime", "archie-cli", "capabilities"];
+const packages = ["archie-runtime", "archie-cli", "conformance", "capabilities"];
 for (const packageName of packages) {
   const from = `dist/packages/${packageName}/src`;
   const to = `packages/${packageName}/dist`;

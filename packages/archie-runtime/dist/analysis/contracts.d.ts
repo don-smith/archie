@@ -35,6 +35,15 @@ export interface AnalysisResponse {
     provenance: typeof SUPPORTED_ANALYZER;
     complete: boolean;
 }
+export type { NormalizedGraphV1 } from "./graph-types.js";
+import type { NormalizedGraphV1 } from "./graph-types.js";
+/** Full-fidelity analyzer evidence for consumers that require graph identity, spans, and provenance. */
+export interface AnalysisResponseV2 {
+    contractVersion: "analysis-response-v2";
+    adapter: typeof ANALYZER_ID;
+    graph: NormalizedGraphV1;
+    complete: boolean;
+}
 export declare function assertSupportedEnvironment(environment?: {
     node: string;
     platform: NodeJS.Platform;

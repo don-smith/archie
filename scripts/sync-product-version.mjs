@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 const root = JSON.parse(readFileSync("package.json"));
-const workspaceManifests = ["packages/archie-runtime/package.json", "packages/archie-cli/package.json", "packages/archie-context/package.json", "packages/architecture-docs/package.json", "packages/assessment/package.json", "packages/capabilities/package.json"];
+const workspaceManifests = ["packages/archie-runtime/package.json", "packages/archie-cli/package.json", "packages/archie-context/package.json", "packages/architecture-docs/package.json", "packages/assessment/package.json", "packages/conformance/package.json", "packages/capabilities/package.json"];
 for (const file of workspaceManifests) {
   const value = JSON.parse(readFileSync(file));
   if (value.version !== root.version) throw new Error(`${file} version ${value.version} does not match product version ${root.version}`);
