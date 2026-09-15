@@ -4,3 +4,4 @@ node_modules/
 .archie/runtime/node_modules/
 .archie/npm-cache/
 apm_modules/
+.myflow/
