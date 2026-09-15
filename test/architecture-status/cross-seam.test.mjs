@@ -139,7 +139,7 @@ async function createFinalSite(directory) {
 }
 
 test("runtime producer and imported architecture-docs consumer share the contract without a reverse dependency", async () => {
-  const files = ["valid-snapshot.json", "canonical-bytes.json", "invalid-unsafe-path.json", "normalized-report.json", "malformed-report.json"];
+  const files = ["valid-snapshot.json", "canonical-bytes.json", "invalid-unsafe-path.json", "invalid-unknown-field.json", "invalid-unknown-report-field.json", "invalid-uri-path.json", "normalized-report.json", "malformed-report.json"];
   const manifest = (await readFile(path.join(statusFixture, "MANIFEST.sha256"), "utf8")).trim().split("\n");
   for (const line of manifest) {
     const [expected, file] = line.split(/\s+/, 2);

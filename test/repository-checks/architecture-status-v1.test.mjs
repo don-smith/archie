@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import {
   adaptDeclaredExitMapV1, adaptNormalizedJsonReportV1,
@@ -68,8 +68,17 @@ test("retention and fatal input errors preserve the previous latest snapshot", (
   assert.notEqual(retainedBytes, before);
 });
 
-test("unsafe evidence paths, missing digests, and contradictory times are rejected", () => {
+test("unsafe evidence paths, URI schemes, symlink escapes, and contradictory times are rejected", () => {
   const root = mkdtempSync(join(tmpdir(), "architecture-status-"));
   assert.throws(() => writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ evidencePath: "../outside.json" })])), /unsafe/);
+  const uriPath = JSON.parse(readFileSync("test/fixtures/architecture-status/invalid-uri-path.json", "utf8")).path;
+  assert.throws(() => writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ evidencePath: uriPath })])), /unsafe/);
+  const outside = join(dirname(root), "architecture-status-outside-evidence.json");
+  writeFileSync(outside, "outside evidence");
+  symlinkSync(outside, join(root, "escaped.json"));
+  assert.throws(() => writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ evidencePath: "escaped.json" })])), /escapes repository root/);
+  assert.throws(() => validateArchitectureStatusSnapshotV1(JSON.parse(readFileSync("test/fixtures/architecture-status/invalid-unknown-field.json", "utf8"))), /unknown/);
+  assert.throws(() => adaptNormalizedJsonReportV1(JSON.parse(readFileSync("test/fixtures/architecture-status/invalid-unknown-report-field.json", "utf8"))), /unknown/);
+  assert.throws(() => writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ unexpected: true })])), /unknown/);
   assert.throws(() => validateArchitectureStatusSnapshotV1({ kind: "archie-architecture-status", version: 1, repository: { name: "x", revision }, generatedAt: "2026-01-01T00:00:00.000Z", freshnessPolicy: { maxAgeSeconds: 10 }, checks: [{ id: "x", title: "x", authority: "x", resultMeaning: "x", limits: [], execution: { state: "not-run", reason: "x" }, result: { state: "unknown", reason: "x" }, evidence: { state: "present", source: "current", path: "x.json", sha256: "bad", observedAt: "2026-01-01T00:00:00.000Z", observedRevision: "fixture-revision" }, freshness: { state: "current", reasons: [] } }] }), /digest/);
 });

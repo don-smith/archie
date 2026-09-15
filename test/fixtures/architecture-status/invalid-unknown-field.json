@@ -1,0 +1,43 @@
+{
+  "kind": "archie-architecture-status",
+  "version": 1,
+  "repository": {
+    "name": "fixture-repository",
+    "revision": {
+      "commit": "fixture-revision",
+      "workingTree": "clean"
+    }
+  },
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "freshnessPolicy": {
+    "maxAgeSeconds": 86400
+  },
+  "checks": [
+    {
+      "id": "fixture-check",
+      "title": "Fixture check",
+      "authority": "fixture owner",
+      "resultMeaning": "The fixture owns this meaning.",
+      "limits": [],
+      "execution": {
+        "state": "not-run",
+        "reason": "fixture-only",
+        "unexpected": true
+      },
+      "result": {
+        "state": "unknown",
+        "reason": "not-collected"
+      },
+      "evidence": {
+        "state": "missing",
+        "reason": "fixture-only"
+      },
+      "freshness": {
+        "state": "unknown",
+        "reasons": [
+          "evidence-missing"
+        ]
+      }
+    }
+  ]
+}

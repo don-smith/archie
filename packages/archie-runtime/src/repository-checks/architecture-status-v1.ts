@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, renameSync, writeFileSync, unlinkSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, realpathSync, renameSync, writeFileSync, unlinkSync } from "node:fs";
 import { basename, dirname, resolve, sep } from "node:path";
 import type {
   ArchitectureStatusCheckV1, ArchitectureStatusEvidenceV1, ArchitectureStatusExecutionV1,
@@ -52,19 +52,17 @@ export interface NormalizedJsonReportV1 {
 }
 
 function fail(message: string): never { throw new Error(`Invalid architecture status v1: ${message}`); }
-function rejectOutputFields(value: unknown): void {
-  if (!value || typeof value !== "object") return;
-  if (Array.isArray(value)) { for (const entry of value) rejectOutputFields(entry); return; }
-  for (const [key, child] of Object.entries(value)) {
-    if (key === "stdout" || key === "stderr") fail(`${key} fields are not permitted`);
-    rejectOutputFields(child);
-  }
-}
 function object(value: unknown, name: string): JsonObject { if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${name} must be an object`); return value as JsonObject; }
+function knownFields(value: unknown, name: string, allowed: readonly string[]): JsonObject {
+  const item = object(value, name);
+  const allowedSet = new Set(allowed);
+  for (const key of Object.keys(item)) if (!allowedSet.has(key)) fail(`${name}.${key} is unknown`);
+  return item;
+}
 function string(value: unknown, name: string, max = MAX_STRING): string { if (typeof value !== "string" || value.length === 0 || value.length > max || /[\u0000-\u001f\u007f]/.test(value)) fail(`${name} must be a bounded string`); return value; }
 function id(value: unknown, name: string): string { const result = string(value, name, 64); if (!ID.test(result)) fail(`${name} is unsafe`); return result; }
 function timestamp(value: unknown, name: string): string { const result = string(value, name, 24); if (!ISO.test(result) || Number.isNaN(Date.parse(result)) || new Date(result).toISOString() !== result) fail(`${name} must be canonical UTC`); return result; }
-function path(value: unknown, name: string): string { const result = string(value, name, MAX_PATH); if (result.startsWith("/") || result.includes("\\") || result.split("/").some((part) => part === ".." || part === "" || part === ".") || /^[A-Za-z]:/.test(result)) fail(`${name} is unsafe`); return result; }
+function path(value: unknown, name: string): string { const result = string(value, name, MAX_PATH); if (result.startsWith("/") || result.includes("\\") || result.split("/").some((part) => part === ".." || part === "" || part === ".") || /^[A-Za-z]:/.test(result) || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(result)) fail(`${name} is unsafe`); return result; }
 function digest(value: unknown, name: string): string { const result = string(value, name, 64); if (!DIGEST.test(result)) fail(`${name} must be a lowercase SHA-256 digest`); return result; }
 function orderedUnique(values: unknown, name: string): string[] { if (!Array.isArray(values)) fail(`${name} must be an array`); const out = values.map((v, i) => string(v, `${name}[${i}]`)); if (new Set(out).size !== out.length) fail(`${name} must be unique`); return out; }
 function compareTime(a: string, b: string, message: string): void { if (Date.parse(a) > Date.parse(b)) fail(message); }
@@ -72,7 +70,7 @@ function compareTime(a: string, b: string, message: string): void { if (Date.par
 function normalizeCounts(value: unknown, name: string): Array<{ id: string; value: number }> | undefined {
   if (value === undefined) return undefined;
   if (!Array.isArray(value) || value.length > 100) fail(`${name} must be a bounded array`);
-  const result = value.map((entry, index) => { const item = object(entry, `${name}[${index}]`); const itemId = id(item.id, `${name}[${index}].id`); if (!Number.isSafeInteger(item.value) || (item.value as number) < 0 || (item.value as number) > 1_000_000_000) fail(`${name}[${index}].value is invalid`); return { id: itemId, value: item.value as number }; });
+  const result = value.map((entry, index) => { const item = knownFields(entry, `${name}[${index}]`, ["id", "value"]); const itemId = id(item.id, `${name}[${index}].id`); if (!Number.isSafeInteger(item.value) || (item.value as number) < 0 || (item.value as number) > 1_000_000_000) fail(`${name}[${index}].value is invalid`); return { id: itemId, value: item.value as number }; });
   if (new Set(result.map((entry) => entry.id)).size !== result.length || result.some((entry, index) => index > 0 && entry.id.localeCompare(result[index - 1].id) < 0)) fail(`${name} must be unique and lexically ordered`);
   return result;
 }
@@ -85,7 +83,7 @@ function normalizeFindingIds(value: unknown, name: string): string[] | undefined
 }
 
 function normalizeRevision(value: unknown): ArchitectureStatusRevisionV1 {
-  const item = object(value, "repository.revision");
+  const item = knownFields(value, "repository.revision", ["commit", "workingTree"]);
   const commit = string(item.commit, "repository.revision.commit", 256);
   if (!/^[A-Za-z0-9._:/@+-]+$/.test(commit)) fail("repository.revision.commit is unsafe");
   const workingTree = item.workingTree;
@@ -106,7 +104,11 @@ function freshness(generatedAt: string, revision: ArchitectureStatusRevisionV1, 
 function normalizeExecution(value: unknown): ArchitectureStatusExecutionV1 {
   const item = object(value, "execution");
   const state = item.state;
-  if (state === "not-run") return { state, reason: string(item.reason, "execution.reason") };
+  if (state === "not-run") {
+    knownFields(item, "execution", ["state", "reason"]);
+    return { state, reason: string(item.reason, "execution.reason") };
+  }
+  knownFields(item, "execution", state === "completed" ? ["state", "startedAt", "finishedAt", "exitCode"] : ["state", "startedAt", "finishedAt", "reason"]);
   const startedAt = timestamp(item.startedAt, "execution.startedAt");
   const finishedAt = timestamp(item.finishedAt, "execution.finishedAt");
   compareTime(startedAt, finishedAt, "execution times are contradictory");
@@ -120,7 +122,11 @@ function normalizeExecution(value: unknown): ArchitectureStatusExecutionV1 {
 
 function normalizeResult(value: unknown): ArchitectureStatusResultV1 {
   const item = object(value, "result");
-  if (item.state === "unknown") return { state: "unknown", reason: string(item.reason, "result.reason") };
+  if (item.state === "unknown") {
+    knownFields(item, "result", ["state", "reason"]);
+    return { state: "unknown", reason: string(item.reason, "result.reason") };
+  }
+  knownFields(item, "result", ["state", "code", "label", "summary", "counts", "findingIds"]);
   if (item.state !== "reported") fail("result.state is unsupported");
   const result: ArchitectureStatusResultV1 = { state: "reported", code: id(item.code, "result.code"), label: string(item.label, "result.label"), summary: string(item.summary, "result.summary") };
   const counts = normalizeCounts(item.counts, "result.counts");
@@ -132,7 +138,11 @@ function normalizeResult(value: unknown): ArchitectureStatusResultV1 {
 
 function normalizeEvidence(value: unknown): ArchitectureStatusEvidenceV1 {
   const item = object(value, "evidence");
-  if (item.state === "missing") return { state: "missing", reason: string(item.reason, "evidence.reason") };
+  if (item.state === "missing") {
+    knownFields(item, "evidence", ["state", "reason"]);
+    return { state: "missing", reason: string(item.reason, "evidence.reason") };
+  }
+  knownFields(item, "evidence", ["state", "source", "path", "sha256", "observedAt", "observedRevision"]);
   if (item.state !== "present") fail("evidence.state is unsupported");
   const source = item.source;
   if (source !== "current" && source !== "retained") fail("evidence.source is unsupported");
@@ -140,7 +150,7 @@ function normalizeEvidence(value: unknown): ArchitectureStatusEvidenceV1 {
 }
 
 function normalizeFreshness(value: unknown): ArchitectureStatusFreshnessV1 {
-  const item = object(value, "freshness");
+  const item = knownFields(value, "freshness", ["state", "reasons"]);
   if (item.state !== "current" && item.state !== "stale" && item.state !== "unknown") fail("freshness.state is unsupported");
   const reasons = orderedUnique(item.reasons, "freshness.reasons");
   if (reasons.some((reason, index) => index > 0 && reason.localeCompare(reasons[index - 1]) < 0)) fail("freshness.reasons must be lexically ordered");
@@ -151,19 +161,18 @@ function normalizeFreshness(value: unknown): ArchitectureStatusFreshnessV1 {
 
 /** Validates a complete wire snapshot and returns a normalized copy. */
 export function validateArchitectureStatusSnapshotV1(value: unknown): ArchitectureStatusSnapshotV1 {
-  rejectOutputFields(value);
-  const input = object(value, "snapshot");
+  const input = knownFields(value, "snapshot", ["kind", "version", "repository", "generatedAt", "freshnessPolicy", "checks"]);
   if (input.kind !== "archie-architecture-status" || input.version !== 1) fail("kind/version is unsupported");
-  const repository = object(input.repository, "repository");
+  const repository = knownFields(input.repository, "repository", ["name", "revision"]);
   const name = string(repository.name, "repository.name");
   const revision = normalizeRevision(repository.revision);
   const generatedAt = timestamp(input.generatedAt, "generatedAt");
-  const policy = object(input.freshnessPolicy, "freshnessPolicy");
+  const policy = knownFields(input.freshnessPolicy, "freshnessPolicy", ["maxAgeSeconds"]);
   if (!Number.isSafeInteger(policy.maxAgeSeconds) || (policy.maxAgeSeconds as number) < 0 || (policy.maxAgeSeconds as number) > 31_536_000) fail("freshnessPolicy.maxAgeSeconds is invalid");
   const maxAgeSeconds = policy.maxAgeSeconds as number;
   if (!Array.isArray(input.checks)) fail("checks must be an array");
   const checks = input.checks.map((entry, index) => {
-    const check = object(entry, `checks[${index}]`);
+    const check = knownFields(entry, `checks[${index}]`, ["id", "title", "authority", "resultMeaning", "limits", "execution", "result", "evidence", "freshness"]);
     const result: ArchitectureStatusCheckV1 = {
       id: id(check.id, `checks[${index}].id`), title: string(check.title, `checks[${index}].title`), authority: string(check.authority, `checks[${index}].authority`), resultMeaning: string(check.resultMeaning, `checks[${index}].resultMeaning`), limits: orderedUnique(check.limits, `checks[${index}].limits`), execution: normalizeExecution(check.execution), result: normalizeResult(check.result), evidence: normalizeEvidence(check.evidence), freshness: normalizeFreshness(check.freshness)
     };
@@ -188,17 +197,16 @@ export const canonicalizeArchitectureStatusSnapshotV1 = serializeArchitectureSta
 
 function reportObject(value: unknown): NormalizedJsonReportV1 {
   const input = typeof value === "string" ? (() => { try { return JSON.parse(value) as unknown; } catch { fail("normalized report is malformed JSON"); } })() : value;
-  rejectOutputFields(input);
-  const item = object(input, "normalized report");
+  const item = knownFields(input, "normalized report", ["kind", "version", "checkId", "observedAt", "observedRevision", "result", "evidence"]);
   if (item.kind !== "archie-architecture-status-report" || item.version !== 1) fail("normalized report kind/version is unsupported");
-  const result = object(item.result, "normalized report.result");
+  const result = knownFields(item.result, "normalized report.result", ["code", "label", "summary", "counts", "findingIds"]);
   const report: NormalizedJsonReportV1 = { kind: "archie-architecture-status-report", version: 1, checkId: id(item.checkId, "normalized report.checkId"), observedAt: timestamp(item.observedAt, "normalized report.observedAt"), observedRevision: string(item.observedRevision, "normalized report.observedRevision", 256), result: { code: id(result.code, "normalized report.result.code"), label: string(result.label, "normalized report.result.label"), summary: string(result.summary, "normalized report.result.summary") } };
   const counts = normalizeCounts(result.counts, "normalized report.result.counts");
   const findingIds = normalizeFindingIds(result.findingIds, "normalized report.result.findingIds");
   if (counts) report.result.counts = counts;
   if (findingIds) report.result.findingIds = findingIds;
   if (item.evidence !== undefined) {
-    const evidence = object(item.evidence, "normalized report.evidence");
+    const evidence = knownFields(item.evidence, "normalized report.evidence", ["path", "sha256", "observedAt", "observedRevision"]);
     report.evidence = { path: path(evidence.path, "normalized report.evidence.path"), sha256: digest(evidence.sha256, "normalized report.evidence.sha256"), ...(evidence.observedAt === undefined ? {} : { observedAt: timestamp(evidence.observedAt, "normalized report.evidence.observedAt") }), ...(evidence.observedRevision === undefined ? {} : { observedRevision: string(evidence.observedRevision, "normalized report.evidence.observedRevision", 256) }) };
   }
   return report;
@@ -212,20 +220,51 @@ export function adaptNormalizedJsonReportV1(report: unknown, checkId?: string): 
 }
 export const normalizeNormalizedJsonReportV1 = adaptNormalizedJsonReportV1;
 
+function normalizeExitMap(value: unknown, name: string): Record<string, ArchitectureStatusExitMappingV1> {
+  const map = object(value, name);
+  const normalized: Record<string, ArchitectureStatusExitMappingV1> = {};
+  for (const [code, mapping] of Object.entries(map)) {
+    const item = knownFields(mapping, `${name}.${code}`, ["code", "label", "summary", "counts", "findingIds"]);
+    const result = normalizeResult({ state: "reported", ...item });
+    if (result.state !== "reported") fail(`${name}.${code} must report a result`);
+    normalized[code] = { code: result.code, label: result.label, summary: result.summary, ...(result.counts ? { counts: result.counts } : {}), ...(result.findingIds ? { findingIds: result.findingIds } : {}) };
+  }
+  return normalized;
+}
+
 /** Maps an explicit target-owned exit code; it never interprets stdout or stderr. */
 export function adaptDeclaredExitMapV1(exitCode: number, exitMap: Record<string, ArchitectureStatusExitMappingV1>): ArchitectureStatusResultV1 {
   if (!Number.isInteger(exitCode)) fail("exit code is invalid");
-  const mapped = exitMap[String(exitCode)];
+  const normalizedMap = normalizeExitMap(exitMap, "exitMap");
+  const mapped = normalizedMap[String(exitCode)];
   if (!mapped) return { state: "unknown", reason: "exit-unmapped" };
-  const normalized = normalizeResult({ state: "reported", ...mapped });
-  return normalized;
+  return normalizeResult({ state: "reported", ...mapped });
 }
 export const normalizeDeclaredExitMapV1 = adaptDeclaredExitMapV1;
 
 function safeEvidencePath(root: string, relative: string): string {
-  const absolute = resolve(root, relative);
-  if (absolute !== resolve(root) && !absolute.startsWith(`${resolve(root)}${sep}`)) fail("evidence path escapes repository root");
-  return absolute;
+  const absoluteRoot = resolve(root);
+  const absolute = resolve(absoluteRoot, relative);
+  if (absolute !== absoluteRoot && !absolute.startsWith(`${absoluteRoot}${sep}`)) fail("evidence path escapes repository root");
+  let realRoot: string;
+  try { realRoot = realpathSync(absoluteRoot); } catch { fail("repository root cannot be resolved"); }
+  let candidate = absolute;
+  while (true) {
+    let realCandidate: string;
+    try { realCandidate = realpathSync(candidate); } catch {
+      // A missing final artifact is a valid missing-evidence state, but every
+      // existing ancestor still needs realpath containment checked.
+      let isSymbolicLink = false;
+      try { isSymbolicLink = lstatSync(candidate).isSymbolicLink(); } catch { /* continue with the nearest existing ancestor */ }
+      if (isSymbolicLink) fail("evidence path cannot be resolved safely");
+      const parent = dirname(candidate);
+      if (parent === candidate) return absolute;
+      candidate = parent;
+      continue;
+    }
+    if (realCandidate !== realRoot && !realCandidate.startsWith(`${realRoot}${sep}`)) fail("evidence path escapes repository root");
+    return candidate === absolute ? realCandidate : absolute;
+  }
 }
 function hashFile(root: string, relative: string): string | undefined {
   const file = safeEvidencePath(root, relative);
@@ -241,7 +280,28 @@ function executionFromInput(input: ArchitectureStatusCheckInputV1): Architecture
 function missingEvidence(reason: string): ArchitectureStatusEvidenceV1 { return { state: "missing", reason }; }
 
 function buildCheck(input: ArchitectureStatusCheckInputV1, generatedAt: string, revision: ArchitectureStatusRevisionV1, maxAgeSeconds: number, root: string, prior?: ArchitectureStatusCheckV1): ArchitectureStatusCheckV1 {
+  knownFields(input, "check input", ["id", "command", "authority", "evidencePath", "resultMeaning", "title", "limits", "adapter", "exitMap", "reportPath", "run", "execution", "report"]);
+  string(input.command, "check.command");
   path(input.evidencePath, "evidencePath");
+  if (input.reportPath !== undefined) path(input.reportPath, "reportPath");
+  if (input.run !== undefined) normalizeExecution(input.run);
+  if (input.execution !== undefined) normalizeExecution(input.execution);
+  if (input.report !== undefined) reportObject(input.report);
+  if (input.exitMap !== undefined) normalizeExitMap(input.exitMap, "exitMap");
+  if (input.adapter && typeof input.adapter === "object") {
+    const adapter = knownFields(input.adapter, "adapter", ["kind", "reportPath", "exitMap"]);
+    if (adapter.kind === "normalized-json-v1") {
+      knownFields(adapter, "adapter", ["kind", "reportPath"]);
+      if (adapter.reportPath !== undefined) path(adapter.reportPath, "adapter.reportPath");
+    } else if (adapter.kind === "declared-exit-map-v1") {
+      knownFields(adapter, "adapter", ["kind", "exitMap"]);
+      if (adapter.exitMap !== undefined) normalizeExitMap(adapter.exitMap, "adapter.exitMap");
+    } else {
+      fail("adapter is unsupported");
+    }
+  } else if (input.adapter !== undefined && input.adapter !== "normalized-json-v1" && input.adapter !== "declared-exit-map-v1") {
+    fail("adapter is unsupported");
+  }
   const execution = executionFromInput(input);
   const adapter = typeof input.adapter === "object" ? input.adapter.kind : (input.adapter ?? (input.exitMap ? "declared-exit-map-v1" : "declared-exit-map-v1"));
   let result: ArchitectureStatusResultV1 = { state: "unknown", reason: "no-report" };
@@ -284,8 +344,9 @@ function buildCheck(input: ArchitectureStatusCheckInputV1, generatedAt: string, 
 
 /** Builds and atomically publishes one latest snapshot. */
 export function writeArchitectureStatusSnapshotV1(options: ArchitectureStatusWriterOptionsV1): ArchitectureStatusSnapshotV1 {
+  knownFields(options, "writer options", ["outputPath", "repositoryRoot", "repository", "generatedAt", "checks", "previousSnapshotPath", "maxAgeSeconds"]);
   const generatedAt = timestamp(options.generatedAt, "generatedAt");
-  const repository = object(options.repository, "repository");
+  const repository = knownFields(options.repository, "repository", ["name", "revision"]);
   const revision = normalizeRevision(repository.revision);
   const name = string(repository.name, "repository.name");
   const maxAgeSeconds = options.maxAgeSeconds ?? 86_400;
