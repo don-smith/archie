@@ -6,8 +6,16 @@
   "bin": {
     "architecture-conformance": "./dist/cli.js"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/public.d.ts",
+      "import": "./dist/public.js"
+    },
+    "./schemas/*": "./schemas/*"
+  },
   "files": [
     "dist",
+    "schemas",
     "skills",
     "README.md",
     "ARCHITECTURE_CONFORMANCE.md",

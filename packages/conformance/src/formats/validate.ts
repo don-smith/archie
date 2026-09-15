@@ -7,6 +7,7 @@ function string(value: unknown, label: string): string { if (typeof value !== "s
 function strings(value: unknown, label: string): string[] { return array(value, label).map((item, index) => string(item, `${label}[${index}]`)); }
 function oneOf<T extends string>(value: unknown, choices: readonly T[], label: string): T { const result = string(value, label) as T; if (!choices.includes(result)) fail(`${label} must be one of ${choices.join(", ")}`); return result; }
 function version(value: Record<string, unknown>, expected: string): void { if (value.version !== expected) fail(`unsupported document version: ${String(value.version)}`); }
+function exactKeys(raw: Record<string, unknown>, allowed: readonly string[], label: string): void { for (const key of Object.keys(raw)) if (!allowed.includes(key)) fail(`${label} has unknown field ${key}`); }
 
 export function validateRealizationMap(value: unknown): RealizationMapV1 {
   const raw = record(value, "realization map"); version(raw, "realization-map/v1");
@@ -47,19 +48,73 @@ export function validateArchitectureContract(value: unknown): ArchitectureContra
   return { version: "architecture-contract/v1", rules, exceptions };
 }
 
+function validatePosition(value: unknown, label: string): { line: number; column: number } {
+  const raw = record(value, label); exactKeys(raw, ["line", "column"], label);
+  if (!Number.isInteger(raw.line) || (raw.line as number) < 1) fail(`${label}.line must be a positive integer`);
+  if (!Number.isInteger(raw.column) || (raw.column as number) < 0) fail(`${label}.column must be a non-negative integer`);
+  return { line: raw.line as number, column: raw.column as number };
+}
+
+function validateSpan(value: unknown, label: string): { file: string; start: { line: number; column: number }; end: { line: number; column: number } } {
+  const raw = record(value, label); exactKeys(raw, ["file", "start", "end"], label);
+  return { file: string(raw.file, `${label}.file`), start: validatePosition(raw.start, `${label}.start`), end: validatePosition(raw.end, `${label}.end`) };
+}
+
+function validateEdge(value: unknown, label: string): NormalizedGraphV1["edges"][number] {
+  const raw = record(value, label); exactKeys(raw, ["id", "source", "target", "kind", "specifier", "status", "span"], label);
+  return {
+    id: string(raw.id, `${label}.id`), source: string(raw.source, `${label}.source`),
+    ...(raw.target === undefined ? {} : { target: string(raw.target, `${label}.target`) }),
+    kind: oneOf(raw.kind, ["runtime", "type"] as const, `${label}.kind`), specifier: typeof raw.specifier === "string" ? raw.specifier : fail(`${label}.specifier must be a string`),
+    status: oneOf(raw.status, ["resolved", "unresolved"] as const, `${label}.status`), span: validateSpan(raw.span, `${label}.span`)
+  };
+}
+
+function validateGap(value: unknown, label: string): NormalizedGraphV1["gaps"][number] {
+  const raw = record(value, label); exactKeys(raw, ["kind", "message", "file", "span"], label);
+  return { kind: string(raw.kind, `${label}.kind`), message: string(raw.message, `${label}.message`), ...(raw.file === undefined ? {} : { file: string(raw.file, `${label}.file`) }), ...(raw.span === undefined ? {} : { span: validateSpan(raw.span, `${label}.span`) }) };
+}
+
+function validateScope(value: unknown, label: string): NonNullable<NormalizedGraphV1["scope"]> {
+  const raw = record(value, label); exactKeys(raw, ["rootConfigs", "include", "exclusions"], label);
+  return {
+    rootConfigs: strings(raw.rootConfigs, `${label}.rootConfigs`), include: strings(raw.include, `${label}.include`),
+    exclusions: array(raw.exclusions, `${label}.exclusions`).map((item, index) => {
+      const exclusion = record(item, `${label}.exclusions[${index}]`); exactKeys(exclusion, ["path", "reason"], `${label}.exclusions[${index}]`);
+      return { path: string(exclusion.path, `${label}.exclusions[${index}].path`), reason: string(exclusion.reason, `${label}.exclusions[${index}].reason`) };
+    })
+  };
+}
+
 export function validateNormalizedGraph(value: unknown): NormalizedGraphV1 {
-  const raw = record(value, "normalized graph"); version(raw, "normalized-graph/v1");
-  for (const key of ["nodes", "edges", "exclusions", "gaps"]) array(raw[key], key);
-  const provenance = record(raw.provenance, "provenance");
-  if (provenance.adapter !== "typescript-program-v1") fail("unsupported graph adapter");
-  return value as NormalizedGraphV1;
+  const raw = record(value, "normalized graph"); exactKeys(raw, ["version", "scope", "nodes", "edges", "exclusions", "gaps", "provenance"], "normalized graph"); version(raw, "normalized-graph/v1");
+  const nodes = array(raw.nodes, "graph.nodes").map((item, index) => {
+    const node = record(item, `graph.nodes[${index}]`); exactKeys(node, ["id", "kind", "module", "file"], `graph.nodes[${index}]`);
+    return { id: string(node.id, `graph.nodes[${index}].id`), kind: oneOf(node.kind, ["source-module", "external-module"] as const, `graph.nodes[${index}].kind`), module: string(node.module, `graph.nodes[${index}].module`), ...(node.file === undefined ? {} : { file: string(node.file, `graph.nodes[${index}].file`) }) };
+  });
+  const edges = array(raw.edges, "graph.edges").map((item, index) => validateEdge(item, `graph.edges[${index}]`));
+  const exclusions = array(raw.exclusions, "graph.exclusions").map((item, index) => {
+    const exclusion = record(item, `graph.exclusions[${index}]`); exactKeys(exclusion, ["path", "reason"], `graph.exclusions[${index}]`);
+    return { path: string(exclusion.path, `graph.exclusions[${index}].path`), reason: string(exclusion.reason, `graph.exclusions[${index}].reason`) };
+  });
+  const gaps = array(raw.gaps, "graph.gaps").map((item, index) => validateGap(item, `graph.gaps[${index}]`));
+  const provenanceRaw = record(raw.provenance, "graph.provenance"); exactKeys(provenanceRaw, ["adapter", "compilerVersion", "rootConfigs", "sourceFiles", "resolutionInputs", "compilerOptions"], "graph.provenance");
+  if (provenanceRaw.adapter !== "typescript-program-v1") fail("unsupported graph adapter");
+  const provenance = { adapter: "typescript-program-v1" as const, compilerVersion: string(provenanceRaw.compilerVersion, "graph.provenance.compilerVersion"), rootConfigs: strings(provenanceRaw.rootConfigs, "graph.provenance.rootConfigs"), sourceFiles: strings(provenanceRaw.sourceFiles, "graph.provenance.sourceFiles"), resolutionInputs: strings(provenanceRaw.resolutionInputs, "graph.provenance.resolutionInputs"), compilerOptions: record(provenanceRaw.compilerOptions, "graph.provenance.compilerOptions") as NormalizedGraphV1["provenance"]["compilerOptions"] };
+  return { version: "normalized-graph/v1", ...(raw.scope === undefined ? {} : { scope: validateScope(raw.scope, "graph.scope") }), nodes, edges, exclusions, gaps, provenance };
 }
 
 export function validateConformanceReport(value: unknown): ConformanceReportV1 {
-  const raw = record(value, "conformance report"); version(raw, "conformance-report/v1");
-  array(raw.results, "report.results"); array(raw.gaps, "report.gaps");
-  validateNormalizedGraph(raw.graph);
-  return value as ConformanceReportV1;
+  const raw = record(value, "conformance report"); exactKeys(raw, ["version", "digests", "results", "gaps", "graph"], "conformance report"); version(raw, "conformance-report/v1");
+  const digests = record(raw.digests, "report.digests"); exactKeys(digests, ["realizationMap", "contract", "graph", "provenance", "output"], "report.digests");
+  for (const name of ["realizationMap", "contract", "graph", "provenance", "output"]) string(digests[name], `report.digests.${name}`);
+  const results = array(raw.results, "report.results").map((item, index) => {
+    const result = record(item, `report.results[${index}]`); exactKeys(result, ["fingerprint", "status", "category", "ruleId", "message", "sourceArchitectureId", "targetArchitectureId", "edge"], `report.results[${index}]`);
+    return { fingerprint: string(result.fingerprint, `report.results[${index}].fingerprint`), status: oneOf(result.status, ["active", "waived", "proposed", "new", "unchanged", "reintroduced", "fixed"] as const, `report.results[${index}].status`), category: oneOf(result.category, ["implementation", "documentation", "coverage"] as const, `report.results[${index}].category`), ...(result.ruleId === undefined ? {} : { ruleId: string(result.ruleId, `report.results[${index}].ruleId`) }), message: string(result.message, `report.results[${index}].message`), ...(result.sourceArchitectureId === undefined ? {} : { sourceArchitectureId: string(result.sourceArchitectureId, `report.results[${index}].sourceArchitectureId`) }), ...(result.targetArchitectureId === undefined ? {} : { targetArchitectureId: string(result.targetArchitectureId, `report.results[${index}].targetArchitectureId`) }), ...(result.edge === undefined ? {} : { edge: validateEdge(result.edge, `report.results[${index}].edge`) }) };
+  });
+  const gaps = array(raw.gaps, "report.gaps").map((item, index) => validateGap(item, `report.gaps[${index}]`));
+  const graph = validateNormalizedGraph(raw.graph);
+  return { version: "conformance-report/v1", digests: Object.fromEntries(Object.entries(digests).map(([name, digest]) => [name, string(digest, `report.digests.${name}`)])), results, gaps, graph };
 }
 
 export function validateBaseline(value: unknown): BaselineV1 {

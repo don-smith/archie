@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "conformance-report/v1",
+  "title": "Architecture Conformance report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "digests", "results", "gaps", "graph"],
+  "properties": {
+    "version": { "const": "conformance-report/v1" },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["realizationMap", "contract", "graph", "provenance", "output"],
+      "properties": {
+        "realizationMap": { "type": "string", "minLength": 1 }, "contract": { "type": "string", "minLength": 1 },
+        "graph": { "type": "string", "minLength": 1 }, "provenance": { "type": "string", "minLength": 1 }, "output": { "type": "string", "minLength": 1 }
+      }
+    },
+    "results": { "type": "array", "items": { "$ref": "#/$defs/result" } },
+    "gaps": { "type": "array", "items": { "$ref": "#/$defs/gap" } },
+    "graph": { "$ref": "#/$defs/graph" }
+  },
+  "$defs": {
+    "span": {
+      "type": "object", "additionalProperties": false,
+      "required": ["file", "start", "end"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "start": { "$ref": "#/$defs/position" },
+        "end": { "$ref": "#/$defs/position" }
+      }
+    },
+    "position": {
+      "type": "object", "additionalProperties": false,
+      "required": ["line", "column"],
+      "properties": { "line": { "type": "integer", "minimum": 1 }, "column": { "type": "integer", "minimum": 0 } }
+    },
+    "edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "source", "kind", "specifier", "status", "span"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "source": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 }, "kind": { "enum": ["runtime", "type"] },
+        "specifier": { "type": "string" }, "status": { "enum": ["resolved", "unresolved"] }, "span": { "$ref": "#/$defs/span" }
+      }
+    },
+    "gap": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "message"],
+      "properties": { "kind": { "type": "string", "minLength": 1 }, "message": { "type": "string", "minLength": 1 }, "file": { "type": "string" }, "span": { "$ref": "#/$defs/span" } }
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fingerprint", "status", "category", "message"],
+      "properties": {
+        "fingerprint": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["active", "waived", "proposed", "new", "unchanged", "reintroduced", "fixed"] },
+        "category": { "enum": ["implementation", "documentation", "coverage"] },
+        "ruleId": { "type": "string", "minLength": 1 }, "message": { "type": "string", "minLength": 1 },
+        "sourceArchitectureId": { "type": "string", "minLength": 1 }, "targetArchitectureId": { "type": "string", "minLength": 1 }, "edge": { "$ref": "#/$defs/edge" }
+      }
+    },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "module"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "kind": { "enum": ["source-module", "external-module"] },
+        "module": { "type": "string", "minLength": 1 }, "file": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rootConfigs", "include", "exclusions"],
+      "properties": {
+        "rootConfigs": { "type": "array", "items": { "type": "string" } },
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["path", "reason"], "properties": { "path": { "type": "string" }, "reason": { "type": "string" } } } }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["adapter", "compilerVersion", "rootConfigs", "sourceFiles", "resolutionInputs", "compilerOptions"],
+      "properties": {
+        "adapter": { "const": "typescript-program-v1" }, "compilerVersion": { "type": "string" },
+        "rootConfigs": { "type": "array", "items": { "type": "string" } }, "sourceFiles": { "type": "array", "items": { "type": "string" } },
+        "resolutionInputs": { "type": "array", "items": { "type": "string" } }, "compilerOptions": { "type": "object" }
+      }
+    },
+    "graph": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "nodes", "edges", "exclusions", "gaps", "provenance"],
+      "properties": {
+        "version": { "const": "normalized-graph/v1" }, "scope": { "$ref": "#/$defs/scope" },
+        "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } }, "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+        "exclusions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["path", "reason"], "properties": { "path": { "type": "string" }, "reason": { "type": "string" } } } },
+        "gaps": { "type": "array", "items": { "$ref": "#/$defs/gap" } }, "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    }
+  }
+}

@@ -242,6 +242,15 @@ architecture-conformance check \
 
 Later reports classify results as new, unchanged, waived, reintroduced, or fixed. `check` never writes a baseline. Do not overwrite a baseline casually. Its ledger is the history needed to identify a reintroduced result.
 
+## Public contracts
+
+The package publishes closed, versioned JSON schemas for downstream readers:
+
+- `schemas/conformance-report-v1.schema.json` describes report identity, digests, results, gaps, and observed graph evidence.
+- `schemas/onboarding-state-v1.schema.json` describes operational resume state and retained evidence digests.
+
+Consumers can import the package root for `readConformanceReport`, `readOnboardingState`, and the two version constants. Checker, rendering, storage, and analyzer modules remain private implementation details.
+
 ## Exit codes
 
 | Code | Meaning |

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "onboarding-state/v1",
+  "title": "Architecture Conformance onboarding state v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "scope", "skillLocation", "paths", "checkpoint", "evidence"],
+  "properties": {
+    "version": { "const": "onboarding-state/v1" },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rootConfigs", "include", "exclusions"],
+      "properties": {
+        "rootConfigs": { "type": "array", "items": { "type": "string" } },
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["path", "reason"], "properties": { "path": { "type": "string" }, "reason": { "type": "string" } } } }
+      }
+    },
+    "skillLocation": { "type": "string", "minLength": 1 },
+    "paths": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state", "graph", "summary", "map", "contract", "report", "baseline"],
+      "properties": {
+        "state": { "type": "string", "minLength": 1 }, "graph": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 }, "map": { "type": "string", "minLength": 1 },
+        "contract": { "type": "string", "minLength": 1 }, "report": { "type": "string", "minLength": 1 }, "baseline": { "type": "string", "minLength": 1 }
+      }
+    },
+    "checkpoint": { "enum": ["scope-selected", "evidence-generated", "classification-drafted", "proposed-contract-checked", "active-contract-checked", "baseline-created"] },
+    "evidence": { "type": "object", "additionalProperties": false, "patternProperties": { "^(graph|summary|map|contract|report|baseline)$": { "type": "string", "minLength": 1 } } }
+  }
+}

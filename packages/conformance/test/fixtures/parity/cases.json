@@ -1,0 +1,21 @@
+{
+  "version": "conformance-parity-fixtures/v1",
+  "sourceRevision": "361b4259a405113deaf777a38dea12f229b5b461",
+  "cases": [
+    "valid",
+    "violation",
+    "strict-gap",
+    "dependency",
+    "cycle",
+    "exception",
+    "baseline",
+    "replay",
+    "reconciliation",
+    "onboarding",
+    "malformed",
+    "stale-state"
+  ],
+  "allowedUnstableFields": [
+    "stderr.absoluteFixtureRoot"
+  ]
+}
