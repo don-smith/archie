@@ -1,0 +1,10 @@
+{
+  "version": "assessment-evidence/v1",
+  "assessmentId": "assessment-001",
+  "status": "ready",
+  "completeness": {"status":"complete","scope":"complete","inventory":"complete","model":"complete","requiredArtifacts":["architecture-model.json","assessment.md"],"missingArtifacts":[]},
+  "evidence": {"availability":"available","sources":[{"id":"src-code","kind":"code","locator":"src/index.ts:1","digest":"sha256-code"}],"unknowns":[],"unavailable":[]},
+  "correction": {"status":"completed","summary":"The developer confirmed the recovered facts.","unresolved":[]},
+  "triage": {"status":"completed","recommendations":[{"id":"rec-boundary","outcome":"deferred","reason":"Keep the decision with the developer.","dependencies":["developer review"],"candidateChecks":["run conformance"]}],"unresolved":[]},
+  "authority": {"facts":"assessment-evidence","recommendations":"developer","approval":"developer","authorization":"none"}
+}

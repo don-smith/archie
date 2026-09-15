@@ -1,0 +1,1 @@
+{"version":"conformance-state-contract/v1","stateVersion":"onboarding-state/v1","identity":"state-006","checkpoint":"scope-selected","paths":{"state":"state","graph":"graph","summary":"summary","map":"map","contract":"contract","report":"report","baseline":"baseline"},"evidence":{},"freshness":{"status":"unavailable","inputs":[],"reason":"The analyzer was not installed."}}

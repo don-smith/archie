@@ -1,0 +1,3 @@
+{
+  "version":"conformance-state-contract/v1","stateVersion":"onboarding-state/v1","identity":"state-004","checkpoint":"baseline-created","paths":{"state":".architecture-conformance/onboarding.json","graph":"evidence/graph.json","summary":"evidence/summary.md","map":"realization-map.json","contract":"architecture-contract.json","report":"evidence/report.json","baseline":"baseline.json"},"evidence":{"graph":"sha256-graph","summary":"sha256-summary","map":"sha256-map","contract":"sha256-contract","report":"sha256-report","baseline":"sha256-baseline"},"freshness":{"status":"fresh","inputs":[{"kind":"source","path":"src/index.ts","digest":"sha256-source"}],"reason":"All retained evidence matches its inputs."}
+}

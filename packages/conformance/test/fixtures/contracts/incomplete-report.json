@@ -1,0 +1,5 @@
+{
+  "version":"conformance-report-contract/v1",
+  "report":{"version":"conformance-report/v1","identity":{"id":"report-003","producer":"@archie/conformance","outputDigest":"sha256-report-3"},"result":{"code":2,"meaning":"incomplete-evidence","status":"incomplete"},"evidence":{"realizationMap":"sha256-map","contract":"sha256-contract","graph":"sha256-graph","provenance":"sha256-provenance"},"freshness":{"status":"unknown","inputs":[{"kind":"source","path":"src/index.ts","digest":"sha256-source"}],"reason":"The analyzer reported an unsupported source."}},
+  "state":{"version":"onboarding-state/v1","identity":"state-003","checkpoint":"evidence-generated","paths":{"state":".architecture-conformance/onboarding.json","graph":"evidence/graph.json","summary":"evidence/summary.md","map":"realization-map.json","contract":"architecture-contract.json","report":"evidence/report.json","baseline":"baseline.json"},"evidence":{"graph":"sha256-graph","summary":"sha256-summary"}}
+}

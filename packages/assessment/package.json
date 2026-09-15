@@ -3,9 +3,15 @@
   "version": "0.1.0-private.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./public.mjs",
+    "./schemas/*": "./schemas/*"
+  },
   "files": [
     "LICENSE",
     "README.md",
+    "public.mjs",
+    "schemas",
     "skills"
   ],
   "scripts": {

@@ -249,7 +249,11 @@ The package publishes closed, versioned JSON schemas for downstream readers:
 - `schemas/conformance-report-v1.schema.json` describes report identity, digests, results, gaps, and observed graph evidence.
 - `schemas/onboarding-state-v1.schema.json` describes operational resume state and retained evidence digests.
 
-Consumers can import the package root for `readConformanceReport`, `readOnboardingState`, and the two version constants. Checker, rendering, storage, and analyzer modules remain private implementation details.
+Consumers can import the package root for `readConformanceReport`, `readOnboardingState`, and the two frozen producer version constants. Checker, rendering, storage, and analyzer modules remain private implementation details.
+
+The later-consumer handoff uses two closed envelopes that do not change parity-frozen report bytes: `readConformanceReportContract` reads `conformance-report-contract/v1`, and `readConformanceStateContract` reads `conformance-state-contract/v1`. These contracts carry result codes and meanings, report identity, evidence digests, freshness inputs, and the nested `onboarding-state/v1` state version. Their schemas are exported under `@archie/conformance/schemas/`.
+
+Result codes are fixed. `0` means pass, `1` means blocking violation, `2` means incomplete evidence, and `3` means invalid input. Freshness is explicit as `fresh`, `stale`, `unavailable`, or `unknown`; consumers must not turn an unavailable or unknown input into a pass.
 
 ## Exit codes
 

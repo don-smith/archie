@@ -1,0 +1,8 @@
+[
+  {"name":"valid ready evidence","input":"valid-ready.json","accepted":true,"status":"ready","availability":"available"},
+  {"name":"valid unavailable evidence","input":"valid-unavailable.json","accepted":true,"status":"in-progress","availability":"unavailable"},
+  {"name":"valid unknown evidence","input":"valid-unknown.json","accepted":true,"status":"blocked","availability":"unknown"},
+  {"name":"malformed evidence","input":"invalid-malformed.json","accepted":false,"error":"unknown field"},
+  {"name":"unsupported evidence version","input":"invalid-version.json","accepted":false,"error":"unsupported document version"},
+  {"name":"incomplete evidence","input":"invalid-incomplete.json","accepted":false,"error":"completeness"}
+]

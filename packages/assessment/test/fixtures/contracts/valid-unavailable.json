@@ -1,0 +1,10 @@
+{
+  "version": "assessment-evidence/v1",
+  "assessmentId": "assessment-002",
+  "status": "in-progress",
+  "completeness": {"status":"partial","scope":"complete","inventory":"partial","model":"partial","requiredArtifacts":["architecture-model.json","packet.html"],"missingArtifacts":["packet.html"]},
+  "evidence": {"availability":"unavailable","sources":[{"id":"src-code","kind":"code","locator":"src/index.ts:1","digest":"sha256-code"}],"unknowns":[],"unavailable":[{"id":"packet","reason":"html-design is not installed"}]},
+  "correction": {"status":"pending","summary":"","unresolved":["packet unavailable"]},
+  "triage": {"status":"pending","recommendations":[],"unresolved":["review packet"]},
+  "authority": {"facts":"assessment-evidence","recommendations":"developer","approval":"developer","authorization":"none"}
+}

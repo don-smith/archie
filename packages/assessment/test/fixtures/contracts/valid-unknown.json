@@ -1,0 +1,10 @@
+{
+  "version": "assessment-evidence/v1",
+  "assessmentId": "assessment-003",
+  "status": "blocked",
+  "completeness": {"status":"partial","scope":"complete","inventory":"complete","model":"partial","requiredArtifacts":["architecture-model.json"],"missingArtifacts":[]},
+  "evidence": {"availability":"unknown","sources":[{"id":"src-history","kind":"history","locator":"git:HEAD","digest":"sha256-history"}],"unknowns":["runtime deployment owner"],"unavailable":[]},
+  "correction": {"status":"pending","summary":"","unresolved":["deployment owner"]},
+  "triage": {"status":"pending","recommendations":[],"unresolved":["developer decision"]},
+  "authority": {"facts":"assessment-evidence","recommendations":"developer","approval":"developer","authorization":"none"}
+}

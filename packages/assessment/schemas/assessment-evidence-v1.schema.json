@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"assessment-evidence/v1",
+  "title":"Architecture Assessment evidence contract v1",
+  "type":"object","additionalProperties":false,
+  "required":["version","assessmentId","status","completeness","evidence","correction","triage","authority"],
+  "properties":{
+    "version":{"const":"assessment-evidence/v1"},"assessmentId":{"type":"string","minLength":1},"status":{"enum":["in-progress","blocked","ready"]},
+    "completeness":{"$ref":"#/$defs/completeness"},"evidence":{"$ref":"#/$defs/evidence"},"correction":{"$ref":"#/$defs/correction"},"triage":{"$ref":"#/$defs/triage"},"authority":{"$ref":"#/$defs/authority"}
+  },
+  "$defs":{
+    "nonEmpty":{"type":"string","minLength":1},"strings":{"type":"array","items":{"type":"string"}},
+    "completeness":{"type":"object","additionalProperties":false,"required":["status","scope","inventory","model","requiredArtifacts","missingArtifacts"],"properties":{"status":{"enum":["complete","partial"]},"scope":{"enum":["complete","partial"]},"inventory":{"enum":["complete","partial"]},"model":{"enum":["complete","partial"]},"requiredArtifacts":{"type":"array","items":{"$ref":"#/$defs/nonEmpty"}},"missingArtifacts":{"type":"array","items":{"$ref":"#/$defs/nonEmpty"}}}},
+    "source":{"type":"object","additionalProperties":false,"required":["id","kind","locator","digest"],"properties":{"id":{"$ref":"#/$defs/nonEmpty"},"kind":{"enum":["code","configuration","intent","decision","test","history","external","developer"]},"locator":{"$ref":"#/$defs/nonEmpty"},"digest":{"$ref":"#/$defs/nonEmpty"}}},
+    "unavailable":{"type":"object","additionalProperties":false,"required":["id","reason"],"properties":{"id":{"$ref":"#/$defs/nonEmpty"},"reason":{"$ref":"#/$defs/nonEmpty"}}},
+    "evidence":{"type":"object","additionalProperties":false,"required":["availability","sources","unknowns","unavailable"],"properties":{"availability":{"enum":["available","unavailable","unknown"]},"sources":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/source"}},"unknowns":{"$ref":"#/$defs/strings"},"unavailable":{"type":"array","items":{"$ref":"#/$defs/unavailable"}}}},
+    "correction":{"type":"object","additionalProperties":false,"required":["status","summary","unresolved"],"properties":{"status":{"enum":["pending","completed"]},"summary":{"type":"string"},"unresolved":{"$ref":"#/$defs/strings"}}},
+    "recommendation":{"type":"object","additionalProperties":false,"required":["id","outcome","reason","dependencies","candidateChecks"],"properties":{"id":{"$ref":"#/$defs/nonEmpty"},"outcome":{"enum":["pending","accepted","rejected","deferred"]},"reason":{"type":"string"},"dependencies":{"$ref":"#/$defs/strings"},"candidateChecks":{"$ref":"#/$defs/strings"}}},
+    "triage":{"type":"object","additionalProperties":false,"required":["status","recommendations","unresolved"],"properties":{"status":{"enum":["pending","completed"]},"recommendations":{"type":"array","items":{"$ref":"#/$defs/recommendation"}},"unresolved":{"$ref":"#/$defs/strings"}}},
+    "authority":{"type":"object","additionalProperties":false,"required":["facts","recommendations","approval","authorization"],"properties":{"facts":{"const":"assessment-evidence"},"recommendations":{"const":"developer"},"approval":{"const":"developer"},"authorization":{"const":"none"}}}
+  }
+}

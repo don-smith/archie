@@ -1,0 +1,12 @@
+[
+  {"name":"valid passing report","kind":"report","input":"valid-report.json","accepted":true,"code":0},
+  {"name":"valid violation report","kind":"report","input":"violation-report.json","accepted":true,"code":1},
+  {"name":"valid incomplete report","kind":"report","input":"incomplete-report.json","accepted":true,"code":2},
+  {"name":"valid invalid-input report","kind":"report","input":"invalid-input-report.json","accepted":true,"code":3},
+  {"name":"valid stale state","kind":"state","input":"stale-state.json","accepted":true,"freshness":"stale"},
+  {"name":"valid unavailable state","kind":"state","input":"unavailable-state.json","accepted":true,"freshness":"unavailable"},
+  {"name":"valid unknown state","kind":"state","input":"unknown-state.json","accepted":true,"freshness":"unknown"},
+  {"name":"malformed report","kind":"report","input":"invalid-report.json","accepted":false,"error":"unknown field"},
+  {"name":"unsupported state version","kind":"state","input":"invalid-state-version.json","accepted":false,"error":"unsupported document version"},
+  {"name":"incomplete state","kind":"state","input":"invalid-state.json","accepted":false,"error":"evidence"}
+]

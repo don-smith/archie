@@ -1,0 +1,1 @@
+{"version":"conformance-state-contract/v1","stateVersion":"onboarding-state/v1","identity":"state-bad","checkpoint":"baseline-created","paths":{"state":"state","graph":"graph","summary":"summary","map":"map","contract":"contract","report":"report","baseline":"baseline"},"evidence":{"graph":"sha256-graph"},"freshness":{"status":"fresh","inputs":[],"reason":"bad"}}
