@@ -1,0 +1,11 @@
+{
+  "ownership": {
+    "product": "architecture-docs",
+    "artifact": "handoff",
+    "generated": true
+  },
+  "version": 1,
+  "digests": {
+    "handoff": "5c4b43491addec5f310879aae8bfd377b98fc0ce2d43400b83bdebf57388f8ef"
+  }
+}
