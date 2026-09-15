@@ -336,7 +336,8 @@ function buildCheck(input: ArchitectureStatusCheckInputV1, generatedAt: string, 
     } else fail("adapter is unsupported");
   }
   if (evidence.state === "missing" && prior?.evidence.state === "present" && path(prior.evidence.path, "retained evidence path") === input.evidencePath) {
-    evidence = { ...prior.evidence, source: "retained" };
+    const currentDigest = hashFile(root, input.evidencePath);
+    if (currentDigest === prior.evidence.sha256) evidence = { ...prior.evidence, source: "retained" };
   }
   const freshnessValue = freshness(generatedAt, revision, evidence, maxAgeSeconds);
   return { id: id(input.id, "check.id"), title: string(input.title ?? input.id, "check.title"), authority: string(input.authority, "check.authority"), resultMeaning: string(input.resultMeaning, "check.resultMeaning"), limits: orderedUnique(input.limits ?? [], "check.limits"), execution, result, evidence, freshness: freshnessValue };

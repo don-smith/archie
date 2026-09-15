@@ -68,6 +68,15 @@ test("retention and fatal input errors preserve the previous latest snapshot", (
   assert.notEqual(retainedBytes, before);
 });
 
+test("mutated evidence is not retained after a failed attempt", () => {
+  const root = mkdtempSync(join(tmpdir(), "architecture-status-"));
+  evidence(root, "original evidence");
+  writeArchitectureStatusSnapshotV1(options(root, [baseCheck()]));
+  evidence(root, "mutated evidence");
+  const snapshot = writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ run: { state: "failed", startedAt: "2026-01-01T00:00:00.000Z", finishedAt: "2026-01-01T00:00:01.000Z", reason: "timeout" } })]));
+  assert.equal(snapshot.checks[0].evidence.state, "missing");
+});
+
 test("unsafe evidence paths, URI schemes, symlink escapes, and contradictory times are rejected", () => {
   const root = mkdtempSync(join(tmpdir(), "architecture-status-"));
   assert.throws(() => writeArchitectureStatusSnapshotV1(options(root, [baseCheck({ evidencePath: "../outside.json" })])), /unsafe/);
