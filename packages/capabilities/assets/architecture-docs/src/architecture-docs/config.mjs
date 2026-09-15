@@ -1,4 +1,4 @@
-import { readFile, realpath, stat } from "node:fs/promises";
+import { lstat, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { ArchitectureDocsConfigurationError } from "./errors.mjs";
 import { loadEvidenceLedger } from "./evidence-ledger.mjs";
@@ -78,6 +78,21 @@ function resolveUnderRoot(configDirectory, rootPath, value) {
 async function canonicalPath(filename) {
   const absolute = path.resolve(filename);
   try { return await realpath(absolute); } catch { const parent = path.dirname(absolute); return parent === absolute ? absolute : path.join(await canonicalPath(parent), path.basename(absolute)); }
+}
+async function hasSymlinkComponent(filename, baseDirectory) {
+  const relative = path.relative(baseDirectory, filename);
+  let current = baseDirectory;
+  for (const component of relative.split(path.sep)) {
+    if (!component || component === ".") continue;
+    current = path.join(current, component);
+    try {
+      if ((await lstat(current)).isSymbolicLink()) return true;
+    } catch (error) {
+      if (error.code === "ENOENT") return false;
+      throw error;
+    }
+  }
+  return false;
 }
 function overlaps(left, right) {
   const relative = path.relative(left, right);
@@ -253,6 +268,7 @@ export async function loadArchitectureDocsConfig(configPath) {
     const canonicalRoot = await canonicalPath(rootDirectory);
     if (architectureStatusSnapshot) {
       const canonicalSnapshot = await canonicalPath(architectureStatusSnapshot);
+      if (await hasSymlinkComponent(architectureStatusSnapshot, configDirectory)) addIssue(issues, "$.architectureStatus.snapshot", "must not contain symlink components", "Use a regular path below the configuration directory.");
       if (!overlaps(canonicalConfigDirectory, canonicalSnapshot)) addIssue(issues, "$.architectureStatus.snapshot", "must resolve below the configuration directory", "Use a repository-relative snapshot path that does not escape through a symlink.");
       const generatedDirectories = await Promise.all([outputDirectory, handoffDirectory, siteDirectory].map(canonicalPath));
       if (generatedDirectories.some((directory) => overlaps(directory, canonicalSnapshot) || overlaps(canonicalSnapshot, directory))) addIssue(issues, "$.architectureStatus.snapshot", "must not overlap preview/, handoff/, or site/", "Choose an authored snapshot path outside generated directories.");
