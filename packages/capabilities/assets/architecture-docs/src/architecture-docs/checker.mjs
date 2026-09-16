@@ -10,7 +10,7 @@ import { buildCompositionGuide } from "./composition-guide.mjs";
 import { compileLikeC4 } from "./likec4-compiler.mjs";
 import { compilePalette } from "./palette.mjs";
 import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
-import { evaluateArchieDocumentation, isArchieDocumentationActive } from "./archie-documentation.mjs";
+import { evaluateArchieDocumentation, isActiveArchieDocumentationPage, isArchieDocumentationActive } from "./archie-documentation.mjs";
 
 const HOME_TOPICS = ["purpose", "actors", "boundary", "runtime-unit", "flow", "domain-language", "pattern", "navigation"];
 const allPages = (config) => [config.pages.home, ...config.pages.areas];
@@ -55,7 +55,7 @@ async function freshnessDiagnostics(config, handoffDirectory) {
   if (manifest.digests?.pageMap !== sha256(jsonBytes(expectedPageMap))) stale("digests.pageMap", "page-map digest does not match the current configuration");
   const archieDocumentationActive = await isArchieDocumentationActive(path.dirname(config.configPath));
   const guideBytes = Buffer.from(buildCompositionGuide({
-    preserveArchieMarkers: archieDocumentationActive && config.pages.areas.some((page) => page.id === "archie"),
+    preserveArchieMarkers: config.pages.areas.some((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
   }));
   if (manifest.digests?.guide !== sha256(guideBytes)) stale("digests.guide", "composition guide digest does not match the generated guide");
   for (const page of allPages(config)) {

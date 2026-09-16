@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import * as archieDocumentation from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/archie-documentation.mjs";
-import { buildCompositionGuide } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/composition-guide.mjs";
+import { pathToFileURL } from "node:url";
 import { loadArchitectureDocsConfig } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/config.mjs";
 import { ArchitectureDocsConfigurationError } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/errors.mjs";
 
@@ -59,17 +58,38 @@ test("shipped config rejects duplicate Archie routes for installed targets", asy
   }
 });
 
-test("shipped package gates Archie rendering and composition on installation", async () => {
+test("shipped package builds an uninstalled Archie-ID page as ordinary Markdown", async () => {
   const directory = await mkdtemp(path.join(process.cwd(), ".tmp-imported-architecture-docs-uninstalled-"));
   try {
-    assert.equal(typeof archieDocumentation.isArchieDocumentationActive, "function");
-    const active = await archieDocumentation.isArchieDocumentationActive(directory);
-    assert.equal(active, false);
-    assert.doesNotMatch(buildCompositionGuide({ preserveArchieMarkers: active }), /preserve all `archie-\*` comments/);
+    const sourceManifest = JSON.parse(readFileSync("source-import-manifest.json", "utf8"));
+    const source = architectureDocsImport(sourceManifest);
+    const packageRoot = path.join(directory, "package");
+    const target = path.join(directory, "target");
+    await cp(assetRoot, packageRoot, { recursive: true });
+    await symlink(path.join(source.repository, "node_modules"), path.join(packageRoot, "node_modules"), "dir");
+    await cp(managedFixture, target, { recursive: true });
+    await rm(path.join(target, ".archie"), { recursive: true, force: true });
+    await rm(path.join(target, "complete/preview"), { recursive: true, force: true });
+    await rm(path.join(target, "complete/handoff"), { recursive: true, force: true });
+    await writeFile(path.join(target, "complete/model/model.c4"), [
+      "specification { element system }",
+      "model { fixture = system 'Fixture' }",
+      "views { view systemContext of fixture { include fixture } }",
+      "",
+    ].join("\n"));
+    const pagePath = path.join(target, "complete/pages/archie.md");
+    await writeFile(pagePath, `${await readFile(pagePath, "utf8")}\n<aside>ordinary raw HTML</aside>\n`);
 
-    const builder = readFileSync(`${assetRoot}/src/architecture-docs/index.mjs`, "utf8");
-    assert.match(builder, /preserveArchieMarkers: archieDocumentationActive && page\.id === "archie"/);
-    assert.match(builder, /writeHandoffBundle\(\{[\s\S]*archieDocumentationActive/);
+    const builderUrl = pathToFileURL(path.join(packageRoot, "src/architecture-docs/index.mjs")).href;
+    const { buildArchitectureDocs } = await import(builderUrl);
+    await buildArchitectureDocs(path.join(target, "architecture-docs.config.json"));
+
+    const preview = await readFile(path.join(target, "complete/preview/archie/index.html"), "utf8");
+    const guide = await readFile(path.join(target, "complete/handoff/composition-guide.md"), "utf8");
+    assert.match(preview, /&lt;!-- archie-guide:v1 --&gt;/);
+    assert.match(preview, /&lt;!-- archie-capability:structural-inspection:start --&gt;/);
+    assert.match(preview, /&lt;aside&gt;ordinary raw HTML&lt;\/aside&gt;/);
+    assert.doesNotMatch(guide, /preserve all `archie-\*` comments/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

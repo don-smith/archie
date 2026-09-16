@@ -10,7 +10,7 @@ import { assertOutputOwned, createPublicationStage, publishDirectory } from "./p
 import { renderSite } from "./render-site.mjs";
 import { readHandoffSnapshot, writeHandoffBundle } from "./handoff.mjs";
 import { claimDigest, claimStatus } from "./evidence-ledger.mjs";
-import { isArchieDocumentationActive } from "./archie-documentation.mjs";
+import { isActiveArchieDocumentationPage, isArchieDocumentationActive } from "./archie-documentation.mjs";
 
 function configuredViewIssues(config, views) {
   const ids = new Set(views.map((view) => view.id));
@@ -54,7 +54,7 @@ export async function buildArchitectureDocs(configPath, { handoffOnly = false } 
     if (viewIssues.length || targetIssues.length) throw new ArchitectureDocsBuildError("Configured architecture docs references are missing.", { code: viewIssues.length ? "CONFIGURED_VIEW_NOT_FOUND" : "CONFIGURED_TARGET_NOT_FOUND", issues: [...viewIssues, ...targetIssues] });
     const statuses = claimStatus(config.ledger.claims);
     const pages = [config.pages.home, ...config.pages.areas];
-    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id], { preserveArchieMarkers: archieDocumentationActive && page.id === "archie" }) })));
+    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id], { preserveArchieMarkers: isActiveArchieDocumentationPage(archieDocumentationActive, page) }) })));
     const generatedFiles = ["index.html", ...config.pages.areas.map((page) => `${page.slug}/index.html`), "assets/likec4-views.js", "assets/views.json", "assets/preview.json"];
     const previewMetadata = {
       ownership: { product: "architecture-docs", artifact: "preview", generated: true, markerVersion: 1 },

@@ -21,6 +21,10 @@ export async function isArchieDocumentationActive(configDirectory) {
   }
 }
 
+export function isActiveArchieDocumentationPage(archieDocumentationActive, page) {
+  return archieDocumentationActive && page?.id === "archie";
+}
+
 function markerComments(text) {
   return text.match(ARCHIE_COMMENT)?.filter((comment) => /\barchie-(?:guide|topic|capability)\b/.test(comment)) ?? [];
 }

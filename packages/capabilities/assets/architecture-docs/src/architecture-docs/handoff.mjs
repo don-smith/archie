@@ -4,6 +4,7 @@ import path from "node:path";
 import { digest } from "./evidence-ledger.mjs";
 import { buildCompositionGuide } from "./composition-guide.mjs";
 import { buildHandoffDelta, deltaToMarkdown } from "./handoff-delta.mjs";
+import { isActiveArchieDocumentationPage } from "./archie-documentation.mjs";
 
 export const HANDOFF_VERSION = 1;
 
@@ -93,7 +94,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
   }
 
   const guide = buildCompositionGuide({
-    preserveArchieMarkers: archieDocumentationActive && pageMap.areas.some((page) => page.id === "archie"),
+    preserveArchieMarkers: pageMap.areas.some((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
   });
   const guideBytes = Buffer.from(guide);
   await writeFile(path.join(destination, "composition-guide.md"), guideBytes);
