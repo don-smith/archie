@@ -54,6 +54,31 @@ test("foundation and catalog use the registered capability vocabulary", () => {
   assert.doesNotMatch(`${foundation}\n${catalog}`, /module audit/i);
 });
 
+test("managed-site packaging is the sole exception to target-owned architecture documents", () => {
+  const foundation = readFileSync("docs/archie/foundation.md", "utf8");
+  assert.match(
+    foundation,
+    /packaged managed-site Archie page[\s\S]*sole narrow exception[\s\S]*ID `archie`[\s\S]*title `Archie`[\s\S]*slug `archie`[\s\S]*hidden completeness markers/i,
+  );
+  assert.match(
+    foundation,
+    /target repository still owns every other page, model, glossary, evidence source, local adaptation of the Archie page, and review rule/i,
+  );
+  assert.match(foundation, /does not create an Archie-wide architecture-document format/i);
+  assert.doesNotMatch(foundation, /Archie (?:defines|imposes|requires) an Archie-wide architecture-document format/i);
+});
+
+test("Architecture Docs is integrated without claiming its source ownership moved", () => {
+  const boundaries = readFileSync("docs/archie/product-boundaries.md", "utf8");
+  assert.match(boundaries, /Architecture Docs is an integrated Archie capability from the user's perspective/i);
+  assert.match(
+    boundaries,
+    /source remains in the developer-owned `c4archviewer` repository[\s\S]*imported into Archie at an immutable revision[\s\S]*delivery arrangements/i,
+  );
+  assert.doesNotMatch(boundaries, /Architecture Docs source (?:is|lives) in the Archie repository/i);
+  assert.doesNotMatch(boundaries, /Archie owns the Architecture Docs source/i);
+});
+
 test("reviewed source imports and exclusions are recorded", () => {
   const manifest = JSON.parse(readFileSync("source-import-manifest.json"));
   assert.equal(manifest.imports.length, 4);

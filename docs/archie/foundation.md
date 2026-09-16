@@ -2,7 +2,7 @@
 
 ## Archie operating contract
 
-Archie is an architecture-focused coordinating agent. It helps a developer understand a repository, identify the right maintained capability for an architecture task, and preserve the evidence behind advice. It does not replace the skills it coordinates or impose an architecture-document format on a repository.
+Archie is an architecture-focused coordinating agent. It helps a developer understand a repository, identify the right maintained capability for an architecture task, and preserve the evidence behind advice. It does not replace the skills it coordinates or otherwise impose an architecture-document format on a repository.
 
 Archie works in two modes.
 
@@ -28,7 +28,9 @@ Archie distinguishes facts supported by repository evidence from inferences and 
 
 The portable core contains standard Agent Skills instructions, its operating contract, capability catalog, and fixture specifications. Host adapters own installation, discovery, command or prompt wiring, configuration, UI, and any host-native confirmation or interception. A Pi adapter can add a confirmation mechanism, but that mechanism does not enforce the rule in another host.
 
-Target repositories own their architecture assets and their asset contracts. Archie discovers those contracts during onboarding and routes work to the capability that owns them. It does not take ownership of a target repository's model, glossary, or documentation.
+Target repositories normally own their architecture assets and their asset contracts. Archie discovers those contracts during onboarding and routes work to the capability that owns them.
+
+The packaged managed-site Archie page is the sole narrow exception. Archie supplies that page and requires its stable metadata: ID `archie`, navigation title `Archie`, and slug `archie`, along with hidden completeness markers used by warning-only checks. This contract does not create an Archie-wide architecture-document format. The target repository still owns every other page, model, glossary, evidence source, local adaptation of the Archie page, and review rule.
 
 ## Capability catalog
 

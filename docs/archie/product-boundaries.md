@@ -15,6 +15,8 @@ Archie is a private, lockstep product for locally reviewed trials. Its one versi
 
 Each capability is independently selectable. Routing never converts advisory results or target-owned checks into one universal architecture result. Material capabilities retain the proposal-before-apply stop.
 
+Architecture Docs is an integrated Archie capability from the user's perspective. Its source remains in the developer-owned `c4archviewer` repository and is imported into Archie at an immutable revision. These are delivery arrangements for the current package. Source ownership has not moved to the Archie repository.
+
 ## Excluded first-release membership
 
 MyFlow lifecycle behavior, general development skills, Architecture Review source, named-agent dependencies, `codebase-locator`, and `codebase-analyzer` are not shipped or required. Structural inspection uses a portable task contract and may run serially. Repository-local checks remain target-owned commands with their original exits and evidence meanings.
