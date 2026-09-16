@@ -94,7 +94,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
   }
 
   const guide = buildCompositionGuide({
-    preserveArchieMarkers: pageMap.areas.some((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
+    archiePage: pageMap.areas.find((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
   });
   const guideBytes = Buffer.from(guide);
   await writeFile(path.join(destination, "composition-guide.md"), guideBytes);

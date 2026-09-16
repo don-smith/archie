@@ -5,9 +5,9 @@ export const COMPOSITION_GUIDE_VERSION = 1;
  * adapter contract between a handoff and the independently installed
  * html-design skill; it is not a copy of that skill.
  */
-export function buildCompositionGuide({ preserveArchieMarkers = false } = {}) {
-  const archieMarkerInstruction = preserveArchieMarkers
-    ? "- When `page-map.json` includes the Archie area, preserve all `archie-*` comments from `pages/archie.md` in the composed `site/archie/index.html`. Keep them as HTML comments so they remain hidden while the final-site check can read the guide contract.\n"
+export function buildCompositionGuide({ archiePage = null } = {}) {
+  const archieMarkerInstruction = archiePage
+    ? `- When \`page-map.json\` includes the Archie area, preserve all \`archie-*\` comments from \`${archiePage.markdown}\` in the composed \`site/${archiePage.slug}/index.html\`. Keep them as HTML comments so they remain hidden while the final-site check can read the guide contract.\n`
     : "";
   return `# Architecture handoff composition guide
 

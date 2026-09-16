@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { cp, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { pathToFileURL } from "node:url";
@@ -29,6 +29,15 @@ test("every Architecture Docs router command has an imported script", () => {
   for (const script of scripts) {
     assert.ok(existsSync(`${assetRoot}/scripts/${script}`), `missing imported router script: ${script}`);
   }
+});
+
+test("shipped Architecture Docs runtime dependencies are declared exactly", () => {
+  const manifest = JSON.parse(readFileSync("packages/capabilities/package.json", "utf8"));
+  assert.deepEqual(manifest.dependencies, {
+    likec4: "1.59.2",
+    marked: "15.0.7",
+    playwright: "1.62.1",
+  });
 });
 
 test("Architecture Docs import receipt matches its source record", () => {
@@ -61,12 +70,9 @@ test("shipped config rejects duplicate Archie routes for installed targets", asy
 test("shipped package builds an uninstalled Archie-ID page as ordinary Markdown", async () => {
   const directory = await mkdtemp(path.join(process.cwd(), ".tmp-imported-architecture-docs-uninstalled-"));
   try {
-    const sourceManifest = JSON.parse(readFileSync("source-import-manifest.json", "utf8"));
-    const source = architectureDocsImport(sourceManifest);
     const packageRoot = path.join(directory, "package");
     const target = path.join(directory, "target");
     await cp(assetRoot, packageRoot, { recursive: true });
-    await symlink(path.join(source.repository, "node_modules"), path.join(packageRoot, "node_modules"), "dir");
     await cp(managedFixture, target, { recursive: true });
     await rm(path.join(target, ".archie"), { recursive: true, force: true });
     await rm(path.join(target, "complete/preview"), { recursive: true, force: true });

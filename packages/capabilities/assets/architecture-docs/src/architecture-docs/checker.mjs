@@ -55,7 +55,7 @@ async function freshnessDiagnostics(config, handoffDirectory) {
   if (manifest.digests?.pageMap !== sha256(jsonBytes(expectedPageMap))) stale("digests.pageMap", "page-map digest does not match the current configuration");
   const archieDocumentationActive = await isArchieDocumentationActive(path.dirname(config.configPath));
   const guideBytes = Buffer.from(buildCompositionGuide({
-    preserveArchieMarkers: config.pages.areas.some((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
+    archiePage: expectedPageMap.areas.find((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
   }));
   if (manifest.digests?.guide !== sha256(guideBytes)) stale("digests.guide", "composition guide digest does not match the generated guide");
   for (const page of allPages(config)) {
