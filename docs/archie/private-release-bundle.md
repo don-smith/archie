@@ -93,4 +93,10 @@ archie upgrade --release ./next-release-bundle --format json \
 
 Inspect `failure-report.json`, `failure-report.stderr`, and `.archie/release/install-journal.json`. Do not rerun with edited records, copied locks, network locators, or manually repaired installed bytes. Restore the last reviewed local bundle or resolve the named prerequisite, then run `archie verify --format json`. Escalate any `compensation: blocked` result before another upgrade attempt.
 
-Phase 8 runs the full release-candidate matrix and creates the trial checklist. Until that evidence and the developer's repository trial are complete, the candidate is not release-approved.
+## Local release-candidate evidence
+
+Run `npm run private-trial:evaluate` to build two independent local v2 bundles and exercise the integrated matrix. The evaluator uses genuine Runtime and Conformance packs, the exact generated lock, real offline npm installation, both installed commands, byte comparisons for both packages and all six skills, replay, v1-to-v2 upgrade, mutation rejection, policy outcomes, and compensation. Its retained packet is `evaluation/private-trials/latest.json`.
+
+The local evaluator deliberately does not run GitHub SSH preflight or create the immutable private context ref. It records those gates as deferred and uses the retained APM identity fixture while byte-checking the current canonical skills. Follow [the substantial-repository trial checklist](substantial-repository-trial-checklist.md) before any release decision.
+
+Until the external context gate and developer repository trial are complete, the candidate is local-only and not release-approved.

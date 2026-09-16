@@ -1,21 +1,11 @@
 # Private-trial evidence
 
-Run the hermetic private-trial evaluator from a clean checkout:
+Run the integrated local release-candidate evaluator from a clean checkout:
 
 ```bash
 npm run private-trial:evaluate
 ```
 
-It writes `evaluation/private-trials/latest.json`. The packet records the local bundle flow, environment versions, deterministic finalization result, tracked-byte manifests, mutation rejections, policy outcomes, recovery result, capability authority checks, and the text report.
+It writes `latest.json` in `archie-private-trial-evidence-v2` format. The evaluator packs the real Runtime and Conformance workspaces twice, finalizes both v2 bundles, installs the exact offline npm projection, deploys and hashes the current six-skill context through the deterministic APM seam, and exercises bootstrap, verify replay, same-version replay, v1-to-v2 upgrade, tamper rejection, policy outcomes, and compensation.
 
-The evaluator stages finalized copies of `test/fixtures/private-bundles/valid`. Its native command runner is deterministic so the npm and APM failure cases can be replayed without network access. It models the required `npm ci --ignore-scripts`, `apm install --frozen`, baseline audit, policy status, and policy audit sequence. `npm run test:e2e -- apm-context` separately runs APM 0.29 against the frozen context.
-
-A successful packet says only that a maintainer selected consistent local bytes. It must contain:
-
-```text
-Archie authorization: NOT ASSESSED — locally reviewed private release selected.
-```
-
-The coordinated replacement case changes an APM content hash and finalizes a new record. It passes because both artifacts were locally selected together. That result is deliberate. Archie does not detect authorization attacks, and it does not claim signing, trusted publication, controllers, keys, rollback policy, or public-release trust.
-
-Review `latest.json`, run one selected-bundle trial, and record the maintainer decision under `.myflow/workstreams/archie-foundation/verify/` before Close.
+The packet is local consistency evidence, not release approval. GitHub SSH preflight, a real immutable private context ref, push, tag, and publication remain explicit external gates. Review the packet with `docs/archie/private-trial-evidence.md` and run `docs/archie/substantial-repository-trial-checklist.md` before any release decision.
