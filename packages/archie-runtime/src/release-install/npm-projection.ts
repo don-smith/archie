@@ -17,7 +17,10 @@ const runtimeDependencies = {
   typescript: "7.0.2"
 };
 const runtimeBin = { "architecture-docs": "dist/architecture-docs/bin/architecture-docs.mjs" };
-const releaseDependencyPackages = (JSON.parse(readFileSync(new URL("../../vendor/release-npm-lock-v2.json", import.meta.url), "utf8")) as { packages: Record<string, unknown> }).packages;
+function loadReleaseDependencyPackages(): Record<string, unknown> {
+  try { return (JSON.parse(readFileSync(new URL("../../vendor/release-npm-lock-v2.json", import.meta.url), "utf8")) as { packages: Record<string, unknown> }).packages; }
+  catch (cause) { throw new Error("Runtime v2 npm lock template is missing or invalid; run the vendor lock regeneration command and rebuild", { cause }); }
+}
 
 export function npmProjection(record: ReleaseRecordForNpm): NpmProjection {
   if (record.schemaVersion === 2) return npmProjectionV2(record);
@@ -74,7 +77,7 @@ export function validateNpmProjection(projection: NpmProjection, record: Release
 function npmProjectionV2(record: ReleaseRecordV2): NpmProjection {
   const dependencies = Object.fromEntries(record.artifacts.map(artifact => [artifact.package, artifact.locator]));
   const manifest = { name: "archie-private-runtime", private: true, version: record.version, dependencies };
-  const packages: Record<string, unknown> = { "": { name: "archie-private-runtime", version: record.version, dependencies }, ...releaseDependencyPackages };
+  const packages: Record<string, unknown> = { "": { name: "archie-private-runtime", version: record.version, dependencies }, ...loadReleaseDependencyPackages() };
   for (const artifact of record.artifacts) {
     packages[`node_modules/${artifact.package}`] = { version: artifact.version, resolved: artifact.locator, integrity: artifact.lockIntegrity, dependencies: artifact.dependencies, bin: artifact.binaries, engines: artifact.engines };
   }

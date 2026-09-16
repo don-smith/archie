@@ -1,0 +1,14 @@
+{
+  "format": "archie-release-npm-lock-template-v1",
+  "description": "Transitive dependency closure for the @archie/runtime v2 release projection. Supplies the complete npm lock packages block used by npmProjectionV2 to generate a target-ready lock that includes every external dependency without network access.",
+  "createdBy": "Generated from an empty temp directory: npm init -y, then add @archie/runtime production dependencies from the runtime package.json with their exact pinned versions, then npm install --package-lock-only --ignore-scripts. Extract packages from the resulting package-lock.json and remove the root entry.",
+  "regenerationCommand": "npm install --package-lock-only --ignore-scripts",
+  "regenerationNotes": "Run in a fresh temp directory with a package.json containing only the runtime production dependencies at their pinned versions, then copy the packages block (minus root) into this file. The check-package-content script verifies the file is packed; a stale template will cause npm ci integrity mismatches in target installations.",
+  "resolvedDependencies": {
+    "@typescript/typescript-darwin-arm64": "7.0.2",
+    "likec4": "1.59.2",
+    "marked": "15.0.7",
+    "playwright": "1.62.1",
+    "typescript": "7.0.2"
+  }
+}
