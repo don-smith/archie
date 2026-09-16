@@ -57,7 +57,7 @@ export function calculateHandoffDigest(manifest) {
   return digest(stableManifest);
 }
 
-export async function writeHandoffBundle({ destination, config, compiled, pages, statuses, pagePaths, previous = null }) {
+export async function writeHandoffBundle({ destination, config, compiled, pages, statuses, pagePaths, archieDocumentationActive = false, previous = null }) {
   await mkdir(path.join(destination, "pages"), { recursive: true });
   await mkdir(path.join(destination, "assets"), { recursive: true });
 
@@ -92,7 +92,9 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
     supplementalInputs.push({ id: input.id, source: input.source, destination: input.destination, sha256: sha256(bytes) });
   }
 
-  const guide = buildCompositionGuide();
+  const guide = buildCompositionGuide({
+    preserveArchieMarkers: archieDocumentationActive && pageMap.areas.some((page) => page.id === "archie"),
+  });
   const guideBytes = Buffer.from(guide);
   await writeFile(path.join(destination, "composition-guide.md"), guideBytes);
   const claimsDigest = await writeJson(path.join(destination, "claims.json"), claims);

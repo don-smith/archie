@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+import * as archieDocumentation from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/archie-documentation.mjs";
+import { buildCompositionGuide } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/composition-guide.mjs";
+import { loadArchitectureDocsConfig } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/config.mjs";
+import { ArchitectureDocsConfigurationError } from "../../packages/capabilities/assets/architecture-docs/src/architecture-docs/errors.mjs";
 
 const importId = "architecture-docs-and-likec4";
 const assetRoot = "packages/capabilities/assets/architecture-docs";
@@ -35,6 +40,39 @@ test("Architecture Docs import receipt matches its source record", () => {
 
   assert.equal(receipt.revision, source.revision);
   assert.deepEqual(receipt.paths, source.paths);
+});
+
+test("shipped config rejects duplicate Archie routes for installed targets", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".tmp-imported-architecture-docs-config-"));
+  try {
+    await cp(managedFixture, directory, { recursive: true });
+    const configPath = path.join(directory, "architecture-docs.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.pages.areas.push({ ...config.pages.areas.at(-1) });
+    await writeFile(configPath, JSON.stringify(config));
+
+    await assert.rejects(loadArchitectureDocsConfig(configPath), (error) => error instanceof ArchitectureDocsConfigurationError
+      && error.issues.some((issue) => issue.message === "contains duplicate page IDs")
+      && error.issues.some((issue) => issue.message === "contains duplicate page slugs"));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("shipped package gates Archie rendering and composition on installation", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".tmp-imported-architecture-docs-uninstalled-"));
+  try {
+    assert.equal(typeof archieDocumentation.isArchieDocumentationActive, "function");
+    const active = await archieDocumentation.isArchieDocumentationActive(directory);
+    assert.equal(active, false);
+    assert.doesNotMatch(buildCompositionGuide({ preserveArchieMarkers: active }), /preserve all `archie-\*` comments/);
+
+    const builder = readFileSync(`${assetRoot}/src/architecture-docs/index.mjs`, "utf8");
+    assert.match(builder, /preserveArchieMarkers: archieDocumentationActive && page\.id === "archie"/);
+    assert.match(builder, /writeHandoffBundle\(\{[\s\S]*archieDocumentationActive/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 function filesBelow(directory, root = directory) {

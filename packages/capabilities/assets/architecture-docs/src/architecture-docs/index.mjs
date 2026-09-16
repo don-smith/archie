@@ -10,6 +10,7 @@ import { assertOutputOwned, createPublicationStage, publishDirectory } from "./p
 import { renderSite } from "./render-site.mjs";
 import { readHandoffSnapshot, writeHandoffBundle } from "./handoff.mjs";
 import { claimDigest, claimStatus } from "./evidence-ledger.mjs";
+import { isArchieDocumentationActive } from "./archie-documentation.mjs";
 
 function configuredViewIssues(config, views) {
   const ids = new Set(views.map((view) => view.id));
@@ -35,6 +36,7 @@ function pageRecord(page) { return { id: page.id, title: page.title, summary: pa
 
 export async function buildArchitectureDocs(configPath, { handoffOnly = false } = {}) {
   const config = await loadArchitectureDocsConfig(configPath);
+  const archieDocumentationActive = await isArchieDocumentationActive(path.dirname(config.configPath));
   const handoffDirectory = path.join(config.paths.rootDirectory, "handoff");
   const outputOptions = { markerPath: "assets/preview.json", artifactLabel: "architecture docs preview", outputPath: "$.preview.output" };
   const handoffOptions = { markerPath: "manifest.json", artifact: "handoff", artifactLabel: "architecture docs handoff", outputPath: "$.handoff.output" };
@@ -52,7 +54,7 @@ export async function buildArchitectureDocs(configPath, { handoffOnly = false } 
     if (viewIssues.length || targetIssues.length) throw new ArchitectureDocsBuildError("Configured architecture docs references are missing.", { code: viewIssues.length ? "CONFIGURED_VIEW_NOT_FOUND" : "CONFIGURED_TARGET_NOT_FOUND", issues: [...viewIssues, ...targetIssues] });
     const statuses = claimStatus(config.ledger.claims);
     const pages = [config.pages.home, ...config.pages.areas];
-    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id], { preserveArchieMarkers: page.id === "archie" }) })));
+    const stagedPages = await Promise.all(pages.map(async (page) => ({ page, html: await loadMarkdownPage(config.paths.pagePaths[page.id], { preserveArchieMarkers: archieDocumentationActive && page.id === "archie" }) })));
     const generatedFiles = ["index.html", ...config.pages.areas.map((page) => `${page.slug}/index.html`), "assets/likec4-views.js", "assets/views.json", "assets/preview.json"];
     const previewMetadata = {
       ownership: { product: "architecture-docs", artifact: "preview", generated: true, markerVersion: 1 },
@@ -75,7 +77,7 @@ export async function buildArchitectureDocs(configPath, { handoffOnly = false } 
       ]);
     }
     handoffStage = await createPublicationStage(handoffDirectory);
-    await writeHandoffBundle({ destination: handoffStage, config, compiled, pages, statuses, pagePaths: config.paths.pagePaths, previous });
+    await writeHandoffBundle({ destination: handoffStage, config, compiled, pages, statuses, pagePaths: config.paths.pagePaths, archieDocumentationActive, previous });
     if (!handoffOnly) {
       await publishDirectory(publicationStage, config.paths.outputDirectory, outputOptions);
       publicationStage = undefined;

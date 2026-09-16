@@ -5,7 +5,10 @@ export const COMPOSITION_GUIDE_VERSION = 1;
  * adapter contract between a handoff and the independently installed
  * html-design skill; it is not a copy of that skill.
  */
-export function buildCompositionGuide() {
+export function buildCompositionGuide({ preserveArchieMarkers = false } = {}) {
+  const archieMarkerInstruction = preserveArchieMarkers
+    ? "- When `page-map.json` includes the Archie area, preserve all `archie-*` comments from `pages/archie.md` in the composed `site/archie/index.html`. Keep them as HTML comments so they remain hidden while the final-site check can read the guide contract.\n"
+    : "";
   return `# Architecture handoff composition guide
 
 This handoff is the architecture source bundle for the independently installed \`html-design\` skill. Use the handoff as the only architecture-content input. Do not import the architecture builder, its source files, or its dependencies into the final site.
@@ -17,8 +20,7 @@ This handoff is the architecture source bundle for the independently installed \
 - \`site/\` is owned and published by the html-design consumer. An architecture rebuild must never replace it.
 - Start each update by reading \`delta.json\` and \`delta.md\`, then inspect the affected claims, pages, and view IDs.
 - Treat \`claims.json\` and \`page-map.json\` as the curated architecture contract. Treat copied Markdown as authored narrative. Presentation may add structure and styling, but must not alter claims, review status, evidence links, page intent, or view identity.
-- When \`page-map.json\` includes the Archie area, preserve all \`archie-*\` comments from \`pages/archie.md\` in the composed \`site/archie/index.html\`. Keep them as HTML comments so they remain hidden while the final-site check can read the guide contract.
-- After composition, write \`site/assets/architecture-handoff.json\` with the current \`manifest.digests.handoff\`, \`manifest.version\`, and an HTML-design ownership marker. This receipt lets the architecture checker detect a presentation composed from an older handoff.
+${archieMarkerInstruction}- After composition, write \`site/assets/architecture-handoff.json\` with the current \`manifest.digests.handoff\`, \`manifest.version\`, and an HTML-design ownership marker. This receipt lets the architecture checker detect a presentation composed from an older handoff.
 
 ## Profile and page composition
 

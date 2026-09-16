@@ -11,7 +11,7 @@ function warning(code, path_, message, expected) {
   return { severity: "warning", code, path: path_, message, expected };
 }
 
-async function isManagedTarget(configDirectory) {
+export async function isArchieDocumentationActive(configDirectory) {
   try {
     await stat(path.join(configDirectory, ".archie", "version"));
     return true;
@@ -69,7 +69,7 @@ async function resolveGuideText(configDirectory, guideText, guideReadError) {
 }
 
 export async function evaluateArchieDocumentation({ configDirectory, areas, guideText, guideReadError, pageText }) {
-  if (!await isManagedTarget(configDirectory)) return [];
+  if (!await isArchieDocumentationActive(configDirectory)) return [];
 
   const warnings = [];
   const guide = parseGuide(await resolveGuideText(configDirectory, guideText, guideReadError));

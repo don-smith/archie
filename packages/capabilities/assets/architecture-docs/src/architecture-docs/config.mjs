@@ -259,21 +259,12 @@ export async function loadArchitectureDocsConfig(configPath) {
   }
   if (pages?.home === null) addIssue(issues, "$.pages.home", "is required", "Provide one orientation home page.");
   if (pages) {
-    let archieInstalled = false;
-    try { await stat(path.join(configDirectory, ".archie", "version")); archieInstalled = true; }
-    catch (error) { if (error.code !== "ENOENT" && error.code !== "ENOTDIR") throw error; }
     const allConfiguredPages = [pages.home, ...pages.areas].filter(Boolean);
-    const areaPages = new Set(pages.areas.filter(Boolean));
-    const archieAreas = pages.areas.filter((page) => page?.id === "archie");
     const ids = new Set(); const slugs = new Set();
-    const isAllowedArchieDuplicate = (field, value) => archieInstalled
-      && value === "archie"
-      && archieAreas.length > 1
-      && allConfiguredPages.filter((page) => page[field] === value).every((page) => areaPages.has(page) && page.id === "archie");
     for (const page of allConfiguredPages) {
-      if (page.id && ids.has(page.id) && !isAllowedArchieDuplicate("id", page.id)) addIssue(issues, "$.pages", "contains duplicate page IDs", "Use unique stable page IDs.");
+      if (page.id && ids.has(page.id)) addIssue(issues, "$.pages", "contains duplicate page IDs", "Use unique stable page IDs.");
       if (page.id) ids.add(page.id);
-      if (page.slug && slugs.has(page.slug) && !isAllowedArchieDuplicate("slug", page.slug)) addIssue(issues, "$.pages", "contains duplicate page slugs", "Use unique area URL slugs.");
+      if (page.slug && slugs.has(page.slug)) addIssue(issues, "$.pages", "contains duplicate page slugs", "Use unique area URL slugs.");
       if (page.slug) slugs.add(page.slug);
     }
   }
