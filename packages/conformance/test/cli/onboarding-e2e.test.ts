@@ -1,19 +1,27 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 
 import { runCli } from "../../src/commands/run.js";
-
-process.env.npm_config_user_agent = "npm/11.19.0 node/v24.20.0";
+import { makeNpmTarball, type NpmTarballManifest } from "../helpers/npm-tarball.js";
 
 async function target(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "architecture-conformance-onboarding-e2e-"));
-  await mkdir(join(root, "src")); await mkdir(join(root, "node_modules", "architecture-conformance"), { recursive: true }); await mkdir(join(root, "node_modules", ".bin"), { recursive: true });
-  await writeFile(join(root, "package.json"), JSON.stringify({ devDependencies: { "architecture-conformance": "0.1.0" } }));
-  await writeFile(join(root, "package-lock.json"), JSON.stringify({ name: "target", lockfileVersion: 3, packages: { "": { devDependencies: { "architecture-conformance": "0.1.0" } }, "node_modules/architecture-conformance": { version: "0.1.0" } } }));
-  await writeFile(join(root, "node_modules", "architecture-conformance", "package.json"), JSON.stringify({ name: "architecture-conformance", version: "0.1.0", bin: { "architecture-conformance": "dist/src/cli.js" } })); await writeFile(join(root, "node_modules", ".bin", "architecture-conformance"), "#!/bin/sh\n");
+  const runtime = join(root, ".archie/runtime");
+  const packageRoot = join(runtime, "node_modules/@archie/conformance");
+  const locator = "file:npm/conformance.tgz";
+  const manifest: NpmTarballManifest = { name: "@archie/conformance", version: "0.1.0-private.0", bin: { "architecture-conformance": "dist/cli.js" } };
+  const tarball = await makeNpmTarball(manifest);
+  await mkdir(join(root, "src")); await mkdir(join(packageRoot, "dist"), { recursive: true }); await mkdir(join(runtime, "node_modules/.bin"), { recursive: true }); await mkdir(join(runtime, "npm"), { recursive: true });
+  await writeFile(join(runtime, "npm/conformance.tgz"), tarball);
+  await writeFile(join(runtime, "package.json"), JSON.stringify({ name: "archie-private-runtime", private: true, dependencies: { "@archie/conformance": locator } }));
+  await writeFile(join(runtime, "package-lock.json"), JSON.stringify({ name: "archie-private-runtime", lockfileVersion: 3, packages: { "": { dependencies: { "@archie/conformance": locator } }, "node_modules/@archie/conformance": { version: manifest.version, resolved: locator, integrity: `sha512-${createHash("sha512").update(tarball).digest("base64")}`, bin: manifest.bin } } }));
+  await writeFile(join(packageRoot, "package.json"), JSON.stringify(manifest));
+  await writeFile(join(packageRoot, "dist/cli.js"), "#!/usr/bin/env node\n");
+  await symlink(join("..", "@archie", "conformance", "dist", "cli.js"), join(runtime, "node_modules/.bin/architecture-conformance"));
   await writeFile(join(root, "tsconfig.json"), JSON.stringify({ compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext" }, include: ["src"] })); await writeFile(join(root, "src", "a.ts"), "export const a = 1;\n");
   return root;
 }

@@ -25,6 +25,9 @@ for (const [, directory] of packages.filter(([name]) => name !== "@archie/runtim
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.dependencies?.["@typescript/typescript-darwin-arm64"]) throw new Error(`${directory} must not carry the analyzer platform payload`);
 }
+for (const legacy of ["packages/capabilities/assets/assessment", "packages/capabilities/assets/conformance"]) {
+  if (existsSync(legacy)) throw new Error(`Completed migration still ships legacy imported assets: ${legacy}`);
+}
 if (!existsSync("dist")) execFileSync("npm", ["run", "build"], { stdio: "inherit" });
 for (const [name] of packages) {
   const output = execFileSync("npm", ["pack", "--dry-run", "--json", "--workspace", name], { encoding: "utf8" });
@@ -32,7 +35,7 @@ for (const [name] of packages) {
   const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|architecture-review|codebase-locator|codebase-analyzer|release-record-v[12]\.json)(\/|$)/i.test(file) && !(name === "@archie/context" && file.startsWith(".apm/skills/")));
   if (forbidden.length) throw new Error(`${name} would ship forbidden paths: ${forbidden.join(", ")}`);
   if (name === "@archie/context") {
-    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs"]) {
+    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs", ".apm/skills/architecture-conformance-onboarding/SKILL.md", ".apm/skills/architecture-contracts/SKILL.md"]) {
       if (!packed.includes(required)) throw new Error(`Context package omits required APM asset: ${required}`);
     }
   }
@@ -55,6 +58,7 @@ for (const [name] of packages) {
   }[name];
   if (expectedEntry && !packed.includes(expectedEntry)) throw new Error(`${name} lacks ${expectedEntry}`);
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
+  if (name === "@archie/runtime" && !packed.includes("vendor/release-npm-lock-v2.json")) throw new Error("Runtime package omits the v2 dependency lock template");
   if (name === "@archie/runtime" && !packed.includes("dist/architecture-docs/scripts/check-final-site-browser.mjs")) throw new Error("Runtime package omits the complete Architecture Docs command implementation");
 }
 console.log("Private workspace publication guards and package contents passed.");

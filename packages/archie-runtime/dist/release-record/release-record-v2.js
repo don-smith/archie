@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { gunzipSync } from "node:zlib";
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { canonicalize } from "../analysis/canonical-json.js";
@@ -7,6 +6,8 @@ import { SUPPORTED_ANALYZER } from "../analysis/contracts.js";
 import { PRODUCT_VERSION } from "../product-version.js";
 import { validateHtmlSnapshotProvenance } from "../html-snapshot/verify.js";
 import { ARCHIE_SKILLS, LOCAL_REVIEW_CLAIM, parseReleaseRecord as parseReleaseRecordV1 } from "./release-record-v1.js";
+import { npmProjection, validateNpmProjection } from "../release-install/npm-projection.js";
+import { inspectNpmTarball, normalizeRequiredPlatformPayload } from "../npm-tarball/inspect.js";
 export const RELEASE_RECORD_SCHEMA_VERSION_V2 = 2;
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
@@ -29,27 +30,6 @@ const map = (value, label) => { const source = object(value, label); const resul
     result[key] = text(source[key], `${label}.${key}`); return result; };
 function within(root, file) { const path = resolve(root, file); if (relative(root, path).startsWith("..") || !existsSync(path) || !statSync(path).isFile())
     throw new Error(`bundle artifact is missing: ${file}`); return path; }
-function tarballManifest(tarball) {
-    let archive;
-    try {
-        archive = gunzipSync(tarball);
-    }
-    catch {
-        throw new Error("npm tarball is not a valid gzip archive");
-    }
-    for (let offset = 0; offset + 512 <= archive.length;) {
-        const name = archive.subarray(offset, offset + 100).toString("utf8").replace(/\0.*$/, "");
-        if (!name)
-            break;
-        const size = Number.parseInt(archive.subarray(offset + 124, offset + 136).toString("utf8").replace(/\0.*$/, "").trim() || "0", 8);
-        if (!Number.isSafeInteger(size) || size < 0)
-            throw new Error("npm tarball has an invalid entry size");
-        if (name === "package/package.json")
-            return object(parseJson(archive.subarray(offset + 512, offset + 512 + size).toString("utf8"), "npm tarball package manifest"), "npm tarball package manifest");
-        offset += 512 + Math.ceil(size / 512) * 512;
-    }
-    throw new Error("npm tarball omits package/package.json");
-}
 function bundleInput(root) {
     const value = object(parseJson(readFileSync(join(root, "bundle.json"), "utf8"), "bundle input"), "bundle input");
     exactKeys(value, ["format", "artifacts", "apm"], "bundle input");
@@ -77,13 +57,14 @@ function apmEvidence(root, input) { const manifest = readFileSync(within(root, i
     throw new Error("APM lock differs from bundle input"); const resolvedCommit = field(lock, "resolved_commit", "APM lock"), contentHash = field(lock, "content_hash", "APM lock"); if (!/^[a-f0-9]{40}$/i.test(resolvedCommit) || !/^sha256:[a-f0-9]{64}$/i.test(contentHash))
     throw new Error("APM lock evidence is malformed"); return { package: input.package, skills: input.skills, locator: input.locator, ref: input.ref, resolvedCommit, contentHash }; }
 function artifactEvidence(root, input) { if (!input.locator.startsWith("file:npm/") || input.locator.includes(".."))
-    throw new Error("v2 artifact locators must be target-owned local tarballs"); const tarball = readFileSync(within(root, input.tarball)); const manifest = tarballManifest(tarball); if (manifest.name !== input.package || manifest.version !== input.version)
-    throw new Error("npm tarball package identity differs from bundle input"); const lock = object(parseJson(readFileSync(within(root, input.lockFile), "utf8"), "npm lock"), "npm lock"); const packages = object(lock.packages, "npm lock packages"); const packageLock = object(packages[`node_modules/${input.package}`], `npm lock package ${input.package}`); if (packageLock.version !== input.version || packageLock.resolved !== input.locator || packageLock.integrity !== sha512Integrity(tarball))
-    throw new Error("npm lock evidence does not match finalized tarball bytes"); const dependencies = map(manifest.dependencies ?? {}, "artifact dependencies"), engines = map(manifest.engines ?? {}, "artifact engines"), binaries = map(manifest.bin ?? {}, "artifact binaries"); return { package: input.package, version: input.version, locator: input.locator, lockIntegrity: sha512Integrity(tarball), tarballSha256: sha256(tarball), requiredPlatformPayload: input.requiredPlatformPayload, dependencies, engines, binaries }; }
+    throw new Error("v2 artifact locators must be target-owned local tarballs"); const tarball = readFileSync(within(root, input.tarball)); const inspected = inspectNpmTarball(tarball), manifest = inspected.manifest; if (manifest.name !== input.package || manifest.version !== input.version)
+    throw new Error("npm tarball package identity differs from bundle input"); const requiredPlatformPayload = normalizeRequiredPlatformPayload(input.requiredPlatformPayload); if (!inspected.files.has(`package/${requiredPlatformPayload}`))
+    throw new Error(`npm tarball omits required platform payload: ${requiredPlatformPayload}`); const lock = object(parseJson(readFileSync(within(root, input.lockFile), "utf8"), "npm lock"), "npm lock"); const packages = object(lock.packages, "npm lock packages"); const packageLock = object(packages[`node_modules/${input.package}`], `npm lock package ${input.package}`); if (packageLock.version !== input.version || packageLock.resolved !== input.locator || packageLock.integrity !== sha512Integrity(tarball))
+    throw new Error("npm lock evidence does not match finalized tarball bytes"); const dependencies = map(manifest.dependencies ?? {}, "artifact dependencies"), engines = map(manifest.engines ?? {}, "artifact engines"), binaries = map(manifest.bin ?? {}, "artifact binaries"); return { package: input.package, version: input.version, locator: input.locator, lockIntegrity: sha512Integrity(tarball), tarballSha256: sha256(tarball), requiredPlatformPayload, dependencies, engines, binaries }; }
 function analyzer() { return { adapter: SUPPORTED_ANALYZER.adapter, typescript: SUPPORTED_ANALYZER.typeScript, nodeMajor: SUPPORTED_ANALYZER.nodeMajor, platform: SUPPORTED_ANALYZER.platform, architecture: SUPPORTED_ANALYZER.architecture, platformPackage: SUPPORTED_ANALYZER.platformPackage, knownDefects: [...SUPPORTED_ANALYZER.knownDefects] }; }
 function validateHtml(value) { validateHtmlSnapshotProvenance(value); const html = object(value, "release record HTML snapshot"); exactKeys(html, ["format", "upstream", "commit", "sourcePath", "gitTree", "digest", "license", "requiredNotices", "importToolVersion", "verificationCommand"], "release record HTML snapshot"); }
 function validateArtifact(value, label) { const artifact = object(value, label); exactKeys(artifact, ["package", "version", "locator", "lockIntegrity", "tarballSha256", "requiredPlatformPayload", "dependencies", "engines", "binaries"], label); for (const key of ["package", "version", "locator", "lockIntegrity", "requiredPlatformPayload"])
-    text(artifact[key], `${label}.${key}`); if (!String(artifact.locator).startsWith("file:npm/") || String(artifact.locator).includes("..") || !/^sha512-/.test(String(artifact.lockIntegrity)) || !isSha256(artifact.tarballSha256))
+    text(artifact[key], `${label}.${key}`); if (!String(artifact.locator).startsWith("file:npm/") || String(artifact.locator).includes("..") || !/^sha512-/.test(String(artifact.lockIntegrity)) || !isSha256(artifact.tarballSha256) || normalizeRequiredPlatformPayload(String(artifact.requiredPlatformPayload)) !== artifact.requiredPlatformPayload)
     throw new Error(`${label} evidence is malformed`); map(artifact.dependencies, `${label}.dependencies`); map(artifact.engines, `${label}.engines`); map(artifact.binaries, `${label}.binaries`); }
 export function serializeReleaseRecordV2(record) { validateRecord(record); return `${canonicalize(record)}\n`; }
 function validateRecord(record) { const value = record; exactKeys(value, ["schemaVersion", "product", "version", "sourceCommit", "authorization", "artifacts", "apm", "analyzerCompatibility", "htmlDesignSnapshot"], "release record v2"); if (record.schemaVersion !== 2 || record.product !== "archie" || !/^[a-f0-9]{40}$/i.test(record.sourceCommit) || !record.version)
@@ -120,7 +101,10 @@ export function selectLocalReleaseV2(directory) {
         throw new Error("selected bundle artifact evidence differs from its finalized record"); return { record: artifact, tarballPath, tarballName: tarballPath.split(/[\\/]/).pop() }; });
     if (JSON.stringify(artifacts.map(artifact => artifact.record.package)) !== JSON.stringify(["@archie/runtime", "@archie/conformance"]))
         throw new Error("selected bundle artifacts are missing, extra, or reordered");
-    const npmLockBytes = readFileSync(within(root, input.artifacts[0].lockFile), "utf8");
+    const npmLockBytes = readFileSync(within(root, input.artifacts[0].lockFile), "utf8"), generatedNpm = npmProjection(record);
+    if (npmLockBytes !== generatedNpm.lock)
+        throw new Error("selected bundle npm lock differs from the exact generated v2 projection");
+    validateNpmProjection({ manifest: generatedNpm.manifest, lock: npmLockBytes }, record);
     const selectedApm = apmEvidence(root, input.apm);
     if (canonicalize(selectedApm) !== canonicalize(record.apm))
         throw new Error("selected bundle APM evidence differs from its finalized record");
@@ -135,5 +119,6 @@ export function validateBundleLayoutV2(bundleDirectory) { const root = resolve(b
 export function finalizeReleaseV2(request) { const root = resolve(request.bundleDirectory); validateBundleLayoutV2(root); if (!/^[a-f0-9]{40}$/i.test(request.sourceCommit))
     throw new Error("sourceCommit must be a 40-character Git commit"); const input = bundleInput(root); if (input.apm.ref !== `v${PRODUCT_VERSION}` || input.artifacts.some(artifact => artifact.version !== PRODUCT_VERSION))
     throw new Error("bundle version does not match the Archie product version authority"); const artifacts = input.artifacts.map(artifact => artifactEvidence(root, artifact)); if (artifacts[0].package !== "@archie/runtime" || artifacts[1].package !== "@archie/conformance")
-    throw new Error("bundle v2 artifacts must be ordered runtime then conformance"); const record = { schemaVersion: 2, product: "archie", version: PRODUCT_VERSION, sourceCommit: request.sourceCommit, authorization: { kind: "none", claim: LOCAL_REVIEW_CLAIM }, artifacts, apm: apmEvidence(root, input.apm), analyzerCompatibility: analyzer(), htmlDesignSnapshot: parseJson(readFileSync(request.htmlProvenancePath, "utf8"), "HTML snapshot provenance") }; validateHtml(record.htmlDesignSnapshot); const bytes = serializeReleaseRecordV2(record), recordSha256 = sha256(bytes); const receipt = ["Archie private release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid", "Artifacts: @archie/runtime, @archie/conformance", "Archie authorization: NOT ASSESSED — locally reviewed private release selected.", "This receipt reports finalized-byte consistency only. Signing, public-release trust, controller distribution, and key operations are deferred.", ""].join("\n"); const recordPath = join(root, "release-record-v2.json"); writeFileSync(recordPath, bytes); writeFileSync(join(root, "release-review.txt"), receipt); return { record, recordPath, receiptPath: join(root, "release-review.txt"), recordSha256 }; }
+    throw new Error("bundle v2 artifacts must be ordered runtime then conformance"); const record = { schemaVersion: 2, product: "archie", version: PRODUCT_VERSION, sourceCommit: request.sourceCommit, authorization: { kind: "none", claim: LOCAL_REVIEW_CLAIM }, artifacts, apm: apmEvidence(root, input.apm), analyzerCompatibility: analyzer(), htmlDesignSnapshot: parseJson(readFileSync(request.htmlProvenancePath, "utf8"), "HTML snapshot provenance") }; validateHtml(record.htmlDesignSnapshot); const bundledLock = readFileSync(within(root, input.artifacts[0].lockFile), "utf8"), generatedNpm = npmProjection(record); if (bundledLock !== generatedNpm.lock)
+    throw new Error("bundle npm lock differs from the exact generated v2 projection"); validateNpmProjection({ manifest: generatedNpm.manifest, lock: bundledLock }, record); const bytes = serializeReleaseRecordV2(record), recordSha256 = sha256(bytes); const receipt = ["Archie private release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid", "Artifacts: @archie/runtime, @archie/conformance", "Archie authorization: NOT ASSESSED — locally reviewed private release selected.", "This receipt reports finalized-byte consistency only. Signing, public-release trust, controller distribution, and key operations are deferred.", ""].join("\n"); const recordPath = join(root, "release-record-v2.json"); writeFileSync(recordPath, bytes); writeFileSync(join(root, "release-review.txt"), receipt); return { record, recordPath, receiptPath: join(root, "release-review.txt"), recordSha256 }; }
 //# sourceMappingURL=release-record-v2.js.map

@@ -1,14 +1,37 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 const manifest = JSON.parse(readFileSync(new URL("../source-import-manifest.json", import.meta.url)));
 const workspace = new URL("..", import.meta.url).pathname;
-for (const item of manifest.imports) {
+
+function verifyRevision(item) {
   const actual = execFileSync("git", ["-C", item.repository, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   if (actual !== item.revision) throw new Error(`${item.id} is not at recorded revision ${item.revision}; found ${actual}`);
-  if (item.id === "architecture-assessment") continue;
+}
+
+for (const item of manifest.imports) verifyRevision(item);
+for (const migration of manifest.migrations ?? []) {
+  if (!migration.inventory) continue;
+  verifyRevision(migration);
+  const inventoryPath = join(workspace, migration.inventory);
+  const inventory = JSON.parse(readFileSync(inventoryPath, "utf8"));
+  if (inventory.source.repository !== migration.repository || inventory.source.revision !== migration.revision) {
+    throw new Error(`${migration.id} migration inventory source differs from its completed migration record`);
+  }
+  const summary = { included: 0, excluded: 0, adapted: 0, generated: 0 };
+  for (const entry of inventory.entries) summary[entry.disposition] += 1;
+  if (JSON.stringify(summary) !== JSON.stringify(migration.inventorySummary)) {
+    throw new Error(`${migration.id} migration inventory summary differs from its completed migration record`);
+  }
+  if (migration.legacyDestination && existsSync(join(workspace, migration.legacyDestination))) {
+    throw new Error(`${migration.id} completed migration still has legacy imported assets at ${migration.legacyDestination}`);
+  }
+}
+execFileSync(process.execPath, [join(workspace, "scripts/check-migration-inventory.mjs")], { stdio: "inherit" });
+
+for (const item of manifest.imports) {
   const temporary = mkdtempSync(join(tmpdir(), "archie-import-"));
   const archive = join(temporary, "source.tar");
   try {
@@ -21,11 +44,5 @@ for (const item of manifest.imports) {
     }
   } finally { rmSync(temporary, { recursive: true, force: true }); }
 }
-const assessmentSkill = join(workspace, "packages/assessment/skills/architecture-assessment/SKILL.md");
-const neutralizedAssessment = readFileSync(assessmentSkill, "utf8")
-  .replace("without a MyFlow workstream", "without a product workstream")
-  .replace(/1\. Resolve the loaded `myflow` skill directory from the available-skills metadata\. Run:\n\n   ```text\n   node <myflow-skill-dir>\/scripts\/resolve-repository-map\.mjs discover --cwd <git-root>\n   ```\n\n2\. Read the selected repository map when found, then/, "1. Inspect repository-local instructions, the supplied artifact, and its linked intent, design, research, glossary, decision, and architecture sources.\n2. Then")
-  .replace("3. Read `git status --short`. Record the selected repository map and current Git state.", "3. Read `git status --short`. Record applicable repository instructions and current Git state.");
-writeFileSync(assessmentSkill, neutralizedAssessment);
 writeFileSync(join(workspace, "packages/capabilities/assets/IMPORTS.json"), `${JSON.stringify({ format: manifest.format, productVersion: manifest.productVersion, imports: manifest.imports.filter((item) => item.id !== "html-design-snapshot"), migrations: manifest.migrations ?? [], excluded: manifest.excluded }, null, 2)}\n`);
-console.log(`Verified ${manifest.imports.length} reviewed source inputs at immutable revisions.`);
+console.log(`Verified ${manifest.imports.length} imported source and ${(manifest.migrations ?? []).length} completed migrations at immutable revisions.`);

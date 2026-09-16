@@ -200,7 +200,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:358c26afd1c5f55764871c4cf86f338d10c3f2d749d182f931ddf87d95861c46
+  content_hash: sha256:9c18225c9884aaad80e19cc8ede048d19a0e1817bba721de470911fa25aade23
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-contracts
@@ -218,7 +218,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:a7970fb0020e962c4d4cd9df726a227e78aec57ec496dea36729a7443cb6a37e
+  content_hash: sha256:b9030f14e233b7690f3a1369cba824a03849d8e2ee119737bfd88090710fc4b3
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-docs
@@ -343,8 +343,8 @@ local_deployed_file_hashes:
   .agents/skills/architecture-assessment/templates/evolution.md: sha256:392a120a38c73ebf84e31a50662ac66e230c3828da8256e97c56964481c37ead
   .agents/skills/architecture-assessment/templates/flows.md: sha256:686806d7a25ed454b72212a9b25971ec2a498ecc7aeed4c2bd5c656ace1febde
   .agents/skills/architecture-assessment/templates/inventory.md: sha256:9884119c3a3233f05ed2ec188edfa05e01e52e67f4e46eb85bbf26c1dfa689e5
-  .agents/skills/architecture-conformance-onboarding/SKILL.md: sha256:358c26afd1c5f55764871c4cf86f338d10c3f2d749d182f931ddf87d95861c46
-  .agents/skills/architecture-contracts/SKILL.md: sha256:a7970fb0020e962c4d4cd9df726a227e78aec57ec496dea36729a7443cb6a37e
+  .agents/skills/architecture-conformance-onboarding/SKILL.md: sha256:9c18225c9884aaad80e19cc8ede048d19a0e1817bba721de470911fa25aade23
+  .agents/skills/architecture-contracts/SKILL.md: sha256:b9030f14e233b7690f3a1369cba824a03849d8e2ee119737bfd88090710fc4b3
   .agents/skills/architecture-docs/SKILL.md: sha256:0877c385f73f6c6ccc471b584ab2a1a61078e9b88e1e052d025ca481f8897cd1
   .agents/skills/architecture-docs/package-commands.md: sha256:b1138b2655b35cbaa53307e838c7df767b2a759b3aa980a1b44d51532b17b2b0
   .agents/skills/likec4-authoring/SKILL.md: sha256:2b0689a74688f0fabefcf51715b7c38a826a51425d04eee7aa95585e865b1dea

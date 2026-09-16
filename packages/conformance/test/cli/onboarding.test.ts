@@ -1,43 +1,87 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { gzipSync } from "node:zlib";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 
 import { runCli } from "../../src/commands/run.js";
 import { verifyLocalOnboardingSetup, verifyOnboardingRuntime } from "../../src/onboarding-state/setup.js";
+import { makeNpmTarball, type NpmTarballManifest } from "../helpers/npm-tarball.js";
 
-process.env.npm_config_user_agent = "npm/11.19.0 node/v24.20.0";
+const installedManifest: NpmTarballManifest = { name: "@archie/conformance", version: "0.1.0-private.0", bin: { "architecture-conformance": "dist/cli.js" } };
 
-async function target(installed = true, lockfile = true): Promise<string> {
+async function target(options: { installed?: boolean; lockfile?: boolean; archiveManifest?: NpmTarballManifest; tarball?: Buffer } = {}): Promise<string> {
+  const { installed = true, lockfile = true, archiveManifest = installedManifest } = options;
   const root = await mkdtemp(join(tmpdir(), "architecture-conformance-onboarding-cli-"));
-  await writeFile(join(root, "package.json"), JSON.stringify({ devDependencies: { "architecture-conformance": "0.1.0" } }));
-  if (lockfile) await writeFile(join(root, "package-lock.json"), JSON.stringify({ name: "target", lockfileVersion: 3, packages: { "": { devDependencies: { "architecture-conformance": "0.1.0" } }, "node_modules/architecture-conformance": { version: "0.1.0" } } }));
+  const runtime = join(root, ".archie/runtime");
+  const locator = "file:npm/conformance.tgz";
+  const tarball = options.tarball ?? await makeNpmTarball(archiveManifest);
+  await mkdir(join(runtime, "npm"), { recursive: true });
+  await writeFile(join(runtime, "npm/conformance.tgz"), tarball);
+  await writeFile(join(runtime, "package.json"), JSON.stringify({ name: "archie-private-runtime", private: true, dependencies: { "@archie/conformance": locator } }));
+  if (lockfile) await writeFile(join(runtime, "package-lock.json"), JSON.stringify({ name: "archie-private-runtime", lockfileVersion: 3, packages: { "": { dependencies: { "@archie/conformance": locator } }, "node_modules/@archie/conformance": { version: installedManifest.version, resolved: locator, integrity: `sha512-${createHash("sha512").update(tarball).digest("base64")}`, bin: installedManifest.bin } } }));
   if (installed) {
-    await mkdir(join(root, "node_modules", "architecture-conformance"), { recursive: true });
-    await mkdir(join(root, "node_modules", ".bin"), { recursive: true });
-    await writeFile(join(root, "node_modules", "architecture-conformance", "package.json"), JSON.stringify({ name: "architecture-conformance", version: "0.1.0", bin: { "architecture-conformance": "dist/src/cli.js" } }));
-    await writeFile(join(root, "node_modules", ".bin", "architecture-conformance"), "#!/bin/sh\n");
+    const packageRoot = join(runtime, "node_modules/@archie/conformance");
+    await mkdir(join(packageRoot, "dist"), { recursive: true });
+    await mkdir(join(runtime, "node_modules/.bin"), { recursive: true });
+    await writeFile(join(packageRoot, "package.json"), JSON.stringify(installedManifest));
+    await writeFile(join(packageRoot, "dist/cli.js"), "#!/usr/bin/env node\n");
+    await symlink(join("..", "@archie", "conformance", "dist", "cli.js"), join(runtime, "node_modules/.bin/architecture-conformance"));
   }
   return root;
 }
 
-test("setup rejects an incompatible Node or an ambient non-npm runtime", () => {
-  assert.throws(() => verifyOnboardingRuntime("23.11.0", "npm/11.19.0 node/v23.11.0"), /Node >=24 <25/);
-  assert.throws(() => verifyOnboardingRuntime("24.0.0-rc.1", "npm/11.19.0 node/v24.0.0-rc.1"), /Node >=24 <25/);
-  assert.throws(() => verifyOnboardingRuntime("24.20.0", "yarn/1.22.0"), /run by npm/);
-  assert.doesNotThrow(() => verifyOnboardingRuntime("24.20.0", "npm/11.19.0 node/v24.20.0"));
+test("setup rejects an incompatible Node", () => {
+  assert.throws(() => verifyOnboardingRuntime("23.11.0"), /Node >=24 <25/);
+  assert.throws(() => verifyOnboardingRuntime("24.0.0-rc.1"), /Node >=24 <25/);
+  assert.doesNotThrow(() => verifyOnboardingRuntime("24.20.0"));
 });
 
-test("setup requires target lockfile evidence for the exact local devDependency", async () => {
-  const root = await target(true, false);
-  assert.throws(() => verifyLocalOnboardingSetup(root), /package-lock|lockfile/i);
+test("setup requires Archie runtime lockfile evidence for the local artifact", async () => {
+  const root = await target({ lockfile: false });
+  assert.throws(() => verifyLocalOnboardingSetup(root), /setup is missing|lock/i);
 });
 
-test("onboard init writes only safe operational state after local pinned setup verification", async () => {
+test("setup rejects missing, escaped, malformed, and tampered tarballs", async () => {
+  const missing = await target();
+  await rm(join(missing, ".archie/runtime/npm/conformance.tgz"));
+  assert.throws(() => verifyLocalOnboardingSetup(missing), /tarball is missing/);
+
+  const escaped = await target();
+  const external = join(escaped, "outside-conformance.tgz");
+  await writeFile(external, await readFile(join(escaped, ".archie/runtime/npm/conformance.tgz")));
+  await rm(join(escaped, ".archie/runtime/npm/conformance.tgz"));
+  await symlink(external, join(escaped, ".archie/runtime/npm/conformance.tgz"));
+  assert.throws(() => verifyLocalOnboardingSetup(escaped), /target-owned regular file/);
+
+  const malformed = await target({ tarball: gzipSync(Buffer.from("not a tar archive")) });
+  assert.throws(() => verifyLocalOnboardingSetup(malformed), /truncated|invalid block alignment|contains no entries/);
+
+  const tampered = await target();
+  await writeFile(join(tampered, ".archie/runtime/npm/conformance.tgz"), await makeNpmTarball({ ...installedManifest, extra: "changed" } as NpmTarballManifest));
+  assert.throws(() => verifyLocalOnboardingSetup(tampered), /lock or tarball differs/);
+});
+
+test("setup rejects tarballs with the wrong package identity or binary contract", async () => {
+  const missingBinary = await target({ tarball: await makeNpmTarball(installedManifest, false) });
+  assert.throws(() => verifyLocalOnboardingSetup(missingBinary), /omits its declared architecture-conformance binary/);
+
+  for (const [archiveManifest, expected] of [
+    [{ ...installedManifest, name: "wrong-package" }, /package identity/],
+    [{ ...installedManifest, version: "9.9.9" }, /package identity/],
+    [{ ...installedManifest, bin: { "architecture-conformance": "dist/wrong.js" } }, /binary contract/]
+  ] as Array<[NpmTarballManifest, RegExp]>) {
+    const root = await target({ archiveManifest });
+    assert.throws(() => verifyLocalOnboardingSetup(root), expected);
+  }
+});
+
+test("onboard init writes only safe operational state after Archie pin verification", async () => {
   const root = await target();
   const result = runCli(["onboard", "init", "--root", "tsconfig.json", "--include", "src/**/*.ts", "--exclude", "src/**/*.micro.ts", "--skill-location", ".agents/skills/architecture-conformance-onboarding"], root);
-  assert.equal(result.code, 0);
+  assert.equal(result.code, 0, result.stderr);
   const state = JSON.parse(await readFile(join(root, ".architecture-conformance", "onboarding.json"), "utf8")) as { version: string; scope: { exclusions: Array<{ path: string; reason: string }> } };
   assert.equal(state.version, "onboarding-state/v1");
   assert.deepEqual(state.scope.exclusions, [{ path: "src/**/*.micro.ts", reason: "command-line exclusion" }]);
@@ -45,9 +89,9 @@ test("onboard init writes only safe operational state after local pinned setup v
   assert.equal("rules" in state, false);
 });
 
-test("onboard refuses missing or non-local setup without a global fallback", async () => {
-  const root = await target(false);
+test("onboard refuses a missing Archie-provisioned command without a global fallback", async () => {
+  const root = await target({ installed: false });
   const result = runCli(["onboard", "init", "--root", "tsconfig.json", "--skill-location", "skills/onboarding"], root);
   assert.equal(result.code, 3);
-  assert.match(result.stderr, /install architecture-conformance as an exact devDependency.*commit the lockfile/i);
+  assert.match(result.stderr, /bootstrap or repair the pinned Archie release/i);
 });

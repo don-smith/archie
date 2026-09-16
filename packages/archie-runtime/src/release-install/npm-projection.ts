@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
 import type { ReleaseRecordV2 } from "../release-record/release-record-v2.js";
 
@@ -16,6 +17,7 @@ const runtimeDependencies = {
   typescript: "7.0.2"
 };
 const runtimeBin = { "architecture-docs": "dist/architecture-docs/bin/architecture-docs.mjs" };
+const releaseDependencyPackages = (JSON.parse(readFileSync(new URL("../../vendor/release-npm-lock-v2.json", import.meta.url), "utf8")) as { packages: Record<string, unknown> }).packages;
 
 export function npmProjection(record: ReleaseRecordForNpm): NpmProjection {
   if (record.schemaVersion === 2) return npmProjectionV2(record);
@@ -72,11 +74,9 @@ export function validateNpmProjection(projection: NpmProjection, record: Release
 function npmProjectionV2(record: ReleaseRecordV2): NpmProjection {
   const dependencies = Object.fromEntries(record.artifacts.map(artifact => [artifact.package, artifact.locator]));
   const manifest = { name: "archie-private-runtime", private: true, version: record.version, dependencies };
-  const packages: Record<string, unknown> = { "": { name: "archie-private-runtime", version: record.version, dependencies } };
+  const packages: Record<string, unknown> = { "": { name: "archie-private-runtime", version: record.version, dependencies }, ...releaseDependencyPackages };
   for (const artifact of record.artifacts) {
-    const artifactDependencies = { ...artifact.dependencies };
-    for (const local of record.artifacts) if (local.package in artifactDependencies) artifactDependencies[local.package] = local.locator;
-    packages[`node_modules/${artifact.package}`] = { version: artifact.version, resolved: artifact.locator, integrity: artifact.lockIntegrity, dependencies: artifactDependencies, bin: artifact.binaries, engines: artifact.engines };
+    packages[`node_modules/${artifact.package}`] = { version: artifact.version, resolved: artifact.locator, integrity: artifact.lockIntegrity, dependencies: artifact.dependencies, bin: artifact.binaries, engines: artifact.engines };
   }
   return { manifest: `${JSON.stringify(manifest, null, 2)}\n`, lock: `${JSON.stringify({ name: "archie-private-runtime", version: record.version, lockfileVersion: 3, requires: true, packages }, null, 2)}\n` };
 }
@@ -86,12 +86,12 @@ function validateNpmProjectionV2(projection: NpmProjection, record: ReleaseRecor
   if (manifest.name !== "archie-private-runtime" || manifest.private !== true || manifest.version !== record.version || lock.lockfileVersion !== 3) throw new Error("generated npm projection differs from the pinned release record");
   const dependencies = manifest.dependencies as Record<string, unknown> | undefined, packages = lock.packages as Record<string, Record<string, unknown>> | undefined;
   if (!dependencies || !packages || JSON.stringify(Object.keys(dependencies)) !== JSON.stringify(record.artifacts.map(artifact => artifact.package))) throw new Error("generated npm projection artifact order differs from the pinned release record");
+  const lockedRoot = packages[""];
+  if (!lockedRoot || lockedRoot.name !== manifest.name || lockedRoot.version !== record.version || JSON.stringify(lockedRoot.dependencies) !== JSON.stringify(dependencies)) throw new Error("generated npm projection root differs from the pinned release record");
   for (const artifact of record.artifacts) {
     if (dependencies[artifact.package] !== artifact.locator) throw new Error("generated npm projection differs from the pinned release record");
     const installed = packages[`node_modules/${artifact.package}`];
-    const expectedDependencies = { ...artifact.dependencies };
-    for (const local of record.artifacts) if (local.package in expectedDependencies) expectedDependencies[local.package] = local.locator;
-    if (!installed || installed.version !== artifact.version || installed.resolved !== artifact.locator || installed.integrity !== artifact.lockIntegrity || JSON.stringify(installed.dependencies) !== JSON.stringify(expectedDependencies) || JSON.stringify(installed.engines) !== JSON.stringify(artifact.engines) || JSON.stringify(installed.bin) !== JSON.stringify(artifact.binaries)) throw new Error("generated npm projection differs from the pinned release record");
+    if (!installed || installed.version !== artifact.version || installed.resolved !== artifact.locator || installed.integrity !== artifact.lockIntegrity || JSON.stringify(installed.dependencies) !== JSON.stringify(artifact.dependencies) || JSON.stringify(installed.engines) !== JSON.stringify(artifact.engines) || JSON.stringify(installed.bin) !== JSON.stringify(artifact.binaries)) throw new Error("generated npm projection differs from the pinned release record");
   }
 }
 

@@ -15,6 +15,15 @@ function run(command, args, cwd) {
   return spawnSync(command, args, { cwd, encoding: "utf8" });
 }
 
+test("completed migrations verify pinned sources without recreating legacy asset trees", () => {
+  const result = run("npm", ["run", "import:owned"], root);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Verified 1 imported source and 3 completed migrations/);
+  for (const legacy of ["packages/capabilities/assets/assessment", "packages/capabilities/assets/conformance"]) {
+    assert.equal(run(process.execPath, ["-e", `process.exit(require('node:fs').existsSync('${legacy}') ? 1 : 0)`], root).status, 0, legacy);
+  }
+});
+
 test("migration inventories cover both pinned source trees and reject an unmapped path", async () => {
   const result = run(process.execPath, ["scripts/check-migration-inventory.mjs"], root);
   assert.equal(result.status, 0, result.stderr || result.stdout);

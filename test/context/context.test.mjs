@@ -20,6 +20,9 @@ test("canonical skill sources exactly match the APM context projection", () => {
   for (const skill of ["archie", "architecture-assessment", "architecture-docs", "likec4-authoring", "architecture-conformance-onboarding", "architecture-contracts"]) {
     assert.ok(readFileSync(join(context, ".apm", "skills", skill, "SKILL.md"), "utf8").includes("name:"));
   }
+  const onboarding = readFileSync(join(context, ".apm/skills/architecture-conformance-onboarding/SKILL.md"), "utf8");
+  assert.match(onboarding, /\.archie\/runtime\/node_modules\/\.bin\/architecture-conformance/);
+  assert.doesNotMatch(onboarding, /install a published exact `architecture-conformance`/);
 });
 
 test("projected Assessment validator executes representative valid and invalid models", () => {

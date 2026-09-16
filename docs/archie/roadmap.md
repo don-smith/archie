@@ -24,22 +24,13 @@ The deployed skills are currently:
 
 This membership is accepted for the Foundation release line. It can change only through an explicit product-boundary decision.
 
-## Next milestone: conformance consolidation
+## Conformance consolidation status
 
-Archie's largest ownership gap is the halfway migration from `arch-conformance`. Archie contains the conformance skills and TypeScript analyzer, but not the complete engine or executable that those skills instruct repositories to run.
+Archie now owns the complete Conformance engine, formats, CLI, skills, tests, reports, replay, reconciliation, and onboarding state in `@archie/conformance`. The private release records Runtime and Conformance as ordered local artifacts and verifies the project-local `architecture-conformance` binary. Parity against pinned `arch-conformance@361b4259a405113deaf777a38dea12f229b5b461` and the versioned report contracts are retained as migration evidence.
 
-The next workstream should:
+The sibling `arch-conformance` repository remains writable as a rollback reference. Archiving or marking it read-only requires a separate developer decision after the finished release candidate is tried on another substantial repository. Architecture Docs consumption of the public Conformance contracts remains a later integration workstream.
 
-- add a cohesive Archie conformance workspace;
-- migrate realization maps, contracts, deterministic rules, dependency and cycle checks, exceptions, baselines, reports, replay, reconciliation, onboarding state, CLI behavior, exit semantics, and tests;
-- continue exposing the `architecture-conformance` binary for target compatibility;
-- provision that binary from the Archie release instead of requiring a separately maintained package;
-- preserve Architecture Docs as a downstream consumer of versioned reports rather than checker internals;
-- compare Archie and `arch-conformance` on representative fixtures before switching consumers;
-- update `source-import-manifest.json` only after parity and installation replay pass;
-- archive or mark `arch-conformance` read-only only after parity, consumer transition, and rollback evidence are accepted.
-
-`FINISH-CONFORMANCE-MIGRATION.md` is the retained research seed for this workstream. It is not proof that the migration is complete.
+`FINISH-CONFORMANCE-MIGRATION.md` remains the research seed, not current operational guidance.
 
 ## Deployment hardening and next private release
 
@@ -61,7 +52,7 @@ Resolve these independently rather than reopening Foundation:
 
 - **HTML Design:** decide whether its current snapshot relationship remains part of Architecture Docs, becomes a first-class Archie capability, or is replaced. Preserve provenance and notices under every option.
 - **Architecture Docs source:** after consumer transition evidence, make Archie canonical and treat `c4archviewer` as an archive or migration source.
-- **Conformance source:** make Archie canonical only after the gates above; until then, `arch-conformance` remains the complete implementation.
+- **Conformance source:** Archie is canonical at the pinned migration revision. Keep `arch-conformance` writable until release-candidate trial and rollback evidence are reviewed.
 - **Drift Detection:** keep the implemented playbook parked at Verify until the developer reviews its final pressure output. Do not infer acceptance from automated checks alone.
 
 ## Broader trials

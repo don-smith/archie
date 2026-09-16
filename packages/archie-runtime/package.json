@@ -18,6 +18,7 @@
     "dist",
     "vendor/html-design",
     "vendor/html-design.provenance.json",
+    "vendor/release-npm-lock-v2.json",
     "README.md"
   ],
   "engines": {

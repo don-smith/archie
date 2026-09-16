@@ -1,111 +1,64 @@
-## Short answer
+# Conformance migration record
 
-They have been **partially integrated**.
+Archie now owns the complete Conformance product. The migration from `arch-conformance` is complete at pinned source revision `361b4259a405113deaf777a38dea12f229b5b461`.
 
-Archie copied selected parts of `arch-conformance`, but the complete conformance product is still only in this repository. Given Archie's recorded product decisions, I think the integration should be finished, but as a deliberate migration rather than by merging the repositories wholesale.
+This document began as the research note for finishing a partial migration. It now records what moved, where it lives, and what still needs developer review. It is not an instruction to install or maintain a separate Conformance product.
 
-## What has already moved into Archie
+## Current ownership
 
-Archie records `arch-conformance` as a source input pinned to this repository’s current HEAD, `361b425`:
+The canonical implementation is the private `@archie/conformance` workspace at `packages/conformance/`. It owns:
 
-- `~/projects/archie/source-import-manifest.json`
-- `arch-conformance` is currently clean at that exact revision.
+- realization-map and contract formats;
+- deterministic rule evaluation;
+- dependency-policy and cycle checks;
+- exact exceptions and baselines;
+- report construction and rendering;
+- replay and reconciliation;
+- onboarding state;
+- the `architecture-conformance` CLI and exit semantics;
+- Conformance skills, documentation, fixtures, and tests.
 
-The imported or retained pieces are:
+Runtime owns the shared TypeScript analyzer contract and implementation. Conformance consumes `analysis-response-v2` through the public `@archie/runtime` boundary rather than carrying another compiler-backed analyzer.
 
-1. **Two operating skills**
-   - `architecture-conformance-onboarding`
-   - `architecture-contracts`
+The canonical skills live at:
 
-   The Archie copies are byte-for-byte copies of the source versions.
+- `packages/conformance/skills/architecture-conformance-onboarding/`
+- `packages/conformance/skills/architecture-contracts/`
 
-2. **The TypeScript analyzer**
-   - The compiler-backed analyzer core was copied into `@archie/runtime`.
-   - Supporting path, canonical JSON, and digest utilities were also retained.
-   - The analyzer core differs mostly through import-path rewrites.
-   - Archie wraps it with a smaller analysis request/response contract in:
-     - `packages/archie-runtime/src/analysis/typescript-program-v1.ts`
-     - `packages/archie-runtime/src/analysis/contracts.ts`
+Archie's generated context projects those exact trees into `packages/archie-context/.apm/skills/`.
 
-3. **Capability routing**
-   - Archie exposes conformance onboarding and architecture contracts as selectable capabilities.
-   - It also has a generic repository-check abstraction, although that abstraction does not implement conformance policy.
+## Target command
 
-This first appeared in Archie commit `53d9d6a`, `feat: establish Archie private trial foundation`.
-
-## What has not moved
-
-The actual `architecture-conformance` product remains here:
-
-- realization-map and contract formats
-- deterministic rule evaluation
-- dependency-policy and cycle checks
-- exact exceptions
-- baselines
-- report construction and rendering
-- replay and reconciliation
-- onboarding state machinery
-- CLI commands and exit semantics
-- most conformance tests
-
-Archie has:
-
-- no `architecture-conformance` package dependency
-- no production import from this repository
-- no conformance engine workspace
-- no `architecture-conformance` executable
-- no Git history relationship such as a fork or subtree
-
-This creates a visible gap. The copied Archie skills still tell target repositories to run:
+The Archie v2 release installs `@archie/runtime` and `@archie/conformance` into the target-owned runtime. Target repositories invoke Conformance only through:
 
 ```sh
-npx --no-install architecture-conformance ...
+.archie/runtime/node_modules/.bin/architecture-conformance ...
 ```
 
-So the Archie capability currently assumes that the target separately installs the standalone package. Archie itself cannot supply the command.
+Do not install a standalone package, use a global link, or allow `npx` to download a command. Onboarding verifies the local tarball, generated npm projection, installed package, binary link, and release-record-v2 evidence when present.
 
-## The nature of the overlap
+## Migration evidence
 
-| Area | Relationship |
-|---|---|
-| Product intent | Conformance is one of Archie’s named capabilities |
-| Skills | Copied verbatim into Archie |
-| TypeScript analysis | Copied and wrapped inside `@archie/runtime` |
-| Checker and contract engine | Still only in `arch-conformance` |
-| CLI | Still only in `arch-conformance` |
-| npm dependency | None |
-| Git relationship | Separate repositories |
-| Documentation/visualization | Intended downstream consumer of versioned reports, not part of the checker |
+`source-import-manifest.json` records Conformance as a completed Archie-owned migration. `packages/conformance/migration-inventory.json` maps all 98 tracked paths from the pinned source revision. The retained evidence includes:
 
-One subtle point is important: the overlap is not accidental duplication. Archie’s foundation artifacts explicitly say that Archie should own the full conformance core and CLI. The accepted scope says the developer does not intend to maintain separate npm products:
+- frozen CLI fixtures and exit meanings;
+- parity coverage for checks, replay, reconciliation, onboarding, malformed input, and stale state;
+- versioned report and onboarding contracts;
+- package-boundary tests;
+- packed Runtime and Conformance artifacts;
+- v1-to-v2 upgrade and compensation coverage;
+- native v2 installation through the generated manifest and bundled npm lock.
 
-`~/projects/archie/.myflow/workstreams/archie-foundation/scope/20260905T010634Z_archie-product-boundaries-and-prototype-gates.md`
+The former `packages/capabilities/assets/conformance/` copy has been removed. `scripts/import-owned-sources.mjs` verifies the pinned source, inventory summary, and absence of that legacy tree without recreating it.
 
-The corresponding research lists the complete conformance implementation as material to move into Archie:
+## Historical context
 
-`~/projects/archie/.myflow/workstreams/archie-foundation/research/20260905T004310Z_archie-monorepo-product-boundaries.md`
+The first Archie foundation import copied two skills and the TypeScript analyzer while leaving the checker, CLI, and most tests in `arch-conformance`. The copied skills still assumed a separately installed `architecture-conformance` package. That halfway state motivated this workstream.
 
-Delivery stopped after importing the skills and analyzer.
+Phases 1 through 7 replaced the partial import with the canonical workspace, parity evidence, public contracts, a separate Conformance release artifact, project-local execution, and completed-migration records. Architecture Docs remains a downstream consumer of versioned reports rather than checker internals.
 
-## Should they be integrated?
+The sibling `arch-conformance` repository remains a writable rollback reference. Archie does not push to it, archive it, or make it read-only. Any such change requires a separate developer decision.
 
-**Yes, based on Archie's recorded product decision.** Maintaining the current halfway state has few benefits:
+## Deferred review
 
-- the analyzer already exists in both repositories;
-- the skills exist in both repositories;
-- the skills expect a CLI Archie does not provide;
-- changes to the analyzer or skill contracts can drift;
-- users must understand two installation and versioning stories even though Archie claims one product version.
-
-I would finish the migration like this:
-
-1. Add a cohesive Archie workspace, probably `@archie/conformance`.
-2. Move the complete engine, artifact formats, CLI, and tests into it.
-3. Continue exposing the binary as `architecture-conformance` for target-repository compatibility.
-4. Have Archie’s skills and installer provision that binary from the Archie release rather than requiring an unrelated package.
-5. Keep Architecture Docs downstream. It should consume versioned conformance reports, not import checker internals. That matches `ARCHITECTURE_CONFORMANCE.md`.
-6. Add parity tests against this repository before declaring the migration complete.
-7. Once parity and installation replay pass, record this as a completed migration in `source-import-manifest.json`, as Archie is now doing for Architecture Docs.
-8. Archive this repository or mark it read-only. Do not keep both as writable canonical implementations.
-
-I would **not** delete or freeze `arch-conformance` yet. Today it is still the only complete implementation. Archie’s current uncommitted work is about migrating Architecture Docs and does not materially advance conformance consolidation.
+Automated migration and installation checks do not constitute developer acceptance. Review of the inventories, parity normalization, report contracts, `analysis-response-v2`, `release-record-v2`, Assessment output, and integrated Conformance behavior remains deferred to the Phase 8 release-candidate trial on another substantial repository.

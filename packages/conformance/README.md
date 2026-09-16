@@ -1,5 +1,7 @@
 # Architecture Conformance
 
+This private workspace is Archie's canonical Conformance implementation. It owns the engine, formats, CLI, skills, reports, replay, reconciliation, onboarding state, and tests migrated from pinned `arch-conformance@361b4259a405113deaf777a38dea12f229b5b461`.
+
 Architecture Conformance turns maintainer-approved dependency rules into a repeatable TypeScript check. It separates observed source evidence from architecture intent. The tool does not infer that an existing dependency is approved.
 
 ## Requirements
@@ -50,12 +52,11 @@ Each file has a separate job.
 
 ## Local onboarding bootstrap
 
-Install a published version as an exact devDependency in the target, commit the target lockfile, and invoke only its local executable. Do not use a global link or permit `npx` to download a version.
+The Archie release installs `@archie/conformance` beside Runtime and verifies its project-local binary link. Invoke only that pinned executable. Do not install a separate package, use a global link, or permit `npx` to download a version.
 
 ```sh
-npm install --save-dev --save-exact architecture-conformance@0.1.1
-npx --no-install architecture-conformance onboard setup
-npx --no-install architecture-conformance onboard init \
+.archie/runtime/node_modules/.bin/architecture-conformance onboard setup
+.archie/runtime/node_modules/.bin/architecture-conformance onboard init \
   --root tsconfig.json --include 'src/**/*.ts' \
   --exclude 'src/**/*.micro.ts' \
   --skill-location .agents/skills/architecture-conformance-onboarding
@@ -68,7 +69,7 @@ Initialization writes operational `onboarding-state/v1` at `.architecture-confor
 Start with `analyze` when you need to see what the adapter found or where its coverage ends.
 
 ```sh
-architecture-conformance analyze \
+.archie/runtime/node_modules/.bin/architecture-conformance analyze \
   --root packages/core/tsconfig.json \
   --include 'packages/core/src/**' \
   --exclude 'packages/core/src/**/*.micro.ts' \
@@ -166,7 +167,7 @@ Change a rule to `active` only after a maintainer supplies its approval metadata
 `check` loads the map and contract, builds fresh source evidence, validates the map, evaluates rules, applies exact exceptions, and writes a conformance report.
 
 ```sh
-architecture-conformance check \
+.archie/runtime/node_modules/.bin/architecture-conformance check \
   --map realization-map.json \
   --contract architecture-contract.json \
   --strict \
@@ -176,7 +177,7 @@ architecture-conformance check \
 Use text output to read the result. Keep JSON output when another tool or a baseline needs it.
 
 ```sh
-architecture-conformance check \
+.archie/runtime/node_modules/.bin/architecture-conformance check \
   --map realization-map.json \
   --contract architecture-contract.json \
   --strict \
@@ -192,7 +193,7 @@ A report distinguishes implementation drift, documentation drift, and coverage d
 Use state mode to reproduce one recorded observation. It reads the state-recorded map, contract, scope, paths, and evidence digests. It regenerates or verifies graph, summary, and report only when each recomputed digest matches the state. This is useful for restoring missing derived files from an unchanged observation.
 
 ```sh
-architecture-conformance replay \
+.archie/runtime/node_modules/.bin/architecture-conformance replay \
   --state .architecture-conformance/onboarding.json \
   --verify
 ```
@@ -200,7 +201,7 @@ architecture-conformance replay \
 Use map mode to analyze a current realization-map scope. It writes or verifies graph and summary only. The outputs are deterministic paths under the map directory: `evidence/observed-graph.json` and `evidence/onboarding-summary.md`. Map mode cannot produce a conformance report because a realization map does not supply a contract.
 
 ```sh
-architecture-conformance replay \
+.archie/runtime/node_modules/.bin/architecture-conformance replay \
   --map .architecture-conformance/realization-map.json \
   --regenerate
 ```
@@ -212,7 +213,7 @@ Each invocation needs exactly one of `--state` or `--map` and exactly one of `--
 `reconcile` compares two consumer-produced JSON documents. The package treats their IDs, fingerprints, and drift `state` values as opaque. It does not parse consumer reports or Markdown, alter an input, suppress a result, or decide a lifecycle action.
 
 ```sh
-architecture-conformance reconcile \
+.archie/runtime/node_modules/.bin/architecture-conformance reconcile \
   --active architecture/conformance/active-results.json \
   --drift architecture/conformance/drift-records.json \
   --output architecture/conformance/evidence/reconciliation.json
@@ -227,13 +228,13 @@ A reconciliation report has ordered `missing`, `duplicates`, `stale`, and `resol
 A baseline records current active result fingerprints. It supports incremental adoption without hiding a result behind a broad ignore.
 
 ```sh
-architecture-conformance baseline --report report.json --output baseline.json
+.archie/runtime/node_modules/.bin/architecture-conformance baseline --report report.json --output baseline.json
 ```
 
 Pass that baseline to later checks:
 
 ```sh
-architecture-conformance check \
+.archie/runtime/node_modules/.bin/architecture-conformance check \
   --map realization-map.json \
   --contract architecture-contract.json \
   --baseline baseline.json \
@@ -268,4 +269,4 @@ Result codes are fixed. `0` means pass, `1` means blocking violation, `2` means 
 
 `typescript-program-v1` supports explicit root configs and their project references, static ESM imports, re-exports, and string-literal dynamic imports. Nonliteral dynamic imports, CommonJS `require`, unresolved imports, compiler diagnostics, unsupported files, and scope files outside a program are gaps. Workspace declaration-to-source correspondence requires a unique path derived from declared `rootDir` and `outDir` or `declarationDir`. The command does not discover workspace configs.
 
-For repeat CI, run the same local command: `npx --no-install architecture-conformance check --map .architecture-conformance/realization-map.json --contract .architecture-conformance/architecture-contract.json --baseline .architecture-conformance/baseline.json --strict`. Read [TypeScript support](docs/typescript-support.md), the [compiler upgrade policy](docs/compiler-upgrade-policy.md), [the onboarding skill](skills/architecture-conformance-onboarding/SKILL.md), and [the maintainer workflow](skills/architecture-contracts/SKILL.md) before activating rules.
+For repeat CI, run the same local command: `.archie/runtime/node_modules/.bin/architecture-conformance check --map .architecture-conformance/realization-map.json --contract .architecture-conformance/architecture-contract.json --baseline .architecture-conformance/baseline.json --strict`. Read [TypeScript support](docs/typescript-support.md), the [compiler upgrade policy](docs/compiler-upgrade-policy.md), [the onboarding skill](skills/architecture-conformance-onboarding/SKILL.md), and [the maintainer workflow](skills/architecture-contracts/SKILL.md) before activating rules.

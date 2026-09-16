@@ -9,6 +9,8 @@ for (const packageName of packages) {
   rmSync(to, { recursive: true, force: true });
   cpSync(from, to, { recursive: true });
 }
+mkdirSync("dist/packages/archie-runtime/vendor", { recursive: true });
+cpSync("packages/archie-runtime/vendor/release-npm-lock-v2.json", "dist/packages/archie-runtime/vendor/release-npm-lock-v2.json");
 
 const architectureDocsSource = "packages/architecture-docs";
 const architectureDocsRuntime = "packages/archie-runtime/dist/architecture-docs";

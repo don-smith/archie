@@ -1,4 +1,4 @@
-/** Verifies the runtime expected by the locally installed package, without consulting PATH. */
-export declare function verifyOnboardingRuntime(nodeVersion?: string, npmUserAgent?: string | undefined): void;
-/** Rejects ambient executables: onboarding may run only the target's exact local devDependency. */
+/** Verifies the runtime supported by the Archie-provisioned package. */
+export declare function verifyOnboardingRuntime(nodeVersion?: string): void;
+/** Rejects ambient executables: onboarding may run only Archie's target-owned npm projection. */
 export declare function verifyLocalOnboardingSetup(repositoryRoot?: string): void;

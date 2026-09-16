@@ -9,10 +9,10 @@ The CLI creates evidence; the maintainer chooses architecture and approval. Do n
 
 ## Start or resume
 
-1. From the target repository, run `npx --no-install architecture-conformance onboard setup`. If it fails, stop: install a published exact `architecture-conformance` devDependency and commit the lockfile. Never use a global executable or download through `npx`.
+1. From the target repository, run `.archie/runtime/node_modules/.bin/architecture-conformance onboard setup`. If the project-local executable is missing or does not resolve into the pinned `@archie/conformance` package, stop and repair the Archie installation. Never use a global executable or download through `npx`.
 2. Choose the repository’s skill-discovery directory with the maintainer. Initialize once:
    ```sh
-   npx --no-install architecture-conformance onboard init \
+   .archie/runtime/node_modules/.bin/architecture-conformance onboard init \
      --root tsconfig.json --include 'src/**/*.ts' \
      --exclude 'src/**/*.micro.ts' \
      --skill-location .agents/skills/architecture-conformance-onboarding
@@ -25,7 +25,7 @@ The CLI creates evidence; the maintainer chooses architecture and approval. Do n
 1. Confirm roots, includes, and exclusions with the maintainer. Do not select an architecture ID.
 2. Generate evidence once:
    ```sh
-   npx --no-install architecture-conformance analyze \
+   .archie/runtime/node_modules/.bin/architecture-conformance analyze \
      --root tsconfig.json --include 'src/**/*.ts' \
      --exclude 'src/**/*.micro.ts' \
      --output .architecture-conformance/evidence/observed-graph.json \
@@ -37,7 +37,7 @@ The CLI creates evidence; the maintainer chooses architecture and approval. Do n
 5. Before a baseline, show the explicit JSON report and ask how the maintainer wants to handle active results. The agent must not create a baseline through `check`, create broad exceptions, or call any result passing.
 6. After each satisfied evidence boundary, advance only the operational checkpoint, for example:
    ```sh
-   npx --no-install architecture-conformance onboard advance \
+   .archie/runtime/node_modules/.bin/architecture-conformance onboard advance \
      --checkpoint evidence-generated
    ```
 

@@ -3,34 +3,6 @@
   "productVersion": "0.1.0-private.0",
   "imports": [
     {
-      "id": "architecture-assessment",
-      "repository": "/Users/don/projects/architecture-assessment",
-      "revision": "a281d5e4f7ac286279b1aac1c3ce45cda0d59f2e",
-      "owner": "developer-owned",
-      "paths": [
-        "skills/architecture-assessment"
-      ],
-      "destination": "packages/capabilities/assets/assessment"
-    },
-    {
-      "id": "conformance-skills",
-      "repository": "/Users/don/projects/arch-conformance",
-      "revision": "361b4259a405113deaf777a38dea12f229b5b461",
-      "owner": "developer-owned",
-      "paths": [
-        "skills/architecture-conformance-onboarding",
-        "skills/architecture-contracts"
-      ],
-      "destination": "packages/capabilities/assets/conformance",
-      "retainedAdapterSourcePaths": [
-        "src/analyzer/typescript-program-v1.ts",
-        "src/analyzer/types.ts",
-        "src/analyzer/repository-paths.ts",
-        "src/artifacts/canonical-json.ts",
-        "src/artifacts/digest.ts"
-      ]
-    },
-    {
       "id": "html-design-snapshot",
       "repository": "/Users/don/projects/html-design-skill",
       "revision": "f8bc6fbf750f59caabd94ab98cb5c34fdad9cc58",
@@ -42,6 +14,56 @@
     }
   ],
   "migrations": [
+    {
+      "id": "architecture-assessment",
+      "repository": "/Users/don/projects/architecture-assessment",
+      "revision": "a281d5e4f7ac286279b1aac1c3ce45cda0d59f2e",
+      "owner": "archie-owned",
+      "destination": "packages/assessment",
+      "inventory": "packages/assessment/migration-inventory.json",
+      "inventorySummary": {
+        "included": 40,
+        "excluded": 7,
+        "adapted": 15,
+        "generated": 0
+      },
+      "legacyDestination": "packages/capabilities/assets/assessment",
+      "gateEvidence": {
+        "automated": [
+          "314430b650d4c7e511cebc352faf266c63661a7b migration inventory and pinned fixtures",
+          "2f23d24ef7ed2fd003fa46b4dbb4fc177a6f15e3 canonical, projected, packed, and frozen-installed validation",
+          "08343371b04f0b1cdc9277a57dcc1df5c33319a2 closed public evidence contract"
+        ],
+        "manualReview": "deferred-to-phase-8-release-candidate-trial"
+      },
+      "reason": "Archie owns the canonical Assessment skill, schemas, validators, deterministic tests, controlled evaluation assets, package contract, and generated APM projection."
+    },
+    {
+      "id": "architecture-conformance",
+      "repository": "/Users/don/projects/arch-conformance",
+      "revision": "361b4259a405113deaf777a38dea12f229b5b461",
+      "owner": "archie-owned",
+      "destination": "packages/conformance",
+      "inventory": "packages/conformance/migration-inventory.json",
+      "inventorySummary": {
+        "included": 61,
+        "excluded": 28,
+        "adapted": 8,
+        "generated": 1
+      },
+      "legacyDestination": "packages/capabilities/assets/conformance",
+      "gateEvidence": {
+        "automated": [
+          "314430b650d4c7e511cebc352faf266c63661a7b migration inventory and frozen CLI fixtures",
+          "77aa84bcf6a5c74e794be71522aa035dec7f4568 complete engine, CLI, skills, and tests",
+          "9eee8ca030fb40323f3f726f658d23341ba7b0b2 parity report a82cc8161e64c8f67f684ca9f1e696ee31c2da26d66cd310863b14f1cb1756a9",
+          "08343371b04f0b1cdc9277a57dcc1df5c33319a2 closed report and state contracts",
+          "51a91883a99e4c3f1230168553b1371e1f33aa0c ordered local release artifact and project-local binary verification"
+        ],
+        "manualReview": "deferred-to-phase-8-release-candidate-trial"
+      },
+      "reason": "Archie owns the canonical Conformance engine, formats, CLI, reports, replay, reconciliation, onboarding state, skills, tests, and release artifact."
+    },
     {
       "id": "architecture-docs-and-likec4",
       "repository": "/Users/don/projects/c4archviewer",

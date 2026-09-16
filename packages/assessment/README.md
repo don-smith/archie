@@ -1,6 +1,6 @@
 # @archie/assessment
 
-This private workspace is Archie's canonical source for the `architecture-assessment` skill. The skill recovers a typed factual model before architecture judgment and keeps current code, intended architecture, inference, and unresolved gaps separate.
+This private workspace is Archie's canonical source for the `architecture-assessment` skill. Its exact migration inventory is pinned to `architecture-assessment@a281d5e4f7ac286279b1aac1c3ce45cda0d59f2e`; Archie owns the skill, schemas, validators, deterministic tests, and controlled evaluation assets. The skill recovers a typed factual model before architecture judgment and keeps current code, intended architecture, inference, and unresolved gaps separate.
 
 The deployed skill is self-contained under `skills/architecture-assessment/`. `packages/archie-context` is generated from that directory.
 
