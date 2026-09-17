@@ -1,10 +1,10 @@
 {
-  "format": "archie-private-trial-evidence-v2",
+  "format": "archie-private-trial-evidence-v3",
   "candidate": {
     "status": "local-only",
     "version": "0.1.0-private.0",
-    "sourceCommit": "c1dca9e588ae85aa9ef49cfbdd0800b66c2985af",
-    "schemaVersion": 2,
+    "sourceCommit": "f25e6ee54c2b369e2095d9ebf5c30ec02f5dc429",
+    "schemaVersion": 3,
     "authorization": "not-assessed"
   },
   "environment": {
@@ -17,14 +17,14 @@
   },
   "finalization": {
     "deterministic": true,
-    "recordSha256": "bc1e1eacab253d06b691eefb6e2735932dbf0cc50299c7914d364d2c3652cbec",
+    "recordSha256": "694f717d362244a90213dfaadd20e33be94bd697ca67620786bd5d4cbb06e2c6",
     "artifactManifest": {
-      "count": 13,
-      "digest": "560d9652c759b9d349fe16d8d4529d0c49995e24ec6cd0920693d4bedf351036"
+      "count": 9,
+      "digest": "3e2fe0ce79dfb4933a4eda92e1c3e333080fae5220e43ea80fa58a0abdbec52b"
     },
     "repeatedArtifactManifest": {
-      "count": 13,
-      "digest": "560d9652c759b9d349fe16d8d4529d0c49995e24ec6cd0920693d4bedf351036"
+      "count": 9,
+      "digest": "3e2fe0ce79dfb4933a4eda92e1c3e333080fae5220e43ea80fa58a0abdbec52b"
     },
     "orderedArtifacts": [
       "@archie/runtime",
@@ -43,7 +43,6 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
-      "html": "passed",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -58,7 +57,6 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
-      "html": "passed",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -73,7 +71,6 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
-      "html": "passed",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -88,7 +85,6 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
-      "html": "passed",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -103,63 +99,48 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
-      "html": "passed",
       "replay": "passed",
       "compensation": "not-run"
     },
     "byteStable": true,
     "manifests": {
       "bootstrap": {
-        "count": 8373,
-        "digest": "5710ce556ee01d1e430ac358821a2f5535f18f470b9cbc3350242f503009e714"
+        "count": 8299,
+        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
       },
       "firstVerify": {
-        "count": 8373,
-        "digest": "5710ce556ee01d1e430ac358821a2f5535f18f470b9cbc3350242f503009e714"
+        "count": 8299,
+        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
       },
       "secondVerify": {
-        "count": 8373,
-        "digest": "5710ce556ee01d1e430ac358821a2f5535f18f470b9cbc3350242f503009e714"
+        "count": 8299,
+        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
       },
       "sameVersion": {
-        "count": 8373,
-        "digest": "5710ce556ee01d1e430ac358821a2f5535f18f470b9cbc3350242f503009e714"
+        "count": 8299,
+        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
       },
       "replay": {
-        "count": 8373,
-        "digest": "5710ce556ee01d1e430ac358821a2f5535f18f470b9cbc3350242f503009e714"
+        "count": 8299,
+        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
       }
     }
   },
-  "v1ToV2Upgrade": {
-    "passed": true,
-    "report": {
-      "authorization": "not-assessed",
-      "recordConsistency": "passed",
-      "npm": "passed",
-      "apm": {
-        "frozen": "passed",
-        "baseline": "passed",
-        "policy": "passed",
-        "content": "passed"
-      },
-      "analyzerCompatibility": "passed",
-      "html": "passed",
-      "replay": "passed",
-      "compensation": "not-run"
-    }
+  "legacyPin": {
+    "rejected": true,
+    "error": "target has a pre-v3 Archie release pin; remove .archie/release, .archie/runtime, and .archie/version, then bootstrap the v3 release"
   },
   "recovery": {
     "rejected": true,
     "compensation": "passed",
     "restored": true,
     "before": {
-      "count": 8242,
-      "digest": "6f1174e8f045b37b5e36a30836ca0aaf3a0b39b1cca6759d35498c90dbea0f5c"
+      "count": 8299,
+      "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
     },
     "after": {
-      "count": 8242,
-      "digest": "6f1174e8f045b37b5e36a30836ca0aaf3a0b39b1cca6759d35498c90dbea0f5c"
+      "count": 8299,
+      "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
     }
   },
   "integrity": {
@@ -167,36 +148,36 @@
     "stagedArtifacts": {
       "@archie/runtime": {
         "locator": "file:npm/archie-runtime.tgz",
-        "sha256": "114cfd6a263ad51199d9f3f12ef2f914c864ad77dacfa26cd90fece92fb2b1a6",
-        "recordedSha256": "114cfd6a263ad51199d9f3f12ef2f914c864ad77dacfa26cd90fece92fb2b1a6"
+        "sha256": "177caec377b1620d7a4b91f396b1e86f61c2b1cbe1810add0ef8a547dc861919",
+        "recordedSha256": "177caec377b1620d7a4b91f396b1e86f61c2b1cbe1810add0ef8a547dc861919"
       },
       "@archie/conformance": {
         "locator": "file:npm/conformance.tgz",
-        "sha256": "f3ce0c7c6b11470f9bbaafe30c04de31924fff0a709646b7ec947828c5158247",
-        "recordedSha256": "f3ce0c7c6b11470f9bbaafe30c04de31924fff0a709646b7ec947828c5158247"
+        "sha256": "bb0365cd124f65cc574345845f56c72a10f26b0d39045e3c3a116569dd07688a",
+        "recordedSha256": "bb0365cd124f65cc574345845f56c72a10f26b0d39045e3c3a116569dd07688a"
       }
     },
     "packages": {
       "@archie/runtime": {
         "exact": true,
         "packed": {
-          "count": 230,
-          "digest": "3fd038c190a1b68a7a4407ba6cc1b89c7278419bcaab21d1c16df0b541e3b83e"
+          "count": 112,
+          "digest": "b24f22fe0bb8e2d1e74ae0e0265d188ad4fcabb40168d98747cb40f26db2eb16"
         },
         "installed": {
-          "count": 230,
-          "digest": "3fd038c190a1b68a7a4407ba6cc1b89c7278419bcaab21d1c16df0b541e3b83e"
+          "count": 112,
+          "digest": "b24f22fe0bb8e2d1e74ae0e0265d188ad4fcabb40168d98747cb40f26db2eb16"
         }
       },
       "@archie/conformance": {
         "exact": true,
         "packed": {
-          "count": 119,
-          "digest": "ba6881c12908ded5b80e38241b140285bf46d7d71d38b4fe367175ac9519b5e8"
+          "count": 122,
+          "digest": "ad71800764cd9a9d5d2e3844daa44548b6a4bdc379a95b2578d255e2c5607f00"
         },
         "installed": {
-          "count": 119,
-          "digest": "ba6881c12908ded5b80e38241b140285bf46d7d71d38b4fe367175ac9519b5e8"
+          "count": 122,
+          "digest": "ad71800764cd9a9d5d2e3844daa44548b6a4bdc379a95b2578d255e2c5607f00"
         }
       }
     },
@@ -204,23 +185,23 @@
       "archie": {
         "exact": true,
         "canonical": {
-          "count": 5,
-          "digest": "9d6d38bb3b0643cdeb64b1a699c51c07a24ecd461ce38d7d425c418c31ff9ad0"
+          "count": 6,
+          "digest": "f57a478fcb910ea634a5fef4f2697dcd70763035d65b0c102bb1756f3e9bf416"
         },
         "deployed": {
-          "count": 5,
-          "digest": "9d6d38bb3b0643cdeb64b1a699c51c07a24ecd461ce38d7d425c418c31ff9ad0"
+          "count": 6,
+          "digest": "f57a478fcb910ea634a5fef4f2697dcd70763035d65b0c102bb1756f3e9bf416"
         }
       },
       "architecture-assessment": {
         "exact": true,
         "canonical": {
-          "count": 13,
-          "digest": "9c9b47b77688dbd4aeb261d76bdd7e58c77b6f3ad66c7e809204f43633a7b53f"
+          "count": 14,
+          "digest": "2849aacac4d3140eb918eac8ff5d53cdc0eabb433b199c7f60e806ff0d7e54c9"
         },
         "deployed": {
-          "count": 13,
-          "digest": "9c9b47b77688dbd4aeb261d76bdd7e58c77b6f3ad66c7e809204f43633a7b53f"
+          "count": 14,
+          "digest": "2849aacac4d3140eb918eac8ff5d53cdc0eabb433b199c7f60e806ff0d7e54c9"
         }
       },
       "architecture-conformance-onboarding": {
@@ -249,11 +230,33 @@
         "exact": true,
         "canonical": {
           "count": 2,
-          "digest": "2816d247b3d0360cf4ad9061a50b5506b9208c5b422f660d0a52020e6b89d57d"
+          "digest": "21ef6b35673b067a18d337d186b2466fed6f68e98cd2deee32dbaa2d2f8c4c50"
         },
         "deployed": {
           "count": 2,
-          "digest": "2816d247b3d0360cf4ad9061a50b5506b9208c5b422f660d0a52020e6b89d57d"
+          "digest": "21ef6b35673b067a18d337d186b2466fed6f68e98cd2deee32dbaa2d2f8c4c50"
+        }
+      },
+      "architecture-review": {
+        "exact": true,
+        "canonical": {
+          "count": 3,
+          "digest": "d9703631028502c8ffd9421a77bbd3a9e34063b1768eec34caf4af12fc30926e"
+        },
+        "deployed": {
+          "count": 3,
+          "digest": "d9703631028502c8ffd9421a77bbd3a9e34063b1768eec34caf4af12fc30926e"
+        }
+      },
+      "html-design": {
+        "exact": true,
+        "canonical": {
+          "count": 36,
+          "digest": "cced891ac555eef44b1f18fd0d1921bc06304a77d2be864279b4725e0fe7f3de"
+        },
+        "deployed": {
+          "count": 36,
+          "digest": "cced891ac555eef44b1f18fd0d1921bc06304a77d2be864279b4725e0fe7f3de"
         }
       },
       "likec4-authoring": {
@@ -268,7 +271,7 @@
         }
       }
     },
-    "skillCount": 6,
+    "skillCount": 8,
     "binaries": {
       "architectureDocs": "passed",
       "architectureConformance": "passed"
@@ -296,9 +299,13 @@
       "rejected": true,
       "error": "installed npm package differs from the pinned record: @archie/conformance"
     },
-    "html-byte": {
+    "deployed-html-design": {
       "rejected": true,
-      "error": "HTML snapshot mismatch: expected fa6da6ca296596f8f79539d4cadcc88df5c74b01e59a54124286868656bd91d6/115, got 6f6ee096daf648581da99de7db24d91801c46c58bce51d9d0f88fd9d0f4d11b5/115"
+      "error": "APM deployed Archie file differs from the native lock: .agents/skills/html-design/scripts/check-artifact.mjs"
+    },
+    "deployed-architecture-review": {
+      "rejected": true,
+      "error": "APM deployed Archie file differs from the native lock: .agents/skills/architecture-review/SKILL.md"
     },
     "apm-lock": {
       "rejected": true,
@@ -315,7 +322,7 @@
     "blocked": "blocked"
   },
   "capabilities": {
-    "count": 6,
+    "count": 7,
     "authorityStopsPreserved": true
   },
   "externalGates": {
@@ -323,7 +330,7 @@
     "immutableContextRef": "not-created",
     "push": "not-authorized",
     "tag": "not-authorized",
-    "note": "The local RC uses retained deterministic APM fixture identity while deploying and byte-checking the current six-skill context. A real immutable private ref and native APM lock remain manual gates."
+    "note": "The local RC uses retained deterministic APM fixture identity while deploying and byte-checking the current eight-skill context. A real immutable private ref and native APM lock remain manual gates."
   },
-  "textReport": "Archie private release verification\nArchie authorization: NOT ASSESSED — locally reviewed private release selected.\nRecord consistency: passed\nnpm: passed\nAPM frozen install: passed\nAPM baseline audit: passed\nAPM policy: passed\nAPM content: passed\nAnalyzer compatibility: passed\nHTML: passed\nReplay: passed\nCompensation: not-run"
+  "textReport": "Archie private release verification\nArchie authorization: NOT ASSESSED — locally reviewed private release selected.\nRecord consistency: passed\nnpm: passed\nAPM frozen install: passed\nAPM baseline audit: passed\nAPM policy: passed\nAPM content: passed\nAnalyzer compatibility: passed\nReplay: passed\nCompensation: not-run"
 }
