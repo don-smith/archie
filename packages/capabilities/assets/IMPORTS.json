@@ -99,12 +99,32 @@
         "skills/"
       ],
       "reason": "Archie ships HTML Design as a first-class capability. The standalone repository's portable skill bundle became Archie-owned source; its design-system records, generators, site, and evaluations stay in the standalone repository, which continues separately. The parse5 dependency is bundled into scripts/lib/check-artifact.mjs from packages/html-design/src/check-artifact.mjs so the deployed skill needs no installed dependencies."
+    },
+    {
+      "id": "architecture-review",
+      "repository": "/Users/don/projects/myflow",
+      "revision": "74965c241a5822479905057c0eecf77f49dc130d",
+      "owner": "developer-owned",
+      "destination": "packages/architecture-review",
+      "included": [
+        "skills/architecture-review/SKILL.md",
+        "skills/architecture-review/templates/architecture-review.md",
+        "skills/codebase-design/SKILL.md",
+        "skills/codebase-design/DEEPENING.md"
+      ],
+      "excluded": [
+        "skills/codebase-design/DESIGN-IT-TWICE.md",
+        "agents/codebase-locator.md",
+        "agents/codebase-analyzer.md",
+        "skills/_shared/"
+      ],
+      "reason": "Archie owns Architecture Review as its proactive-improvement capability. The review method was kept; MyFlow repository maps, shared metadata scripts, Pi's question tool, named subagents, and design/plan chaining were replaced with plain Git commands, host-neutral checkpoints, optional parallel analysis, .archie/reviews/ artifacts, and a work-item hand-off. Codebase Design's SKILL.md and DEEPENING.md became docs/archie/deep-module-vocabulary.md."
     }
   ],
   "excluded": [
     {
-      "path": "/Users/don/projects/myflow/skills/architecture-review",
-      "reason": "Architecture Review and MyFlow are outside shipped first-release membership. Archie retains only a neutral, serial structural-inspection contract."
+      "path": "/Users/don/projects/myflow",
+      "reason": "MyFlow lifecycle behavior, named agents, and general development skills are not shipped. Only Architecture Review (adapted) and the Codebase Design vocabulary (as a shared reference) were taken from it."
     },
     {
       "path": "skills/",
