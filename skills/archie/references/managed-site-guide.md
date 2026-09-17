@@ -41,7 +41,7 @@ The developer or maintainer keeps decision authority. Before a capability applie
 **Result.** Architecture Docs owns authored Markdown, the claims ledger, the ordered page map, `preview/`, and `handoff/`. A maintainer approves claims. HTML Design alone owns the final `site/`, and its presentation must consume the architecture handoff rather than an unrelated copy.
 
 <!-- archie-capability:architecture-docs:start -->
-**Start.** Ask Archie to route the work to Architecture Docs. Run its commands from the target repository through the pinned target-local `architecture-docs` package and its `architecture-docs.config.json`. Begin by inventorying existing architecture assets before creating or moving authored content.
+**Start.** Ask Archie to route the work to Architecture Docs. Run its commands from the target repository through the `architecture-docs` command in the project-local Archie runtime (`.archie/runtime`) and its `architecture-docs.config.json`. Begin by inventorying existing architecture assets before creating or moving authored content.
 
 ### LikeC4 authoring
 
@@ -58,7 +58,7 @@ Select the smallest view set that answers the reader's question. A context view 
 **Result.** LikeC4 authoring returns a validated workspace, selected view IDs, source links, claim IDs, assumptions, gaps, and the compiler result to Architecture Docs. LikeC4 compilation proves syntax and references, not architectural truth. Maintainer-approved evidence and claims provide that meaning.
 
 <!-- archie-capability:likec4-authoring:start -->
-**Start.** Ask Archie to use LikeC4 authoring as part of Architecture Docs, then provide the evidence inventory, claims ledger, target config, and the architecture question each view must answer. Compile through the pinned Architecture Docs package, not an unpinned global CLI.
+**Start.** Ask Archie to use LikeC4 authoring as part of Architecture Docs, then provide the evidence inventory, claims ledger, target config, and the architecture question each view must answer. Compile through the Architecture Docs command in the project-local Archie runtime, not an unpinned global CLI.
 
 ### Conformance onboarding
 

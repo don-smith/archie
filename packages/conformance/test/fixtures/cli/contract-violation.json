@@ -1,1 +1,0 @@
-{"version":"architecture-contract/v1","exceptions":[],"rules":[{"id":"no-core-infra","kind":"dependency-policy","intent":"forbid","enforcement":"active","severity":"error","world":"open","sources":["core"],"forbiddenTargets":["infra"],"edgeKinds":["runtime"],"approval":{"approvedBy":"maintainer","approvedAt":"2026-08-27"}}]}

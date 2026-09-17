@@ -12,7 +12,7 @@ import { ArchitectureDocsConfigurationError } from "../src/architecture-docs/err
 const fixture = path.resolve("test/fixtures/architecture-docs");
 const managedFixture = path.resolve("test/fixtures/architecture-docs-archie-managed");
 async function setup() { const directory = await mkdtemp(path.join(process.cwd(), ".tmp-publication-")); await cp(fixture, directory, { recursive: true }); return { directory, config: path.join(directory, "architecture-docs.config.json"), ledger: path.join(directory, "evidence/claims.json") }; }
-async function setupManaged(markerCase = "complete") {
+async function setupManaged(markerCase = "complete", { status = false } = {}) {
   const directory = await mkdtemp(path.join(process.cwd(), ".tmp-managed-publication-"));
   await cp(managedFixture, directory, { recursive: true });
   const configPath = path.join(directory, "architecture-docs.config.json");
@@ -23,6 +23,13 @@ async function setupManaged(markerCase = "complete") {
   if (markerCase === "stale") page = page.replace("archie-guide:v1", "archie-guide:v0");
   await writeFile(pagePath, page);
   const config = JSON.parse(await readFile(configPath, "utf8"));
+  if (status) {
+    config.architectureStatus = { snapshot: "status.json" };
+    await writeFile(configPath, JSON.stringify(config));
+    const snapshot = statusSnapshot();
+    snapshot.repository.name = config.repository.name;
+    await writeFile(path.join(directory, "status.json"), `${JSON.stringify(snapshot, null, 2)}\n`);
+  }
   const pages = [config.pages.home, ...config.pages.areas];
   await approveArchitectureDocsLedger(path.join(directory, "evidence/claims.json"), { claimIds: ["purpose", "runtime", "archie-guidance"], pages, reviewer: "maintainer@example.test" });
   await buildArchitectureDocs(configPath);
@@ -77,6 +84,35 @@ test("preview and publication reject installed duplicate Archie IDs during confi
     assert.match(checked.stderr, /CONFIGURATION_INVALID:/);
     assert.doesNotMatch(`${checked.stdout}\n${checked.stderr}`, /ARCHIE_AREA_DUPLICATE|Architecture docs publication checks passed/);
   } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+});
+
+test("an Archie-managed site with architecture status keeps both generated contracts", async () => {
+  for (const [markerCase, expectedCodes] of [["complete", []], ["missing", ["ARCHIE_MARKER_MISSING"]]]) {
+    const temporary = await setupManaged(markerCase, { status: true });
+    try {
+      const handoff = path.join(temporary.directory, "handoff");
+      const manifest = JSON.parse(await readFile(path.join(handoff, "manifest.json"), "utf8"));
+      const pageMap = JSON.parse(await readFile(path.join(handoff, "page-map.json"), "utf8"));
+      assert.equal(manifest.version, 2);
+      assert.equal(manifest.files.architectureStatus, "architecture-status.json");
+      assert.deepEqual(pageMap.areas.map(({ id }) => id), ["runtime", "archie"]);
+      assert.equal(pageMap.status.availability, "present");
+
+      assert.match(await readFile(path.join(temporary.directory, "preview/architecture-status/index.html"), "utf8"), /Fixture check/);
+      const archiePreview = await readFile(path.join(temporary.directory, "preview/archie/index.html"), "utf8");
+      if (markerCase === "complete") assert.match(archiePreview, /<!-- archie-guide:v1 -->/);
+
+      const guide = await readFile(path.join(handoff, "composition-guide.md"), "utf8");
+      assert.match(guide, /preserve all `archie-\*` comments from `pages\/archie\.md`/);
+      assert.match(guide, /## Deterministic architecture status/);
+
+      for (const mode of ["preview", "publication"]) {
+        const report = await checkArchitectureDocs(temporary.config, { mode });
+        assert.equal(report.ok, true, `${markerCase} ${mode}: ${report.diagnostics.map(({ message }) => message).join("\n")}`);
+        assert.deepEqual(report.warnings.map(({ code }) => code), expectedCodes, `${markerCase} ${mode}`);
+      }
+    } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+  }
 });
 
 test("the architecture-docs CLI prints warning codes without making them blockers", async () => {

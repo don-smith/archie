@@ -28,9 +28,7 @@ This membership is accepted for the Foundation release line. It can change only 
 
 Archie now owns the complete Conformance engine, formats, CLI, skills, tests, reports, replay, reconciliation, and onboarding state in `@archie/conformance`. The private release records Runtime and Conformance as ordered local artifacts and verifies the project-local `architecture-conformance` binary. Parity against pinned `arch-conformance@361b4259a405113deaf777a38dea12f229b5b461` and the versioned report contracts are retained as migration evidence.
 
-The sibling `arch-conformance` repository remains writable as a rollback reference. Archiving or marking it read-only requires a separate developer decision after the finished release candidate is tried on another substantial repository. Architecture Docs consumption of the public Conformance contracts remains a later integration workstream.
-
-`FINISH-CONFORMANCE-MIGRATION.md` remains the research seed, not current operational guidance.
+The sibling `arch-conformance` repository was retired on 2026-09-17 after consolidation; Archie is the only source. Architecture Docs consumption of the public Conformance contracts remains a later integration workstream.
 
 ## Deployment hardening and next private release
 
@@ -50,9 +48,10 @@ Hardening should cover:
 
 Resolve these independently rather than reopening Foundation:
 
-- **HTML Design:** decide whether its current snapshot relationship remains part of Architecture Docs, becomes a first-class Archie capability, or is replaced. Preserve provenance and notices under every option.
-- **Architecture Docs source:** after consumer transition evidence, make Archie canonical and treat `c4archviewer` as an archive or migration source.
-- **Conformance source:** Archie is canonical at the pinned migration revision. Keep `arch-conformance` writable until release-candidate trial and rollback evidence are reviewed.
+- **HTML Design:** decided on 2026-09-17 to ship HTML Design as a first-class Archie capability. The standalone `html-design-skill` repository stays separate, and duplication is accepted. Preserve provenance and notices.
+- **Architecture Docs source:** Archie is canonical. `c4archviewer` was retired on 2026-09-17 after its managed-site documentation and architecture status work was ported.
+- **Conformance source:** Archie is canonical. `arch-conformance` was retired on 2026-09-17.
+- **Assessment source:** Archie is canonical. `architecture-assessment` was retired on 2026-09-17. Assessment must not depend on MyFlow.
 - **Drift Detection:** keep the implemented playbook parked at Verify until the developer reviews its final pressure output. Do not infer acceptance from automated checks alone.
 
 ## Broader trials

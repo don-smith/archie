@@ -1,1 +1,0 @@
-{"version":"realization-map/v1","scope":{"rootConfigs":["tsconfig.json"],"include":["src/**/*.ts"],"exclusions":[]},"elements":[{"id":"core"},{"id":"infra"}],"mappings":[{"elementId":"core","path":"src/a.ts"},{"elementId":"infra","path":"src/b.ts"}]}
