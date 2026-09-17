@@ -1,0 +1,27 @@
+{
+  "name": "@archie/html-design",
+  "version": "0.1.0-private.0",
+  "private": true,
+  "description": "Archie's HTML Design skill: a design system and artifact tools for self-contained HTML documents, review packets, and architecture sites.",
+  "license": "MIT",
+  "type": "module",
+  "pi": {
+    "skills": [
+      "./skills/html-design"
+    ]
+  },
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1",
+    "parse5": "8.0.1"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

@@ -75,6 +75,30 @@
         "package-lock.json"
       ],
       "reason": "The former C4 Arch Viewer proof evolved into Architecture Docs and LikeC4 authoring. Archie now owns their canonical source, tests, command, and dependency contract; generated example-site output was deliberately not migrated. The initial migration was taken at f2b7c5f1353c5e76fe8739a657632edafc66580f; the Archie managed-site documentation warnings and the deterministic architecture status consumer were later ported from c4archviewer main at 81a008e629de8ff28b5db01a436c4425827feff5."
+    },
+    {
+      "id": "html-design",
+      "repository": "/Users/don/projects/html-design-skill",
+      "revision": "f8bc6fbf750f59caabd94ab98cb5c34fdad9cc58",
+      "owner": "developer-owned",
+      "destination": "packages/html-design",
+      "included": [
+        "dist/skill/html-design/",
+        "test/fixtures/artifacts/"
+      ],
+      "excluded": [
+        "dist/skill/html-design/node_modules/",
+        "dist/skill/html-design/package.json",
+        "dist/skill/html-design/package-lock.json",
+        "system/",
+        "catalog/",
+        "scripts/",
+        "site/",
+        "evaluations/",
+        "examples/",
+        "skills/"
+      ],
+      "reason": "Archie ships HTML Design as a first-class capability. The standalone repository's portable skill bundle became Archie-owned source; its design-system records, generators, site, and evaluations stay in the standalone repository, which continues separately. The parse5 dependency is bundled into scripts/lib/check-artifact.mjs from packages/html-design/src/check-artifact.mjs so the deployed skill needs no installed dependencies."
     }
   ],
   "excluded": [

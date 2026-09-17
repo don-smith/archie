@@ -11,16 +11,18 @@ function walk(source) {
 }
 
 const requested = process.argv.slice(2);
-const roots = requested.length ? requested : ["test", "packages/assessment/test", "packages/architecture-docs/test"];
+const roots = requested.length ? requested : ["test", "packages/assessment/test", "packages/architecture-docs/test", "packages/html-design/test"];
 const files = roots.flatMap(walk).map((file) => resolve(file)).sort();
 if (!files.length) throw new Error(`No tests found for: ${roots.join(", ")}`);
 
 const assessmentRoot = resolve("packages/assessment");
 const conformanceRoot = resolve("packages/conformance");
 const architectureDocsRoot = resolve("packages/architecture-docs");
+const htmlDesignRoot = resolve("packages/html-design");
 const assessmentTests = files.filter((file) => file.startsWith(`${assessmentRoot}/`));
 const architectureDocsTests = files.filter((file) => file.startsWith(`${architectureDocsRoot}/`));
-const productTests = files.filter((file) => !file.startsWith(`${assessmentRoot}/`) && !file.startsWith(`${architectureDocsRoot}/`));
+const htmlDesignTests = files.filter((file) => file.startsWith(`${htmlDesignRoot}/`));
+const productTests = files.filter((file) => ![assessmentRoot, architectureDocsRoot, htmlDesignRoot].some((root) => file.startsWith(`${root}/`)));
 
 function run(group, cwd) {
   if (!group.length) return 0;
@@ -34,4 +36,5 @@ const conformanceStatus = productStatus === 0 && assessmentStatus === 0
   ? spawnSync("npm", ["run", "test:compiled"], { cwd: conformanceRoot, stdio: "inherit" }).status ?? 1
   : 1;
 const architectureDocsStatus = productStatus === 0 && assessmentStatus === 0 && conformanceStatus === 0 ? run(architectureDocsTests, architectureDocsRoot) : 1;
-process.exit(productStatus || assessmentStatus || conformanceStatus || architectureDocsStatus);
+const htmlDesignStatus = architectureDocsStatus === 0 ? run(htmlDesignTests, htmlDesignRoot) : 1;
+process.exit(productStatus || assessmentStatus || conformanceStatus || architectureDocsStatus || htmlDesignStatus);

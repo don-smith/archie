@@ -1,2 +1,3 @@
 # Immutable imported snapshot bytes retain their upstream formatting.
 packages/archie-runtime/vendor/html-design/** -whitespace
+packages/html-design/skills/html-design/** -whitespace

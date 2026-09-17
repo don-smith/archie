@@ -6,7 +6,7 @@ import { capabilityContracts, selectCapability } from "../../dist/packages/capab
 import { PRODUCT_VERSION } from "../../dist/packages/archie-runtime/src/index.js";
 
 const root = JSON.parse(readFileSync("package.json"));
-const packages = ["archie-runtime", "archie-cli", "archie-context", "architecture-docs", "assessment", "conformance", "capabilities"];
+const packages = ["archie-runtime", "archie-cli", "archie-context", "architecture-docs", "assessment", "conformance", "html-design", "capabilities"];
 const capabilityFieldIds = ["problem", "when-to-use", "result", "start"];
 const requiredTopicIds = ["overview", "working-relationship", "stewardship", "observed-import-graph", "c4-view-selection"];
 
@@ -74,6 +74,7 @@ test("reviewed source imports, completed migrations, and exclusions are recorded
   assert.deepEqual(manifest.imports.map((item) => item.id), ["html-design-snapshot"]);
   assert.ok(manifest.excluded.some((item) => item.path.includes("architecture-review")));
   assert.ok(manifest.migrations.some((item) => item.id === "architecture-docs-and-likec4" && item.destination === "packages/architecture-docs"));
+  assert.ok(manifest.migrations.some((item) => item.id === "html-design" && item.destination === "packages/html-design"));
   for (const [id, destination, inventory] of [
     ["architecture-assessment", "packages/assessment", "packages/assessment/migration-inventory.json"],
     ["architecture-conformance", "packages/conformance", "packages/conformance/migration-inventory.json"]

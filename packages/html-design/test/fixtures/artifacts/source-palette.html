@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta name="color-scheme" content="light dark" />
+    <title>Source palette leak</title>
+    <style>
+      main {
+        color: #111816;
+      }
+      @media (max-width: 60rem) {
+        main {
+          display: block;
+        }
+      }
+      @media print {
+        nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main><h1>Source palette leak</h1></main>
+  </body>
+</html>

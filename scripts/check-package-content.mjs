@@ -3,13 +3,14 @@ import { existsSync, readFileSync } from "node:fs";
 const packages = [
   ["@archie/runtime", "archie-runtime"], ["@archie/cli", "archie-cli"],
   ["@archie/context", "archie-context"], ["@archie/architecture-docs", "architecture-docs"],
-  ["@archie/assessment", "assessment"], ["@archie/conformance", "conformance"], ["@archie/capabilities", "capabilities"]
+  ["@archie/assessment", "assessment"], ["@archie/conformance", "conformance"], ["@archie/html-design", "html-design"],
+  ["@archie/capabilities", "capabilities"]
 ];
 for (const [name, directory] of packages) {
   const manifest = JSON.parse(readFileSync(`packages/${directory}/package.json`));
   if (manifest.private !== true) throw new Error(`${name} must remain private`);
   if (manifest.publishConfig) throw new Error(`${name} must not configure publication`);
-  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (["@archie/architecture-docs", "@archie/assessment", "@archie/conformance"].includes(name) && file === "skills")));
+  const unsafeAllowlist = !Array.isArray(manifest.files) || manifest.files.some((file) => /(^|\/)(test|\.myflow|skills)(\/|$)/.test(file) && !((name === "@archie/context" && file === ".apm/skills") || (["@archie/architecture-docs", "@archie/assessment", "@archie/conformance", "@archie/html-design"].includes(name) && file === "skills")));
   if (unsafeAllowlist) throw new Error(`${name} has unsafe package file allowlist`);
 }
 const runtime = JSON.parse(readFileSync("packages/archie-runtime/package.json"));
@@ -43,6 +44,12 @@ for (const [name] of packages) {
     for (const required of ["skills/architecture-assessment/SKILL.md", "skills/architecture-assessment/schemas/architecture-model.schema.json", "skills/architecture-assessment/scripts/check-model.mjs", "skills/architecture-assessment/scripts/check-assessment.mjs"]) {
       if (!packed.includes(required)) throw new Error(`Assessment package omits required skill asset: ${required}`);
     }
+  }
+  if (name === "@archie/html-design") {
+    for (const required of ["skills/html-design/SKILL.md", "skills/html-design/THIRD_PARTY_NOTICES.md", "skills/html-design/scripts/check-artifact.mjs", "skills/html-design/scripts/lib/check-artifact.mjs", "skills/html-design/templates/review-packet.html"]) {
+      if (!packed.includes(required)) throw new Error(`HTML Design package omits required skill asset: ${required}`);
+    }
+    if (packed.some((file) => file.includes("node_modules/"))) throw new Error("HTML Design package must not ship node_modules");
   }
   if (name === "@archie/conformance") {
     for (const required of ["skills/architecture-conformance-onboarding/SKILL.md", "skills/architecture-contracts/SKILL.md", "dist/formats/conformance-report-v1.js", "dist/replay/run.js", "dist/reconciliation/compare.js"]) {

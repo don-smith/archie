@@ -11,9 +11,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "node scripts/sync-product-version.mjs && tsc -p tsconfig.build.json && node scripts/stage-package-dist.mjs",
+    "build": "node scripts/sync-product-version.mjs && node scripts/bundle-html-design-checker.mjs && tsc -p tsconfig.build.json && node scripts/stage-package-dist.mjs",
     "test": "npm run build --silent && node scripts/run-tests.mjs",
     "test:architecture-docs": "npm run test --workspace @archie/architecture-docs",
+    "test:html-design": "npm run test --workspace @archie/html-design",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pack:check": "node scripts/check-package-content.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
