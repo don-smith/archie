@@ -1,6 +1,6 @@
 {
-  "name": "@archie/cli", "version": "0.1.0-private.0", "private": true,
+  "name": "@archie/cli", "version": "0.1.0-private.1", "private": true,
   "type": "module", "bin": { "archie": "./dist/cli.js", "archie-release": "./dist/release-cli.js" },
   "files": ["dist", "README.md"], "engines": { "node": ">=24 <25" },
-  "dependencies": { "@archie/runtime": "0.1.0-private.0" }
+  "dependencies": { "@archie/runtime": "0.1.0-private.1" }
 }

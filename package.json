@@ -1,6 +1,6 @@
 {
   "name": "archie",
-  "version": "0.1.0-private.0",
+  "version": "0.1.0-private.1",
   "private": true,
   "type": "module",
   "engines": {

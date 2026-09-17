@@ -1,6 +1,6 @@
 {
   "name": "@archie/conformance",
-  "version": "0.1.0-private.0",
+  "version": "0.1.0-private.1",
   "private": true,
   "type": "module",
   "bin": {
@@ -29,6 +29,6 @@
     "node": ">=24 <25"
   },
   "dependencies": {
-    "@archie/runtime": "0.1.0-private.0"
+    "@archie/runtime": "0.1.0-private.1"
   }
 }

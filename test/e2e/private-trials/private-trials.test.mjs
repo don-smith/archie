@@ -15,7 +15,7 @@ test("private-trial evaluation proves the integrated release-candidate matrix", 
     assert.equal(evidence.format, "archie-private-trial-evidence-v3");
     assert.deepEqual(evidence.candidate, {
       status: "local-only",
-      version: "0.1.0-private.0",
+      version: "0.1.0-private.1",
       sourceCommit: evidence.candidate.sourceCommit,
       schemaVersion: 3,
       authorization: "not-assessed"

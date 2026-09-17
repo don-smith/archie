@@ -1,6 +1,6 @@
 {
   "format": "archie-source-import-v1",
-  "productVersion": "0.1.0-private.0",
+  "productVersion": "0.1.0-private.1",
   "imports": [],
   "migrations": [
     {

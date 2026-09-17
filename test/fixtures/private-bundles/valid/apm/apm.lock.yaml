@@ -6,8 +6,8 @@ dependencies:
   name: archie-context
   host: github.com
   resolved_commit: 797c31fba65b397000092cff1175960e002bdff2
-  resolved_ref: v0.1.0-private.0
-  version: 0.1.0-private.0
+  resolved_ref: v0.1.0-private.1
+  version: 0.1.0-private.1
   package_type: apm_package
   content_hash: sha256:3374663d21c7258baebbd119c7b05a1e671301afa90cc0a4294bc540c9059378
   skill_subset:
