@@ -5,6 +5,7 @@ export * from "./analysis/typescript-program-v1.js";
 export * from "./analysis/typescript-program-v2.js";
 export * from "./repository-checks/contracts.js";
 export * from "./repository-checks/run.js";
+export * from "./repository-checks/architecture-status-v1.js";
 export * from "./html-snapshot/verify.js";
 export * from "./npm-tarball/inspect.js";
 export * from "./release-record/release-record-v1.js";

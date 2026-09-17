@@ -60,3 +60,7 @@ When a request does not fit a catalog capability, state the gap, evidence, risks
 Look for repository-owned architecture material before suggesting upkeep. Identify its location, source of truth, authorship or generation status, maintainer, related scripts, review rule, and evidence basis. Preserve that arrangement unless the developer approves a proposal to change it.
 
 The repository's Archie foundation document remains the human-facing boundary and roadmap. This reference defines portable operating instructions for future host packages.
+
+## Deterministic architecture status workflow
+
+When a repository configures deterministic architecture checks, keep the operation ordered and separate: run the target-owned checks, pass their recorded run facts to the Archie runtime snapshot writer, build architecture-docs from that latest snapshot, then let html-design compose the final site from the handoff. Architecture-docs consumes recorded evidence only; it does not run checks, read Git or the current clock, or create an aggregate architecture verdict. Preserve each check's result meaning, failed/missing/stale/not-run/unknown states, retained evidence, and authority boundary. The generated status route is the latest snapshot only—there is no status command or history interface.

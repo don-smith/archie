@@ -60,5 +60,6 @@ for (const [name] of packages) {
   if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
   if (name === "@archie/runtime" && !packed.includes("vendor/release-npm-lock-v2.json")) throw new Error("Runtime package omits the v2 dependency lock template");
   if (name === "@archie/runtime" && !packed.includes("dist/architecture-docs/scripts/check-final-site-browser.mjs")) throw new Error("Runtime package omits the complete Architecture Docs command implementation");
+  if (name === "@archie/runtime" && !packed.includes("dist/schemas/architecture-status-v1.schema.json")) throw new Error("Runtime package must carry architecture-status-v1 schema");
 }
 console.log("Private workspace publication guards and package contents passed.");
