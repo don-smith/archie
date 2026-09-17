@@ -1,9 +1,10 @@
-import { readFile, realpath, stat } from "node:fs/promises";
+import { lstat, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { ArchitectureDocsConfigurationError } from "./errors.mjs";
 import { loadEvidenceLedger } from "./evidence-ledger.mjs";
 
-const ROOT_FIELDS = new Set(["version", "repository", "root", "model", "document", "pages", "evidence", "palette", "sourceLinks", "supplementalInputs", "skillCommand"]);
+const ROOT_FIELDS = new Set(["version", "repository", "root", "model", "document", "pages", "evidence", "palette", "sourceLinks", "supplementalInputs", "skillCommand", "architectureStatus"]);
+const ARCHITECTURE_STATUS_FIELDS = new Set(["snapshot"]);
 const REPOSITORY_FIELDS = new Set(["name", "shortLabel"]);
 const MODEL_FIELDS = new Set(["workspace", "initialView"]);
 const DOCUMENT_FIELDS = new Set(["title"]);
@@ -78,6 +79,21 @@ async function canonicalPath(filename) {
   const absolute = path.resolve(filename);
   try { return await realpath(absolute); } catch { const parent = path.dirname(absolute); return parent === absolute ? absolute : path.join(await canonicalPath(parent), path.basename(absolute)); }
 }
+async function hasSymlinkComponent(filename, baseDirectory) {
+  const relative = path.relative(baseDirectory, filename);
+  let current = baseDirectory;
+  for (const component of relative.split(path.sep)) {
+    if (!component || component === ".") continue;
+    current = path.join(current, component);
+    try {
+      if ((await lstat(current)).isSymbolicLink()) return true;
+    } catch (error) {
+      if (error.code === "ENOENT") return false;
+      throw error;
+    }
+  }
+  return false;
+}
 function overlaps(left, right) {
   const relative = path.relative(left, right);
   return relative === "" || (!relative.startsWith(`..${path.sep}`) && relative !== "..");
@@ -105,6 +121,13 @@ function validateSupplementalInput(value, index, issues) {
     source: normalizedRelativePath(input.source, `${fieldPath}.source`, issues),
     destination: normalizedRelativePath(input.destination, `${fieldPath}.destination`, issues),
   };
+}
+function validateArchitectureStatus(value, issues) {
+  const fieldPath = "$.architectureStatus";
+  const object = objectAt(value, fieldPath, issues); if (!object) return null;
+  rejectUnknown(object, ARCHITECTURE_STATUS_FIELDS, fieldPath, issues);
+  const snapshot = normalizedRelativePath(object.snapshot, `${fieldPath}.snapshot`, issues);
+  return { snapshot };
 }
 function validateSkillCommand(value, issues) {
   if (!Array.isArray(value) || value.length === 0) {
@@ -167,6 +190,7 @@ function validateStructure(parsed, issues) {
   if (sourceLinks) { rejectUnknown(sourceLinks, SOURCE_FIELDS, "$.sourceLinks", issues); normalizedSourceLinks = { browserRoot: validateBrowserRoot(sourceLinks.browserRoot, issues) }; }
   const supplementalInputs = root.supplementalInputs === undefined ? undefined : (Array.isArray(root.supplementalInputs) ? root.supplementalInputs.map((input, index) => validateSupplementalInput(input, index, issues)).filter(Boolean) : (addIssue(issues, "$.supplementalInputs", "must be an array", "Provide an ordered array of supplemental input declarations."), []));
   const skillCommand = root.skillCommand === undefined ? undefined : validateSkillCommand(root.skillCommand, issues);
+  const architectureStatus = root.architectureStatus === undefined ? undefined : validateArchitectureStatus(root.architectureStatus, issues);
   const palette = objectAt(root.palette, "$.palette", issues);
   let normalizedPalette = null;
   if (palette) {
@@ -178,7 +202,7 @@ function validateStructure(parsed, issues) {
     }) : null;
     normalizedPalette = { document: normalizedDocumentPalette, diagram: colorObject(palette.diagram, DIAGRAM_FIELDS, "$.palette.diagram", issues) };
   }
-  return { version: 1, repository: normalizedRepository, root: rootValue, model: normalizedModel, document: normalizedDocument, pages: normalizedPages, evidence: normalizedEvidence, palette: normalizedPalette, sourceLinks: normalizedSourceLinks, ...(supplementalInputs === undefined ? {} : { supplementalInputs }), ...(skillCommand === undefined ? {} : { skillCommand }) };
+  return { version: 1, repository: normalizedRepository, root: rootValue, model: normalizedModel, document: normalizedDocument, pages: normalizedPages, evidence: normalizedEvidence, palette: normalizedPalette, sourceLinks: normalizedSourceLinks, ...(supplementalInputs === undefined ? {} : { supplementalInputs }), ...(skillCommand === undefined ? {} : { skillCommand }), ...(architectureStatus === undefined ? {} : { architectureStatus }) };
 }
 
 export async function loadArchitectureDocsConfig(configPath) {
@@ -200,6 +224,7 @@ export async function loadArchitectureDocsConfig(configPath) {
   const handoffDirectory = rootDirectory ? path.join(rootDirectory, "handoff") : null;
   const siteDirectory = rootDirectory ? path.join(rootDirectory, "site") : null;
   const ledgerPath = rootDirectory && normalized.evidence?.ledger ? resolveUnderRoot(configDirectory, normalized.root, normalized.evidence.ledger) : null;
+  const architectureStatusSnapshot = normalized.architectureStatus?.snapshot ? path.resolve(configDirectory, normalized.architectureStatus.snapshot) : null;
   const pages = normalized.pages;
   const pagePaths = [];
   if (pages) {
@@ -239,7 +264,15 @@ export async function loadArchitectureDocsConfig(configPath) {
   }
   if (rootDirectory) {
     const canonicalConfig = await canonicalPath(absoluteConfigPath);
+    const canonicalConfigDirectory = await canonicalPath(configDirectory);
     const canonicalRoot = await canonicalPath(rootDirectory);
+    if (architectureStatusSnapshot) {
+      const canonicalSnapshot = await canonicalPath(architectureStatusSnapshot);
+      if (await hasSymlinkComponent(architectureStatusSnapshot, configDirectory)) addIssue(issues, "$.architectureStatus.snapshot", "must not contain symlink components", "Use a regular path below the configuration directory.");
+      if (!overlaps(canonicalConfigDirectory, canonicalSnapshot)) addIssue(issues, "$.architectureStatus.snapshot", "must resolve below the configuration directory", "Use a repository-relative snapshot path that does not escape through a symlink.");
+      const generatedDirectories = await Promise.all([outputDirectory, handoffDirectory, siteDirectory].map(canonicalPath));
+      if (generatedDirectories.some((directory) => overlaps(directory, canonicalSnapshot) || overlaps(canonicalSnapshot, directory))) addIssue(issues, "$.architectureStatus.snapshot", "must not overlap preview/, handoff/, or site/", "Choose an authored snapshot path outside generated directories.");
+    }
     // The configuration may live beside the authored root or inside it (root: ".").
     if (modelWorkspace) {
       const canonicalModel = await canonicalPath(modelWorkspace);
@@ -253,14 +286,17 @@ export async function loadArchitectureDocsConfig(configPath) {
         const source = supplementalInputPaths[index];
         if (!source?.sourcePath) continue;
         const canonicalSource = await canonicalPath(source.sourcePath);
-        if (generatedDirectories.some((directory) => overlaps(directory, canonicalSource))) addIssue(issues, `$.supplementalInputs[${index}].source`, "must not read from a generated or html-design-owned directory", "Choose an authored source outside preview/, handoff/, and site/.");
+        if (generatedDirectories.some((directory) => overlaps(directory, canonicalSource) || overlaps(canonicalSource, directory))) addIssue(issues, `$.supplementalInputs[${index}].source`, "must not read from a generated or html-design-owned directory", "Choose an authored source outside preview/, handoff/, and site/.");
       }
     }
   }
   if (pages?.home === null) addIssue(issues, "$.pages.home", "is required", "Provide one orientation home page.");
   if (pages) {
+    const allConfiguredPages = [pages.home, ...pages.areas].filter(Boolean);
     const ids = new Set(); const slugs = new Set();
-    for (const page of [pages.home, ...pages.areas].filter(Boolean)) {
+    for (const page of allConfiguredPages) {
+      if (normalized.architectureStatus && page.id === "architecture-status") addIssue(issues, "$.pages", "page ID collides with generated architecture-status route", "Choose a different authored page ID.");
+      if (normalized.architectureStatus && page.slug === "architecture-status") addIssue(issues, "$.pages", "page slug collides with generated architecture-status route", "Choose a different authored page slug.");
       if (page.id && ids.has(page.id)) addIssue(issues, "$.pages", "contains duplicate page IDs", "Use unique stable page IDs.");
       if (page.id) ids.add(page.id);
       if (page.slug && slugs.has(page.slug)) addIssue(issues, "$.pages", "contains duplicate page slugs", "Use unique area URL slugs.");
@@ -290,8 +326,9 @@ export async function loadArchitectureDocsConfig(configPath) {
     },
     evidence: { ledger: normalizePathForPublic(configDirectory, ledgerPath) },
     site: { output: normalizePathForPublic(configDirectory, outputDirectory), title: normalized.document.title },
+    ...(normalized.architectureStatus === undefined ? {} : { architectureStatus: { snapshot: normalizePathForPublic(configDirectory, architectureStatusSnapshot) } }),
     ...(normalized.supplementalInputs === undefined ? {} : { supplementalInputs: normalized.supplementalInputs }),
     ...(normalized.skillCommand === undefined ? {} : { skillCommand: normalized.skillCommand }),
   };
-  return { ...publicConfig, configPath: absoluteConfigPath, ledger, paths: { rootDirectory, modelWorkspace, outputDirectory, handoffDirectory, siteDirectory, ledgerPath, pagePaths: Object.fromEntries(pagePaths.map(({ page, markdownPath }) => [page.id, markdownPath])), supplementalInputs: supplementalInputPaths }, publicConfig };
+  return { ...publicConfig, configPath: absoluteConfigPath, ledger, paths: { rootDirectory, modelWorkspace, outputDirectory, handoffDirectory, siteDirectory, ledgerPath, architectureStatusSnapshot, pagePaths: Object.fromEntries(pagePaths.map(({ page, markdownPath }) => [page.id, markdownPath])), supplementalInputs: supplementalInputPaths }, publicConfig };
 }

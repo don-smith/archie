@@ -10,6 +10,8 @@ import { buildCompositionGuide } from "./composition-guide.mjs";
 import { compileLikeC4 } from "./likec4-compiler.mjs";
 import { compilePalette } from "./palette.mjs";
 import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
+import { evaluateArchieDocumentation, isActiveArchieDocumentationPage, isArchieDocumentationActive } from "./archie-documentation.mjs";
+import { loadArchitectureStatus } from "./architecture-status.mjs";
 
 const HOME_TOPICS = ["purpose", "actors", "boundary", "runtime-unit", "flow", "domain-language", "pattern", "navigation"];
 const allPages = (config) => [config.pages.home, ...config.pages.areas];
@@ -19,28 +21,54 @@ function requiredClaimDiagnostics(page, claims, topics, path_) {
   return topics.filter((topic) => !attached.some((claim) => claim.topics.includes(topic))).map((topic) => diagnostic(path_, `has no approved claim for topic ${JSON.stringify(topic)}`, "Add an evidence-backed claim, explicitly review it, and attach it to this page."));
 }
 function jsonBytes(value) { return Buffer.from(`${JSON.stringify(value, null, 2)}\n`); }
-function handoffPageMap(config) {
+function handoffPageMap(config, architectureStatus = { configured: false }) {
   const pages = allPages(config);
   const record = (page) => ({ id: page.id, title: page.title, summary: page.summary, markdown: `pages/${page.id}.md`, viewIds: page.viewIds, claimIds: page.claimIds, initialViewId: page.initialViewId ?? page.viewIds[0] ?? null, ...(page.slug ? { slug: page.slug } : {}) });
-  return { version: 1, home: record(pages[0]), areas: pages.slice(1).map(record) };
+  return {
+    version: architectureStatus.configured ? 2 : 1,
+    home: record(pages[0]),
+    areas: pages.slice(1).map(record),
+    ...(architectureStatus.configured ? { status: { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability: architectureStatus.snapshot ? "present" : "missing" } } : {}),
+  };
 }
 function handoffClaims(config) {
   return { version: config.ledger.version, inventory: config.ledger.inventory, claims: config.ledger.claims, pageMapReview: config.ledger.pageMapReview };
 }
 async function readJson(filename) { return JSON.parse(await readFile(filename, "utf8")); }
 async function exists(filename) { try { await stat(filename); return true; } catch (error) { if (error.code === "ENOENT") return false; throw error; } }
+async function archiePreviewWarnings(config) {
+  const archieAreas = config.pages.areas.filter((area) => area.id === "archie");
+  let pageText;
+  if (archieAreas.length === 1) {
+    try { pageText = await readFile(path.join(config.paths.outputDirectory, archieAreas[0].slug, "index.html"), "utf8"); } catch {}
+  }
+  return evaluateArchieDocumentation({
+    configDirectory: path.dirname(config.configPath),
+    areas: config.pages.areas,
+    pageText,
+  });
+}
 
-async function freshnessDiagnostics(config, handoffDirectory) {
+async function freshnessDiagnostics(config, handoffDirectory, architectureStatus) {
   const diagnostics = [];
   let manifest;
   try { manifest = await readJson(path.join(handoffDirectory, "manifest.json")); }
   catch { return [diagnostic("$.handoff.manifest", "handoff manifest could not be read", "Run the architecture docs build before checking publication.", "HANDOFF_STALE")]; }
   const stale = (field, message) => diagnostics.push(diagnostic(`$.handoff.${field}`, message, "Rebuild the handoff from the current authored architecture inputs.", "HANDOFF_STALE"));
+  if (architectureStatus.snapshot) {
+    const currentStatusDigest = sha256(jsonBytes(architectureStatus.snapshot));
+    if (manifest.digests?.architectureStatus !== currentStatusDigest) stale("digests.architectureStatus", "status digest does not match the current configured snapshot");
+  } else if (manifest.digests?.architectureStatus) {
+    stale("digests.architectureStatus", "handoff contains a status digest but the configured snapshot is unavailable");
+  }
   const expectedClaims = handoffClaims(config);
-  const expectedPageMap = handoffPageMap(config);
+  const expectedPageMap = handoffPageMap(config, architectureStatus);
   if (manifest.digests?.claims !== sha256(jsonBytes(expectedClaims))) stale("digests.claims", "claims digest does not match the current evidence ledger");
   if (manifest.digests?.pageMap !== sha256(jsonBytes(expectedPageMap))) stale("digests.pageMap", "page-map digest does not match the current configuration");
-  const guideBytes = Buffer.from(buildCompositionGuide());
+  const archieDocumentationActive = await isArchieDocumentationActive(path.dirname(config.configPath));
+  const guideBytes = Buffer.from(buildCompositionGuide({
+    archiePage: expectedPageMap.areas.find((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
+  }));
   if (manifest.digests?.guide !== sha256(guideBytes)) stale("digests.guide", "composition guide digest does not match the generated guide");
   for (const page of allPages(config)) {
     try {
@@ -108,6 +136,7 @@ async function receiptDiagnostics(config, handoffDirectory) {
 export async function checkArchitectureDocs(configPath, { mode = "preview" } = {}) {
   if (!["preview", "publication"].includes(mode)) throw new TypeError(`Unknown architecture docs check mode: ${mode}`);
   const config = await loadArchitectureDocsConfig(configPath);
+  const architectureStatus = await loadArchitectureStatus(config);
   const statuses = claimStatus(config.ledger.claims);
   const diagnostics = [];
   const pages = allPages(config);
@@ -137,13 +166,30 @@ export async function checkArchitectureDocs(configPath, { mode = "preview" } = {
     const filename = page.id === config.pages.home.id ? path.join(config.paths.outputDirectory, "index.html") : path.join(config.paths.outputDirectory, page.slug, "index.html");
     try { await access(filename); } catch { diagnostics.push(diagnostic(`$.pages.${page.id}`, "generated preview route is missing", "Rebuild the architecture docs preview.")); }
   }
+  if (architectureStatus.configured) {
+    try { await access(path.join(config.paths.outputDirectory, "architecture-status", "index.html")); } catch { diagnostics.push(diagnostic("$.architectureStatus", "generated architecture status route is missing", "Rebuild the architecture docs preview.")); }
+    if (mode === "publication") {
+      try {
+        const manifest = await readJson(path.join(handoffDirectory, "manifest.json"));
+        if (manifest.version !== 2) diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff v2 status record is missing", "Rebuild the architecture docs handoff with architectureStatus configured."));
+        if (architectureStatus.snapshot) {
+          if (manifest.files?.architectureStatus !== "architecture-status.json") diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff status snapshot path is missing", "Rebuild the architecture docs handoff."));
+          const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+          if (manifest.digests?.architectureStatus !== sha256(statusBytes)) diagnostics.push(diagnostic("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the architecture docs handoff."));
+        } else if (manifest.files?.architectureStatus || manifest.digests?.architectureStatus) {
+          diagnostics.push(diagnostic("$.handoff.architectureStatus", "missing status snapshots must not be copied into the handoff", "Rebuild the architecture docs handoff without architecture-status.json."));
+        }
+      } catch { diagnostics.push(diagnostic("$.handoff.architectureStatus", "handoff manifest could not be read", "Rebuild the architecture docs handoff.")); }
+    }
+  }
   if (mode === "publication") {
-    diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory));
+    diagnostics.push(...await freshnessDiagnostics(config, handoffDirectory, architectureStatus));
     diagnostics.push(...await receiptDiagnostics(config, handoffDirectory));
   }
-  return { mode, ok: diagnostics.length === 0, diagnostics, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, pageMapDigest: pageMapDigest(pages), claimDigests: Object.fromEntries(statuses.map((claim) => [claim.id, claimDigest(claim)])) };
+  const warnings = await archiePreviewWarnings(config);
+  return { mode, ok: diagnostics.length === 0, diagnostics, warnings, warningCount: warnings.length, provisionalClaimCount: statuses.filter((claim) => !claim.approved).length, pageMapDigest: pageMapDigest(pages), claimDigests: Object.fromEntries(statuses.map((claim) => [claim.id, claimDigest(claim)])) };
 }
 export function assertPublication(report) {
-  if (!report.ok) throw new ArchitectureDocsBuildError("Architecture docs publication checks failed.", { code: "PUBLICATION_CHECK_FAILED", issues: report.diagnostics });
+  if (report.diagnostics.length > 0) throw new ArchitectureDocsBuildError("Architecture docs publication checks failed.", { code: "PUBLICATION_CHECK_FAILED", issues: report.diagnostics });
   return report;
 }

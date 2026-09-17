@@ -9,7 +9,8 @@ const mode = modeIndex >= 0 ? args[modeIndex + 1] : "publication";
 if (!config) { process.stderr.write("Usage: node scripts/check-architecture-docs.mjs --config <path> [--mode preview|publication]\n"); process.exit(1); }
 try {
   const report = await checkArchitectureDocs(config, { mode });
-  if (!report.ok) {
+  for (const entry of report.warnings) process.stderr.write(`warning ${entry.code}: ${entry.path}: ${entry.message} Expected: ${entry.expected}\n`);
+  if (report.diagnostics.length > 0) {
     for (const entry of report.diagnostics) process.stderr.write(`${entry.path}: ${entry.message} Expected: ${entry.expected}\n`);
     process.exitCode = 1;
   } else console.log(`Architecture docs ${mode} checks passed (${report.provisionalClaimCount} provisional claims).`);

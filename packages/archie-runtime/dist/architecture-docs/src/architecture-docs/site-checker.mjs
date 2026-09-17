@@ -1,7 +1,10 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { loadArchitectureDocsConfig } from "./config.mjs";
-import { calculateHandoffDigest } from "./handoff.mjs";
+import { evaluateArchieDocumentation } from "./archie-documentation.mjs";
+import { loadArchitectureStatus } from "./architecture-status.mjs";
+import { calculateHandoffDigest, sha256 } from "./handoff.mjs";
+const requireDigest = (bytes) => sha256(bytes);
 
 function diagnostic(path_, message, expected, code = undefined) {
   return { path: path_, message, expected, ...(code ? { code } : {}) };
@@ -30,8 +33,26 @@ function pageRoute(config, page) {
   return page.id === config.pages.home.id ? "index.html" : path.join(page.slug, "index.html");
 }
 
+async function archieFinalSiteWarnings(config, siteDirectory) {
+  const archieAreas = config.pages.areas.filter((area) => area.id === "archie");
+  let pageText;
+  if (archieAreas.length === 1) {
+    try { pageText = await readFile(path.join(siteDirectory, archieAreas[0].slug, "index.html"), "utf8"); } catch {}
+  }
+  return evaluateArchieDocumentation({
+    configDirectory: path.dirname(config.configPath),
+    areas: config.pages.areas,
+    pageText,
+  });
+}
+
+function generatedStatusPageRecord(availability) {
+  return { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability };
+}
+
 export async function checkFinalSite(configPath) {
   const config = await loadArchitectureDocsConfig(configPath);
+  const architectureStatus = await loadArchitectureStatus(config);
   const siteDirectory = path.join(config.paths.rootDirectory, "site");
   const handoffDirectory = path.join(config.paths.rootDirectory, "handoff");
   const diagnostics = [];
@@ -39,7 +60,8 @@ export async function checkFinalSite(configPath) {
 
   if (!await exists(siteDirectory)) {
     add("$.site", "final site does not exist", "Compose site/ with html-design before running the final-site check.", "SITE_MISSING");
-    return { ok: false, diagnostics, pageCount: 0 };
+    const warnings = await archieFinalSiteWarnings(config, siteDirectory);
+    return { ok: false, diagnostics, warnings, warningCount: warnings.length, pageCount: 0 };
   }
 
   let manifest;
@@ -70,6 +92,37 @@ export async function checkFinalSite(configPath) {
   }
   const viewIds = new Set(views.map((view) => view.id));
   const pages = [config.pages.home, ...config.pages.areas];
+  if (config.architectureStatus) {
+    const statusRoute = path.join(siteDirectory, "architecture-status", "index.html");
+    if (!await exists(statusRoute)) add("$.site.architectureStatus", "final site architecture status route is missing", "Compose architecture-status/index.html from the handoff status record.", "SITE_STATUS_ROUTE_MISSING");
+    const snapshotAvailable = Boolean(architectureStatus.snapshot);
+    if (manifest?.version !== 2) add("$.handoff.version", "configured architecture status requires handoff version 2", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_VERSION_MISMATCH");
+    if (snapshotAvailable) {
+      const currentStatusDigest = requireDigest(Buffer.from(`${JSON.stringify(architectureStatus.snapshot, null, 2)}\n`));
+      if (manifest?.digests?.architectureStatus !== currentStatusDigest) add("$.handoff.digests.architectureStatus", "handoff status digest does not match the current configured snapshot", "Rebuild the handoff from the current architecture status snapshot.", "SITE_STALE");
+    } else if (manifest?.digests?.architectureStatus) {
+      add("$.handoff.digests.architectureStatus", "handoff contains a status digest but the configured snapshot is unavailable", "Rebuild the handoff without a status snapshot.", "SITE_STALE");
+    }
+    let pageMap;
+    try {
+      pageMap = JSON.parse(await readFile(path.join(handoffDirectory, "page-map.json"), "utf8"));
+    } catch {
+      add("$.handoff.pageMap", "handoff page map could not be read", "Build handoff v2 with the generated architecture status page record.", "SITE_STATUS_PAGE_MAP_MISSING");
+    }
+    const expectedStatus = generatedStatusPageRecord(snapshotAvailable ? "present" : "missing");
+    if (pageMap && (pageMap.version !== 2 || JSON.stringify(pageMap.status) !== JSON.stringify(expectedStatus))) {
+      add("$.handoff.pageMap.status", "handoff page map is missing the matching generated architecture status record", "Build handoff v2 with the generated architecture-status page record and current availability.", "SITE_STATUS_PAGE_MAP_MISMATCH");
+    }
+    if (snapshotAvailable) {
+      try {
+        const statusBytes = await readFile(path.join(handoffDirectory, "architecture-status.json"));
+        if (manifest?.digests?.architectureStatus !== requireDigest(statusBytes)) add("$.handoff.digests.architectureStatus", "handoff status digest is inconsistent", "Rebuild the status handoff before composing the final site.");
+      } catch { add("$.handoff.architectureStatus", "handoff status snapshot is missing", "Build handoff v2 with architecture status configured.", "SITE_STATUS_HANDOFF_MISSING"); }
+    } else if (manifest?.files?.architectureStatus || manifest?.digests?.architectureStatus) {
+      add("$.handoff.architectureStatus", "missing status snapshots must not be copied into the handoff", "Rebuild the architecture docs handoff without architecture-status.json.", "SITE_STATUS_HANDOFF_UNEXPECTED");
+    }
+  }
+
   for (const page of pages) {
     const route = pageRoute(config, page).split(path.sep).join("/");
     const filename = path.join(siteDirectory, route);
@@ -100,7 +153,8 @@ export async function checkFinalSite(configPath) {
   }
 
   if (manifest && receipt?.architectureHandoffDigest === manifest.digests?.handoff && calculateHandoffDigest(manifest) !== manifest.digests.handoff) add("$.handoff.manifest.digests.handoff", "handoff manifest digest is internally inconsistent", "Rebuild the handoff before composing the final site.");
-  return { ok: diagnostics.length === 0, diagnostics, pageCount: pages.length };
+  const warnings = await archieFinalSiteWarnings(config, siteDirectory);
+  return { ok: diagnostics.length === 0, diagnostics, warnings, warningCount: warnings.length, pageCount: pages.length + (config.architectureStatus ? 1 : 0) };
 }
 
 export function formatFinalSiteReport(report) {

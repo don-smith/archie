@@ -42,9 +42,21 @@ handoff/
     └── likec4-views.js           # compiled LikeC4 web component bundle
 ```
 
-The handoff is self-contained for presentation work. Its paths are bundle-relative, its manifest contains no local absolute paths or secrets, and its digests identify the exact authored and semantic compiled inputs consumed. Each page record carries ordered `viewIds` and an `initialViewId`, so the consumer can mount every declared view without guessing. A page with `viewIds: []` is prose-only: omit its interactive-view section, selector, mount, and view metadata rather than falling back to a global model view. The generated LikeC4 JavaScript is a compiler artifact and is not assumed byte-for-byte deterministic; use `views.json` and semantic digests for identity. `architecture-docs` owns the model, evidence ledger, authored Markdown, page map, handoff, and `preview/`. `html-design` owns the final `site/` presentation and may restyle or restructure it without editing those inputs. Neither skill silently overwrites the other skill's owned files.
+The handoff is self-contained for presentation work. Its paths are bundle-relative, its manifest contains no local absolute paths or secrets, and its digests identify the exact authored and semantic compiled inputs consumed. Each page record carries ordered `viewIds` and an `initialViewId`, so the consumer can mount every declared view without guessing. A page with `viewIds: []` is prose-only: omit its interactive-view section, selector, mount, and view metadata rather than falling back to a global model view. The generated LikeC4 JavaScript is a compiler artifact and is not assumed byte-for-byte deterministic; use `views.json` and semantic digests for identity. When `architectureStatus` is configured, handoff version 2 also carries `architecture-status.json` and a generated `architecture-status/index.html` route between home and areas. The route displays recorded revision, generation time, check-owned meaning, evidence, limits, and all incomplete states; missing status is explicit, and there is no aggregate verdict or history. `architecture-docs` owns the model, evidence ledger, authored Markdown, page map, handoff, and `preview/`. `html-design` owns the final `site/` presentation and may restyle or restructure it without editing those inputs. Neither skill silently overwrites the other skill's owned files.
 
 Use this sequence:
+
+1. Run the repository's deterministic architecture checks.
+2. Have the runtime snapshot writer publish one normalized latest snapshot.
+3. Build `architecture-docs` from that recorded snapshot; the build never reruns checks or consults Git/current time.
+4. Invoke `html-design` with the handoff as its only architecture-content source; use the `rail-document` profile for long-form architecture docs.
+5. Let `html-design` publish the final `site/` output and run its artifact, browser, theme, narrow-layout, and print checks.
+6. Rebuild the handoff when claims, page order, Markdown, LikeC4 views, or status snapshot change; treat changed digests as a new composition input.
+7. Run architecture preview checks before maintainer approval, then run the final-site contract and browser checks against every composed route. Run publication checks only after the handoff and final site both pass.
+
+The status snapshot retains target-owned result codes and does not approve intent.
+
+Use this sequence (for statusless repositories, begin at step 4):
 
 1. Build `architecture-docs` and inspect the handoff manifest.
 2. Invoke `html-design` with the handoff as its only architecture-content source; use the `rail-document` profile for long-form architecture docs.

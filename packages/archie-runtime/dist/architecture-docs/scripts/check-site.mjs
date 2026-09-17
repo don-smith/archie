@@ -11,8 +11,9 @@ if (!configPath) {
 
 try {
   const report = await checkFinalSite(configPath);
+  for (const entry of report.warnings) process.stderr.write(`warning ${entry.code}: ${entry.path}: ${entry.message} Expected: ${entry.expected}\n`);
   console.log(formatFinalSiteReport(report));
-  if (!report.ok) process.exitCode = 1;
+  if (report.diagnostics.length > 0) process.exitCode = 1;
 } catch (error) {
   process.stderr.write(`${error.code ?? "CHECK_FAILED"}: ${error.message}\n`);
   for (const issue of error.issues ?? []) process.stderr.write(`${issue.path}: ${issue.message} Expected: ${issue.expected}\n`);
