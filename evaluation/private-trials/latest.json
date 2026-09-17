@@ -2,8 +2,8 @@
   "format": "archie-private-trial-evidence-v3",
   "candidate": {
     "status": "local-only",
-    "version": "0.1.0-private.0",
-    "sourceCommit": "f25e6ee54c2b369e2095d9ebf5c30ec02f5dc429",
+    "version": "0.1.0-private.1",
+    "sourceCommit": "24a9ce8e61accd76d917588f7324956d2ee4ebb5",
     "schemaVersion": 3,
     "authorization": "not-assessed"
   },
@@ -17,14 +17,14 @@
   },
   "finalization": {
     "deterministic": true,
-    "recordSha256": "694f717d362244a90213dfaadd20e33be94bd697ca67620786bd5d4cbb06e2c6",
+    "recordSha256": "b16b1eee8c63be53cd912e7ed6bc1aaf1e8780fa6e79e800b762e86e7d98c545",
     "artifactManifest": {
       "count": 9,
-      "digest": "3e2fe0ce79dfb4933a4eda92e1c3e333080fae5220e43ea80fa58a0abdbec52b"
+      "digest": "b680c300cf87cdb3a5d8a6ede107597d0a98bb2b44545e9ce4e8aa7f2699d834"
     },
     "repeatedArtifactManifest": {
       "count": 9,
-      "digest": "3e2fe0ce79dfb4933a4eda92e1c3e333080fae5220e43ea80fa58a0abdbec52b"
+      "digest": "b680c300cf87cdb3a5d8a6ede107597d0a98bb2b44545e9ce4e8aa7f2699d834"
     },
     "orderedArtifacts": [
       "@archie/runtime",
@@ -106,23 +106,23 @@
     "manifests": {
       "bootstrap": {
         "count": 8299,
-        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
       },
       "firstVerify": {
         "count": 8299,
-        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
       },
       "secondVerify": {
         "count": 8299,
-        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
       },
       "sameVersion": {
         "count": 8299,
-        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
       },
       "replay": {
         "count": 8299,
-        "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
       }
     }
   },
@@ -136,11 +136,11 @@
     "restored": true,
     "before": {
       "count": 8299,
-      "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+      "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
     },
     "after": {
       "count": 8299,
-      "digest": "70eb82348f249b453dbba575f3facd60c59199becdda9c4770024bf26d5ad88a"
+      "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
     }
   },
   "integrity": {
@@ -148,13 +148,13 @@
     "stagedArtifacts": {
       "@archie/runtime": {
         "locator": "file:npm/archie-runtime.tgz",
-        "sha256": "177caec377b1620d7a4b91f396b1e86f61c2b1cbe1810add0ef8a547dc861919",
-        "recordedSha256": "177caec377b1620d7a4b91f396b1e86f61c2b1cbe1810add0ef8a547dc861919"
+        "sha256": "268814cf73784a448c4e7a600ba6c50de2bad9cdddcc508000aadf39ac644f84",
+        "recordedSha256": "268814cf73784a448c4e7a600ba6c50de2bad9cdddcc508000aadf39ac644f84"
       },
       "@archie/conformance": {
         "locator": "file:npm/conformance.tgz",
-        "sha256": "bb0365cd124f65cc574345845f56c72a10f26b0d39045e3c3a116569dd07688a",
-        "recordedSha256": "bb0365cd124f65cc574345845f56c72a10f26b0d39045e3c3a116569dd07688a"
+        "sha256": "a40cf369bcc1a13c5712e5b769e5bdf73d2492351dca395fec83f5a2909e9a76",
+        "recordedSha256": "a40cf369bcc1a13c5712e5b769e5bdf73d2492351dca395fec83f5a2909e9a76"
       }
     },
     "packages": {
@@ -162,22 +162,22 @@
         "exact": true,
         "packed": {
           "count": 112,
-          "digest": "b24f22fe0bb8e2d1e74ae0e0265d188ad4fcabb40168d98747cb40f26db2eb16"
+          "digest": "c338f621708a0a8850e9159174ba859c0c725ab0e458ba9628b1f2c8399d8e97"
         },
         "installed": {
           "count": 112,
-          "digest": "b24f22fe0bb8e2d1e74ae0e0265d188ad4fcabb40168d98747cb40f26db2eb16"
+          "digest": "c338f621708a0a8850e9159174ba859c0c725ab0e458ba9628b1f2c8399d8e97"
         }
       },
       "@archie/conformance": {
         "exact": true,
         "packed": {
           "count": 122,
-          "digest": "ad71800764cd9a9d5d2e3844daa44548b6a4bdc379a95b2578d255e2c5607f00"
+          "digest": "faf705c8c290df8a9bc5754a9ac9eab918fe22f6b0852732b4a0fd498973b5b1"
         },
         "installed": {
           "count": 122,
-          "digest": "ad71800764cd9a9d5d2e3844daa44548b6a4bdc379a95b2578d255e2c5607f00"
+          "digest": "faf705c8c290df8a9bc5754a9ac9eab918fe22f6b0852732b4a0fd498973b5b1"
         }
       }
     },
