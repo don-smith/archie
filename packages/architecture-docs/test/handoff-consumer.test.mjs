@@ -25,7 +25,7 @@ async function serve(root) {
   return { server, url: `http://127.0.0.1:${server.address().port}` };
 }
 
-const htmlDesignSkill = process.env.HTML_DESIGN_SKILL_DIR ?? path.resolve("../archie-runtime/vendor/html-design");
+const htmlDesignSkill = process.env.HTML_DESIGN_SKILL_DIR ?? path.resolve("../html-design/skills/html-design");
 
 async function installCanonicalAssets(root, html) {
   const skill = htmlDesignSkill;
