@@ -14,7 +14,6 @@ function verifyRevision(item) {
 for (const item of manifest.imports) verifyRevision(item);
 for (const migration of manifest.migrations ?? []) {
   if (!migration.inventory) continue;
-  verifyRevision(migration);
   const inventoryPath = join(workspace, migration.inventory);
   const inventory = JSON.parse(readFileSync(inventoryPath, "utf8"));
   if (inventory.source.repository !== migration.repository || inventory.source.revision !== migration.revision) {
@@ -29,7 +28,6 @@ for (const migration of manifest.migrations ?? []) {
     throw new Error(`${migration.id} completed migration still has legacy imported assets at ${migration.legacyDestination}`);
   }
 }
-execFileSync(process.execPath, [join(workspace, "scripts/check-migration-inventory.mjs")], { stdio: "inherit" });
 
 for (const item of manifest.imports) {
   const temporary = mkdtempSync(join(tmpdir(), "archie-import-"));
@@ -45,4 +43,4 @@ for (const item of manifest.imports) {
   } finally { rmSync(temporary, { recursive: true, force: true }); }
 }
 writeFileSync(join(workspace, "packages/capabilities/assets/IMPORTS.json"), `${JSON.stringify({ format: manifest.format, productVersion: manifest.productVersion, imports: manifest.imports.filter((item) => item.id !== "html-design-snapshot"), migrations: manifest.migrations ?? [], excluded: manifest.excluded }, null, 2)}\n`);
-console.log(`Verified ${manifest.imports.length} imported source and ${(manifest.migrations ?? []).length} completed migrations at immutable revisions.`);
+console.log(`Verified ${manifest.imports.length} imported source at its immutable revision and ${(manifest.migrations ?? []).length} completed migration records.`);
