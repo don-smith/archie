@@ -19,8 +19,8 @@ test("all workspaces use the product version and stay private", () => {
   assert.equal(JSON.parse(readFileSync("packages/archie-context/product-version.json")).version, root.version);
 });
 test("capabilities preserve independent request, result, and authority contracts", () => {
-  assert.equal(capabilityContracts.length, 6);
-  assert.notEqual(selectCapability("assessment").resultMeaning, selectCapability("structural-inspection").resultMeaning);
+  assert.equal(capabilityContracts.length, 7);
+  assert.notEqual(selectCapability("assessment").resultMeaning, selectCapability("architecture-review").resultMeaning);
   assert.match(selectCapability("architecture-contracts").authorityStop, /decision/i);
 });
 test("managed-site guide covers the registered capabilities and marker contract", () => {
@@ -38,7 +38,9 @@ test("managed-site guide covers the registered capabilities and marker contract"
   assert.match(guide, /Architecture Assessment skill[\s\S]*optional brief/i);
   assert.doesNotMatch(guide, /planning artifact|workstream/i);
   assert.match(guide, /exact target-local `architecture-conformance` devDependency/);
-  assert.match(guide, /Structural inspection starts through Archie[\s\S]*no available owner/i);
+  assert.match(guide, /Architecture Review[\s\S]*\.archie\/reviews\//);
+  assert.match(guide, /HTML Design[\s\S]*without any extra installation/);
+  assert.doesNotMatch(guide, /structural-inspection|no available owner/i);
   assert.match(guide, /observed import graph/);
   assert.match(guide, /compilation proves syntax and references, not architectural truth/i);
   assert.doesNotMatch(guide, /Architecture Audit/i);

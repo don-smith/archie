@@ -37,7 +37,7 @@ test("private-trial evaluation proves the integrated v2 release-candidate matrix
     assert.ok(Object.values(evidence.integrity.skills).every(value => value.exact));
     assert.ok(Object.values(evidence.integrity.stagedArtifacts).every(value => value.sha256 === value.recordedSha256));
     assert.deepEqual(evidence.policy, { passed: "passed", noPolicy: "not-applied", blocked: "blocked" });
-    assert.equal(evidence.capabilities.count, 6);
+    assert.equal(evidence.capabilities.count, 7);
     assert.equal(evidence.capabilities.authorityStopsPreserved, true);
     for (const [name, mutation] of Object.entries(evidence.mutations)) assert.equal(mutation.rejected, true, `${name} mutation was accepted`);
     assert.equal(evidence.externalGates.push, "not-authorized");

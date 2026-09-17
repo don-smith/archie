@@ -24,10 +24,14 @@
 <!-- archie-capability:architecture-contracts:when-to-use -->
 <!-- archie-capability:architecture-contracts:result -->
 <!-- archie-capability:architecture-contracts:start -->
-<!-- archie-capability:structural-inspection:problem -->
-<!-- archie-capability:structural-inspection:when-to-use -->
-<!-- archie-capability:structural-inspection:result -->
-<!-- archie-capability:structural-inspection:start -->
+<!-- archie-capability:architecture-review:problem -->
+<!-- archie-capability:architecture-review:when-to-use -->
+<!-- archie-capability:architecture-review:result -->
+<!-- archie-capability:architecture-review:start -->
+<!-- archie-capability:html-design:problem -->
+<!-- archie-capability:html-design:when-to-use -->
+<!-- archie-capability:html-design:result -->
+<!-- archie-capability:html-design:start -->
 # Working with Archie
 
 This fixture carries the current Archie guide contract through the normal authored page, preview, handoff, and final-site route.

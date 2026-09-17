@@ -1,6 +1,6 @@
 # Archie capability catalog
 
-This catalog is the contract between Archie and the six registered product capabilities. Stable capability IDs describe responsibilities, not local paths or replacement implementations. An adapter resolves an available owner by ID and reports missing owners or prerequisites.
+This catalog is the contract between Archie and the seven registered product capabilities. Stable capability IDs describe responsibilities, not local paths or replacement implementations. An adapter resolves an available owner by ID and reports missing owners or prerequisites.
 
 | Capability | Trigger | Inputs | Outputs | Authority | Dependencies and gap |
 |---|---|---|---|---|---|
@@ -9,7 +9,8 @@ This catalog is the contract between Archie and the six registered product capab
 | `likec4-authoring` | Architecture Docs needs a supported C4 model or a view that answers a named question. | Evidence inventory, claims ledger, target config, architecture question, and known source links. | Compiled model, selected views, claim IDs, assumptions, and gaps. | Returns results to Architecture Docs. Compilation proves syntax and references, not architectural truth. | Runs through the Architecture Docs command in the project-local Archie runtime. It does not own prose, claim approval, or publication. |
 | `conformance-onboarding` | A TypeScript repository needs observed dependency evidence before the maintainer defines conformance rules. | Approved roots, includes, exclusions, and an exact target-local `architecture-conformance` devDependency. | Observed import graph, onboarding summary, and setup proposal. | The maintainer chooses architecture intent and approvals. Observed code cannot activate rules. | Local setup must pass before analysis. The import graph is an output, not a standalone capability. |
 | `architecture-contracts` | A maintainer needs a realization map, normative contract, exact exception, or explicit baseline. | Observed evidence, current realization map, contract, CLI report, and maintainer decisions. | Precise contract or exception and a deterministic conformance result. | A maintainer decides intent, active-rule approval, exceptions, and baseline handling. | Requires target-owned conformance artifacts. It never weakens a rule merely to pass CI. |
-| `structural-inspection` | One bounded module needs a broad, layer-by-layer advisory inspection. | Bounded module scope, repository evidence, and an available host owner. | Layered advisory findings and phased options. | The developer triages findings before follow-up. Findings are not an architecture pass. | Starts through Archie. The first release may have no host owner, and there is no standalone command. |
+| `architecture-review` | There is no current work item, but one bounded module needs a proactive, layer-by-layer structural review. | Bounded module, directory, or file; repository instructions; and repository evidence. | Triaged findings and a phased polish plan in `.archie/reviews/`. | The developer triages every finding. Accepted phases become proposed work items; findings are not an architecture pass. | Runs the Architecture Review skill. It never edits source and does not implement its plan. |
+| `html-design` | Architecture content needs a self-contained presentation: the final site from a handoff, an Assessment review packet, or a standalone document. | The Architecture Docs handoff or other approved content, and a profile (rail document, review packet, or application shell). | A checked HTML artifact. | Presentation only. It never changes claims, evidence, page intent, or source. | Ships with Archie beside the other skills; its scripts need no extra installation. |
 
 ## Selection rules
 
@@ -17,7 +18,8 @@ This catalog is the contract between Archie and the six registered product capab
 - Recommend an unavailable owner by stable capability ID. Name the missing dependency and do not claim that Archie ran an equivalent capability.
 - Select one primary owner. Add another only when its contract is necessary for the request.
 - Preserve the selected capability's result meaning, authority stops, and approval rules.
-- Use `assessment` for whole-system work and `structural-inspection` for a bounded advisory inspection.
+- Use `assessment` for whole-system work and `architecture-review` for a bounded module review.
+- Use `html-design` for presentation; route content changes to the capability that owns the content.
 - Treat the observed import graph as a `conformance-onboarding` output. Do not advertise it as a standalone command.
 - Record gaps rather than filling them with copied instructions, invented repository contracts, or host-specific assumptions.
 

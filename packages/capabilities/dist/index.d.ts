@@ -1,4 +1,4 @@
-export type CapabilityId = "assessment" | "architecture-docs" | "likec4-authoring" | "conformance-onboarding" | "architecture-contracts" | "structural-inspection";
+export type CapabilityId = "assessment" | "architecture-docs" | "likec4-authoring" | "conformance-onboarding" | "architecture-contracts" | "architecture-review" | "html-design";
 export interface CapabilityContract {
     id: CapabilityId;
     request: string;

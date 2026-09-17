@@ -21,7 +21,7 @@ The developer or maintainer keeps decision authority. Before a capability applie
 **Problem.** Use Assessment to recover and evaluate the architecture of a whole system when redesign, alignment, or refactoring needs a shared evidence base.
 
 <!-- archie-capability:assessment:when-to-use -->
-**When to use it.** Choose it for a whole-repository question that needs a fact model, current and intended views, explicit gaps, and evidence-led findings. Use Structural inspection instead for a bounded advisory inspection.
+**When to use it.** Choose it for a whole-repository question that needs a fact model, current and intended views, explicit gaps, and evidence-led findings. Use Architecture Review instead for one bounded module.
 
 <!-- archie-capability:assessment:result -->
 **Result.** The Architecture Assessment skill produces a validated fact model and assessment. It remains read-only over product source. The developer corrects recovered facts and triages recommendations, so completeness does not mean that every recommendation is approved.
@@ -91,25 +91,39 @@ The observed import graph is an output of Conformance onboarding, not a standalo
 <!-- archie-capability:architecture-contracts:start -->
 **Start.** Ask Archie to route the work to Architecture Contracts with the current observed evidence, realization map, contract, and CLI report. After the maintainer supplies the required decision, run `architecture-conformance check --map <map> --contract <contract> --strict` and trace results to their rule and source evidence.
 
-### Structural inspection
+### Architecture Review
 
-<!-- archie-capability:structural-inspection:problem -->
-**Problem.** Use Structural inspection for a broad, layer-by-layer look at one bounded module when the developer needs advisory findings and phased follow-up options.
+<!-- archie-capability:architecture-review:problem -->
+**Problem.** Use Architecture Review when there is no current work item but one bounded module deserves attention: before a release, after a major refactor, or when it has grown enough to warrant a structural review.
 
-<!-- archie-capability:structural-inspection:when-to-use -->
-**When to use it.** Choose it for a bounded module inspection. Use Assessment when the question concerns the whole system, needs a validated fact model, or must compare current and intended architecture.
+<!-- archie-capability:architecture-review:when-to-use -->
+**When to use it.** Choose it for a proactive, layer-by-layer review of one module, directory, or file. Use Assessment when the question concerns the whole system, needs a validated fact model, or must compare current and intended architecture.
 
-<!-- archie-capability:structural-inspection:result -->
-**Result.** Structural inspection produces layered advisory findings and phased options. The developer triages those findings before follow-up. They are not an architecture pass, an approved plan, or a substitute for a target-owned deterministic check.
+<!-- archie-capability:architecture-review:result -->
+**Result.** Architecture Review produces triaged findings and a phased polish plan in one living artifact. The developer triages every finding, and accepted phases become proposed work items for the repository's tracker. Findings are advisory: they are not an architecture pass, and the review never edits source.
 
-<!-- archie-capability:structural-inspection:start -->
-**Start.** Structural inspection starts through Archie. Give Archie the bounded module scope and the question to inspect. The first release may have no available owner in the current host. When that happens, Archie reports the unavailable owner and stops rather than substituting Assessment or inventing a standalone command.
+<!-- archie-capability:architecture-review:start -->
+**Start.** Ask Archie to review a bounded module. The review confirms the layer split with you, reads every file in scope, and writes to `.archie/reviews/` unless you choose another location. Implement accepted phases later through the repository's normal workflow.
+
+### HTML Design
+
+<!-- archie-capability:html-design:problem -->
+**Problem.** Use HTML Design when architecture content needs a readable, accessible, self-contained presentation: the final documentation site, an assessment review packet, or another standalone document.
+
+<!-- archie-capability:html-design:when-to-use -->
+**When to use it.** Choose it to compose the final `site/` from the Architecture Docs handoff, to build an Assessment `packet.html`, or to restyle an artifact with a named palette. Use Architecture Docs to change the architecture content itself.
+
+<!-- archie-capability:html-design:result -->
+**Result.** HTML Design produces a self-contained artifact that follows its profile (rail document, review packet, or application shell) and passes its artifact checker. It owns presentation only and never changes claims, evidence, page intent, or source.
+
+<!-- archie-capability:html-design:start -->
+**Start.** Ask Archie to compose or restyle the artifact with HTML Design. It ships with Archie beside the other skills, so its scaffold, palette, refresh, and check scripts run without any extra installation.
 
 <!-- archie-topic:stewardship -->
 ## Ongoing stewardship
 
 Treat architecture documentation and checks as maintained repository assets after onboarding. Update claims and authored Markdown when repository evidence changes. Recompile affected LikeC4 views, rebuild the Architecture Docs preview and handoff, and ask HTML Design to recompose the site from that handoff. Reapprove claims only through the maintainer review flow.
 
-Revisit conformance evidence when source scope or dependencies change. A maintainer must review changes to realization maps, contracts, active rules, exceptions, and baselines. Keep Assessment findings and Structural inspection findings tied to their evidence and triage decisions instead of presenting old advice as current fact.
+Revisit conformance evidence when source scope or dependencies change. A maintainer must review changes to realization maps, contracts, active rules, exceptions, and baselines. Keep Assessment findings and Architecture Review findings tied to their evidence and triage decisions instead of presenting old advice as current fact.
 
 An Archie-managed site should keep an obvious `Archie` area with slug `archie` in the ordered Architecture Docs page map. Run the repository's preview, publication, and final-site checks after changes. Missing or stale Archie material should be fixed, but its warning does not replace the checks that own claims, model validity, conformance, or final HTML.

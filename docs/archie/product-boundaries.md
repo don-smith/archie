@@ -11,7 +11,8 @@ Archie is a private, lockstep product for locally reviewed trials. Its one versi
 | LikeC4 authoring | C4 model work | Compiled model and selected views | Returns claims to documentation | LikeC4 syntax and reference validity |
 | Conformance onboarding | Conformance setup | Observed import graph and setup proposal | Cannot approve intent | Observed setup evidence |
 | Architecture Contracts | Normative contract change | Contract or exception | Maintainer decision first | Deterministic conformance result |
-| Structural inspection | Broad structural inspection | Layered advisory findings | Developer triage first | Findings, not an architecture pass |
+| Architecture Review | Proactive review of one bounded module | Triaged findings and phased polish plan | Developer triage first | Findings, not an architecture pass |
+| HTML Design | Self-contained HTML presentation | Checked site, packet, or document | Presentation only; content owners decide content | Artifact profile validity |
 
 Each capability is independently selectable. Routing never converts advisory results or target-owned checks into one universal architecture result. Material capabilities retain the proposal-before-apply stop.
 

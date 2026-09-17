@@ -55,7 +55,7 @@ test("builds an ordered Archie route through the preview and handoff", async () 
     const pageMap = JSON.parse(await readFile(path.join(directory, "handoff/page-map.json"), "utf8"));
     const guide = await readFile(path.join(directory, "handoff/composition-guide.md"), "utf8");
     assert.match(preview, /<!-- archie-guide:v1 -->/);
-    assert.match(preview, /<!-- archie-capability:structural-inspection:start -->/);
+    assert.match(preview, /<!-- archie-capability:architecture-review:start -->/);
     assert.equal(handoffPage, authoredPage);
     assert.match(handoffPage, /<!-- archie-topic:working-relationship -->/);
     assert.deepEqual(pageMap.areas.map(({ id }) => id), ["runtime", "archie"]);
@@ -98,7 +98,7 @@ test("treats an uninstalled Archie-ID page as ordinary Markdown", async () => {
     const handoffPage = await readFile(path.join(directory, "handoff/pages/archie.md"), "utf8");
     const guide = await readFile(path.join(directory, "handoff/composition-guide.md"), "utf8");
     assert.match(preview, /&lt;!-- archie-guide:v1 --&gt;/);
-    assert.match(preview, /&lt;!-- archie-capability:structural-inspection:start --&gt;/);
+    assert.match(preview, /&lt;!-- archie-capability:architecture-review:start --&gt;/);
     assert.match(preview, /&lt;aside&gt;ordinary raw HTML&lt;\/aside&gt;/);
     assert.equal(handoffPage, authoredPage);
     assert.doesNotMatch(guide, /preserve all `archie-\*` comments/);

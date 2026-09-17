@@ -86,13 +86,24 @@ Use a view whose scope matches the decision: context for boundaries, containers 
 - **Result:** Contracts, exceptions, and strict checks for the approved architecture.
 - **Start:** Begin with the maintainer-approved map and contract; the strict check belongs to Architecture Contracts.
 
-<!-- archie-capability:structural-inspection:problem -->
-<!-- archie-capability:structural-inspection:when-to-use -->
-<!-- archie-capability:structural-inspection:result -->
-<!-- archie-capability:structural-inspection:start -->
-### Structural inspection
+<!-- archie-capability:architecture-review:problem -->
+<!-- archie-capability:architecture-review:when-to-use -->
+<!-- archie-capability:architecture-review:result -->
+<!-- archie-capability:architecture-review:start -->
+### Architecture Review
 
-- **Problem:** A bounded module question may need focused structural evidence without a whole-system assessment.
-- **When to use:** Use it for advisory inspection of a defined module or seam.
-- **Result:** A bounded finding set with evidence and clear limits.
-- **Start:** Ask Archie to route the inspection. If its owner is unavailable, Archie reports that boundary rather than promising a standalone command.
+- **Problem:** A module can drift structurally without any current work item that would surface it.
+- **When to use:** Use it for a proactive, layer-by-layer review of one bounded module.
+- **Result:** Triaged findings and a phased polish plan that become work items.
+- **Start:** Ask Archie to review the module; accepted phases become work items in the repository's tracker.
+
+<!-- archie-capability:html-design:problem -->
+<!-- archie-capability:html-design:when-to-use -->
+<!-- archie-capability:html-design:result -->
+<!-- archie-capability:html-design:start -->
+### HTML Design
+
+- **Problem:** Architecture content needs a readable, accessible, self-contained presentation.
+- **When to use:** Use it to compose the final site from the handoff or to build a review packet.
+- **Result:** A checked HTML artifact that follows its profile.
+- **Start:** Ask Archie to compose the site from the current handoff with HTML Design.

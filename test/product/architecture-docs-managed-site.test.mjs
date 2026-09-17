@@ -76,7 +76,7 @@ test("shipped package builds an uninstalled Archie-ID page as ordinary Markdown"
     const preview = await readFile(path.join(target, "complete/preview/archie/index.html"), "utf8");
     const guide = await readFile(path.join(target, "complete/handoff/composition-guide.md"), "utf8");
     assert.match(preview, /&lt;!-- archie-guide:v1 --&gt;/);
-    assert.match(preview, /&lt;!-- archie-capability:structural-inspection:start --&gt;/);
+    assert.match(preview, /&lt;!-- archie-capability:architecture-review:start --&gt;/);
     assert.match(preview, /&lt;aside&gt;ordinary raw HTML&lt;\/aside&gt;/);
     assert.doesNotMatch(guide, /preserve all `archie-\*` comments/);
   } finally {
@@ -133,7 +133,8 @@ test("managed fixture preserves configured Archie handoff order and authored con
   assert.match(finalArchie, /Conformance onboarding can produce an observed TypeScript import graph/);
   assert.match(finalArchie, /<h3>Assessment<\/h3>/);
   assert.match(finalArchie, /Conformance onboarding/);
-  assert.match(finalArchie, /Structural inspection/);
+  assert.match(finalArchie, /<h3>Architecture Review<\/h3>/);
+  assert.match(finalArchie, /<h3>HTML Design<\/h3>/);
   assert.match(finalArchie, /target-local <code>architecture-conformance<\/code>/);
   assert.match(finalArchie, /@media print/);
   assert.match(finalArchie, /data-theme-choice="dark" aria-pressed="false"/);
