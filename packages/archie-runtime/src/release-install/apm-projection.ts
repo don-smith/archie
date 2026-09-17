@@ -1,4 +1,4 @@
-import { ARCHIE_SKILLS, type ArchieSkill, type ReleaseRecordV1 } from "../release-record/release-record-v1.js";
+import type { ArchieSkill, ReleaseRecord } from "../release-record/release-record-v3.js";
 
 export interface ApmProjection { manifest: string; lock?: string; }
 type Span = { start: number; end: number };
@@ -52,21 +52,21 @@ function replace(lines: string[], area: Span, indent: string, owned: (entry: str
   return [...lines.slice(0, current.start), ...next, ...lines.slice(current.end)];
 }
 
-const dependency = (record: ReleaseRecordV1): string[] => [
+const dependency = (record: ReleaseRecord): string[] => [
   `    - git: ${scalar(record.apm.locator, "APM locator")}`,
   `      ref: ${scalar(record.apm.ref, "APM ref")}`,
   "      skills:",
   ...record.apm.skills.map(skill => `        - ${scalar(skill, "APM skill")}`)
 ];
-const ownsDependency = (record: ReleaseRecordV1, entry: string[]) => field(entry, "git") === record.apm.locator && sameSkills(entry, record.apm.skills, "skills");
+const ownsDependency = (record: ReleaseRecord, entry: string[]) => field(entry, "git") === record.apm.locator && sameSkills(entry, record.apm.skills, "skills");
 
-function blankManifest(record: ReleaseRecordV1): string {
+function blankManifest(record: ReleaseRecord): string {
   return [
     "name: archie-private-runtime", `version: ${scalar(record.version, "Archie version")}`, "private: true", "targets:", "  - agent-skills",
     "dependencies:", "  apm:", ...dependency(record), "  mcp: []", "includes: auto", "scripts: {}", ""
   ].join("\n");
 }
-function mergeManifest(current: string | undefined, record: ReleaseRecordV1, previous?: ReleaseRecordV1): string {
+function mergeManifest(current: string | undefined, record: ReleaseRecord, previous?: ReleaseRecord): string {
   if (!current?.trim()) return blankManifest(record);
   let lines = current.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
   const dependencies = section(lines, "dependencies", "APM manifest");
@@ -76,7 +76,7 @@ function mergeManifest(current: string | undefined, record: ReleaseRecordV1, pre
 }
 
 /** Plans only an APM-valid manifest. Native APM owns the companion lock's metadata and serialization. */
-export function planApmProjection(record: ReleaseRecordV1, current: { manifest?: string; lock?: string }, previous?: ReleaseRecordV1): ApmProjection {
+export function planApmProjection(record: ReleaseRecord, current: { manifest?: string; lock?: string }, previous?: ReleaseRecord): ApmProjection {
   return { manifest: mergeManifest(current.manifest, record, previous), lock: current.lock };
 }
 
@@ -86,7 +86,7 @@ function requiredEntry(lines: string[], area: Span, indent: string, owned: (entr
   return lines.slice(candidates[0]!.start, candidates[0]!.end);
 }
 /** Rejects manifest or native APM 0.29 lock drift before Archie treats the target as pinned. */
-export function assertPinnedApmProjection(record: ReleaseRecordV1, projection: Required<ApmProjection>): void {
+export function assertPinnedApmProjection(record: ReleaseRecord, projection: Required<ApmProjection>): void {
   const manifest = projection.manifest.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
   const manifestDependency = requiredEntry(manifest, nestedSection(manifest, section(manifest, "dependencies", "APM manifest"), "apm", "APM manifest"), "    ", entry => ownsDependency(record, entry), "APM manifest dependencies");
   if (field(manifestDependency, "ref") !== record.apm.ref || !sameSkills(manifestDependency, record.apm.skills, "skills")) throw new Error("pinned Archie APM manifest has drifted");

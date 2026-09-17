@@ -1,18 +1,7 @@
 {
   "format": "archie-source-import-v1",
   "productVersion": "0.1.0-private.0",
-  "imports": [
-    {
-      "id": "html-design-snapshot",
-      "repository": "/Users/don/projects/html-design-skill",
-      "revision": "f8bc6fbf750f59caabd94ab98cb5c34fdad9cc58",
-      "owner": "external-immutable-snapshot",
-      "paths": [
-        "dist/skill/html-design"
-      ],
-      "destination": "packages/archie-runtime/vendor/html-design"
-    }
-  ],
+  "imports": [],
   "migrations": [
     {
       "id": "architecture-assessment",

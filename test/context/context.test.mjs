@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -17,7 +17,9 @@ test("canonical skill sources exactly match the APM context projection", () => {
   command(process.execPath, ["scripts/sync-context-skills.mjs", "--check"]);
   const manifest = readFileSync(join(context, "apm.yml"), "utf8");
   assert.match(manifest, /^targets:\n  - agent-skills$/m);
-  for (const skill of ["archie", "architecture-assessment", "architecture-docs", "likec4-authoring", "architecture-conformance-onboarding", "architecture-contracts"]) {
+  const projected = readdirSync(join(context, ".apm", "skills")).sort();
+  assert.deepEqual(projected, ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "architecture-review", "html-design", "likec4-authoring"]);
+  for (const skill of projected) {
     assert.ok(readFileSync(join(context, ".apm", "skills", skill, "SKILL.md"), "utf8").includes("name:"));
   }
   const onboarding = readFileSync(join(context, ".apm/skills/architecture-conformance-onboarding/SKILL.md"), "utf8");
@@ -76,7 +78,7 @@ test("runtime dispatcher invokes only the pinned project-local runtime", () => {
     mkdirSync(join(runtime, "node_modules", "@archie", "runtime", "dist"), { recursive: true });
     mkdirSync(join(target, ".archie", "release"), { recursive: true });
     writeFileSync(join(runtime, "package-lock.json"), "{}\n");
-    writeFileSync(join(target, ".archie", "release", "release-record-v1.json"), JSON.stringify({ npm: { package: "@archie/runtime" } }));
+    writeFileSync(join(target, ".archie", "release", "release-record-v3.json"), JSON.stringify({ schemaVersion: 3, artifacts: [{ package: "@archie/runtime" }, { package: "@archie/conformance" }] }));
     writeFileSync(join(runtime, "node_modules", "@archie", "runtime", "dist", "skill-runtime.js"), "process.stdout.write(JSON.stringify({ cwd: process.cwd(), args: process.argv.slice(2) }));");
     const result = command(process.execPath, [join(process.cwd(), context, "scripts", "dispatch-runtime.mjs"), target, "--describe"]);
     const dispatched = JSON.parse(result.stdout);

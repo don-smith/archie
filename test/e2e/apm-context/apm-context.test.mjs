@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
-const skillNames = ["archie", "architecture-assessment", "architecture-docs", "likec4-authoring", "architecture-conformance-onboarding", "architecture-contracts"];
+const skillNames = ["archie", "architecture-assessment", "architecture-conformance-onboarding", "architecture-contracts", "architecture-docs", "architecture-review", "html-design", "likec4-authoring"];
 
 function files(root, directory = root) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

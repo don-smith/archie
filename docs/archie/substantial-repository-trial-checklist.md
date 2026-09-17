@@ -14,9 +14,9 @@ Use this only after the local Phase 8 packet is green. Choose a repository that 
 1. Bootstrap the local candidate and save its JSON report and stderr.
 2. Confirm `.archie/runtime/package-lock.json` names exactly `@archie/runtime` and `@archie/conformance` at the candidate version.
 3. Run both `.archie/runtime/node_modules/.bin/architecture-docs` and `.archie/runtime/node_modules/.bin/architecture-conformance` on the repository.
-4. Confirm all six `.agents/skills` trees are present and the APM lock still retains unrelated target state.
+4. Confirm all eight `.agents/skills` trees are present and the APM lock still retains unrelated target state.
 5. Run `archie verify --format json` twice. The second replay must not change tracked files or target-owned release bytes.
-6. If this repository has a v1 installation, run the explicit v1-to-v2 upgrade and verify the old pin before staging.
+6. If this repository has a pre-v3 installation, confirm bootstrap refuses it, remove `.archie/release`, `.archie/runtime`, and `.archie/version`, and bootstrap the v3 candidate.
 
 ## Product behavior to inspect
 

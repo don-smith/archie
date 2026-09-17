@@ -73,7 +73,17 @@ test("managed-site packaging is the sole exception to target-owned architecture 
 
 test("reviewed source imports, completed migrations, and exclusions are recorded", () => {
   const manifest = JSON.parse(readFileSync("source-import-manifest.json"));
-  assert.deepEqual(manifest.imports.map((item) => item.id), ["html-design-snapshot"]);
+  assert.deepEqual(manifest.imports, []);
+  for (const migration of manifest.migrations) {
+    if (migration.legacyDestination) assert.equal(existsSync(migration.legacyDestination), false, `${migration.id} legacy assets remain`);
+    if (!migration.inventory) continue;
+    const inventory = JSON.parse(readFileSync(migration.inventory));
+    assert.equal(inventory.source.repository, migration.repository, `${migration.id} inventory repository`);
+    assert.equal(inventory.source.revision, migration.revision, `${migration.id} inventory revision`);
+    const summary = { included: 0, excluded: 0, adapted: 0, generated: 0 };
+    for (const entry of inventory.entries) summary[entry.disposition] += 1;
+    assert.deepEqual(summary, migration.inventorySummary, `${migration.id} inventory summary`);
+  }
   assert.equal(manifest.excluded.some((item) => item.path.includes("architecture-review")), false);
   assert.ok(manifest.migrations.some((item) => item.id === "architecture-review" && item.destination === "packages/architecture-review"));
   assert.ok(manifest.migrations.some((item) => item.id === "architecture-docs-and-likec4" && item.destination === "packages/architecture-docs"));
@@ -96,7 +106,7 @@ test("reviewed source imports, completed migrations, and exclusions are recorded
 });
 test("private release runbook documents v2 artifacts, SSH preflight, and recovery", () => {
   const runbook = readFileSync("docs/archie/private-release-bundle.md", "utf8");
-  assert.match(runbook, /archie-private-bundle-input-v2/);
+  assert.match(runbook, /archie-private-bundle-input-v3/);
   assert.match(runbook, /@archie\/runtime/);
   assert.match(runbook, /@archie\/conformance/);
   assert.match(runbook, /git ls-remote git@github\.com:don-smith\/archie\.git/);

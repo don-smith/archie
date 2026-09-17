@@ -1,13 +1,6 @@
 {
-  "format": "archie-private-bundle-input-v1",
-  "npm": {
-    "package": "@archie/runtime",
-    "version": "0.1.0-private.0",
-    "locator": "file:npm/archie-runtime.tgz",
-    "lockFile": "npm/package-lock.json",
-    "tarball": "npm/archie-runtime.tgz",
-    "requiredPlatformPayload": "vendor/html-design/SKILL.md"
-  },
+  "format": "archie-private-bundle-input-v3",
+  "artifacts": [],
   "apm": {
     "package": "archie-context",
     "skills": [
@@ -16,6 +9,8 @@
       "architecture-conformance-onboarding",
       "architecture-contracts",
       "architecture-docs",
+      "architecture-review",
+      "html-design",
       "likec4-authoring"
     ],
     "locator": "git@github.com:don-smith/archie.git",

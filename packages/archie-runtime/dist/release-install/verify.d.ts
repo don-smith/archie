@@ -1,19 +1,12 @@
 import { type StagedTarget } from "./target-state.js";
-import type { SelectedRelease } from "./selection.js";
-import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
-import type { ReleaseRecordV2 } from "../release-record/release-record-v2.js";
+import type { ReleaseRecord, SelectedRelease } from "../release-record/release-record-v3.js";
 import { type ReleaseInstallReport } from "./report.js";
 import { type NativeCommandRunner } from "./run-npm.js";
 export type { NativeCommand, NativeCommandResult, NativeCommandRunner } from "./run-npm.js";
 export interface ReleaseInstallOptions {
     run?: NativeCommandRunner;
-    /** Test and host seam for the immutable snapshot installed by the runtime package. */
-    verifyHtml?: (root: string, expected: {
-        digest: string;
-        fileCount: number;
-    }) => void;
     /** Test seam for APM deployment verification. Production checks every deployed skill file against the native lock. */
-    verifyApmDeployment?: (root: string, record: ReleaseRecordV1 | ReleaseRecordV2) => void;
+    verifyApmDeployment?: (root: string, record: ReleaseRecord) => void;
 }
 export declare class ReleaseVerificationFailure extends Error {
     readonly report: ReleaseInstallReport;

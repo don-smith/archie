@@ -18,9 +18,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pack:check": "node scripts/check-package-content.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
-    "private-trial:evaluate": "npm run build --silent && node scripts/run-private-trial-evaluation.mjs",
-    "import:owned": "node scripts/import-owned-sources.mjs",
-    "hash:html-snapshot": "node scripts/hash-html-snapshot.mjs"
+    "private-trial:evaluate": "npm run build --silent && node scripts/run-private-trial-evaluation.mjs"
   },
   "devDependencies": {
     "@types/node": "24.10.9",

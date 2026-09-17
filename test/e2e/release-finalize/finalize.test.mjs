@@ -1,23 +1,30 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import test from "node:test";
-import { finalizeRelease, validateBundleLayout } from "../../../dist/packages/archie-runtime/src/release-record/release-record-v1.js";
+import { validateBundleLayout } from "../../../dist/packages/archie-runtime/src/index.js";
+import { makeBundle, sourceCommit } from "../../support/release-bundle.mjs";
 
-const fixture = "test/fixtures/private-bundles/valid";
-const provenance = "packages/archie-runtime/vendor/html-design.provenance.json";
-const sourceCommit = "abcdef0123456789abcdef0123456789abcdef01";
-function prepare() { const root = mkdtempSync(join(tmpdir(), "archie-finalize-e2e-")); const bundle = join(root, "bundle"); cpSync(fixture, bundle, { recursive: true }); return { root, bundle }; }
+function finalizeWithCli(bundle) {
+  const result = spawnSync(process.execPath, ["dist/packages/archie-cli/src/release-cli.js", "finalize", "--bundle", bundle, "--source-commit", sourceCommit], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Archie authorization: NOT ASSESSED/);
+  return { record: readFileSync(join(bundle, "release-record-v3.json"), "utf8"), receipt: readFileSync(join(bundle, "release-review.txt"), "utf8") };
+}
 
 test("release-finalize produces identical local bundle records and receipts", () => {
-  const first = prepare(), second = prepare();
+  const root = mkdtempSync(join(tmpdir(), "archie-finalize-e2e-"));
   try {
-    const one = finalizeRelease({ bundleDirectory: first.bundle, sourceCommit, htmlProvenancePath: provenance });
-    const two = finalizeRelease({ bundleDirectory: second.bundle, sourceCommit, htmlProvenancePath: provenance });
-    assert.equal(readFileSync(one.recordPath, "utf8"), readFileSync(two.recordPath, "utf8"));
-    assert.equal(readFileSync(one.receiptPath, "utf8"), readFileSync(two.receiptPath, "utf8"));
-    assert.equal(one.recordSha256, two.recordSha256);
-    assert.doesNotThrow(() => validateBundleLayout(first.bundle));
-  } finally { rmSync(first.root, { recursive: true, force: true }); rmSync(second.root, { recursive: true, force: true }); }
+    const first = makeBundle(root, "first"), second = makeBundle(root, "second");
+    const one = finalizeWithCli(first), two = finalizeWithCli(second);
+    assert.equal(one.record, two.record);
+    assert.equal(one.receipt, two.receipt);
+    assert.equal(JSON.parse(one.record).schemaVersion, 3);
+    assert.doesNotThrow(() => validateBundleLayout(first));
+    const rejected = spawnSync(process.execPath, ["dist/packages/archie-cli/src/release-cli.js", "finalize", "--bundle", first], { encoding: "utf8" });
+    assert.notEqual(rejected.status, 0);
+    assert.match(rejected.stderr, /Usage: archie-release finalize --bundle <local-directory> --source-commit/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

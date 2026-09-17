@@ -1,12 +1,9 @@
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { verifyHtmlSnapshot } from "../html-snapshot/verify.js";
 import { assertSupportedEnvironment } from "../analysis/contracts.js";
 import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget, type StagedTarget } from "./target-state.js";
-import type { SelectedRelease } from "./selection.js";
-import type { ReleaseRecordV1 } from "../release-record/release-record-v1.js";
-import type { ReleaseRecordV2 } from "../release-record/release-record-v2.js";
+import type { ReleaseRecord, SelectedRelease } from "../release-record/release-record-v3.js";
 import { initialInstallReport, type ReleaseInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
@@ -15,18 +12,11 @@ export type { NativeCommand, NativeCommandResult, NativeCommandRunner } from "./
 
 export interface ReleaseInstallOptions {
   run?: NativeCommandRunner;
-  /** Test and host seam for the immutable snapshot installed by the runtime package. */
-  verifyHtml?: (root: string, expected: { digest: string; fileCount: number }) => void;
   /** Test seam for APM deployment verification. Production checks every deployed skill file against the native lock. */
-  verifyApmDeployment?: (root: string, record: ReleaseRecordV1 | ReleaseRecordV2) => void;
+  verifyApmDeployment?: (root: string, record: ReleaseRecord) => void;
 }
 
-function paths(targetDirectory: string) {
-  const runtime = join(targetDirectory, ".archie", "runtime");
-  return { runtime, installedPackage: (name: string) => join(runtime, "node_modules", name) };
-}
-function runtimePackage(record: ReleaseRecordV1 | ReleaseRecordV2): string { return record.schemaVersion === 2 ? "@archie/runtime" : record.npm.package; }
-function deployedFiles(targetDirectory: string, record: ReleaseRecordV1): string[] {
+function deployedFiles(targetDirectory: string, record: ReleaseRecord): string[] {
   const files: string[] = [];
   const visit = (path: string): void => {
     for (const entry of readdirSync(path, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
@@ -40,7 +30,7 @@ function deployedFiles(targetDirectory: string, record: ReleaseRecordV1): string
   return files.sort();
 }
 
-function lockedDeploymentHashes(lock: string, record: ReleaseRecordV1): Map<string, string> {
+function lockedDeploymentHashes(lock: string, record: ReleaseRecord): Map<string, string> {
   const hashes = new Map<string, string>();
   const prefixes = record.apm.skills.map((skill) => `.agents/skills/${skill}/`);
   for (const match of lock.matchAll(/^\s+(\.agents\/skills\/[^:\r\n]+):\s+sha256:([a-f0-9]{64})\s*$/gm)) {
@@ -52,13 +42,13 @@ function lockedDeploymentHashes(lock: string, record: ReleaseRecordV1): Map<stri
   return hashes;
 }
 
-function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecordV1 | ReleaseRecordV2, lock: string, override?: (root: string, record: ReleaseRecordV1 | ReleaseRecordV2) => void): void {
+function verifyDeployedSkills(targetDirectory: string, record: ReleaseRecord, lock: string, override?: (root: string, record: ReleaseRecord) => void): void {
   if (override) {
     for (const skill of record.apm.skills) override(join(targetDirectory, ".agents", "skills", skill), record);
     return;
   }
-  const actualFiles = deployedFiles(targetDirectory, record as ReleaseRecordV1);
-  const expectedHashes = lockedDeploymentHashes(lock, record as ReleaseRecordV1);
+  const actualFiles = deployedFiles(targetDirectory, record);
+  const expectedHashes = lockedDeploymentHashes(lock, record);
   if (JSON.stringify([...expectedHashes.keys()].sort()) !== JSON.stringify(actualFiles)) throw new Error("APM deployed Archie file coverage differs from the native lock");
   for (const path of actualFiles) {
     const actual = createHash("sha256").update(readFileSync(join(targetDirectory, path))).digest("hex");
@@ -72,19 +62,15 @@ export class ReleaseVerificationFailure extends Error {
 
 /** Validates the installed projection without allowing a package-manager command to repair it. */
 export function verifyCurrentInstalledTarget(targetDirectory: string, options: ReleaseInstallOptions = {}): void {
-  const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
   assertSupportedEnvironment();
   const pin = readPinnedTarget(targetDirectory);
   assertInstalledNpm(pin);
-  const p = paths(pin.targetDirectory);
-  verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
   verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
 }
 
 /** Executes the native, pinned-state-only checks in their required order. */
 export function verifyInstalledTarget(targetDirectory: string, options: ReleaseInstallOptions = {}): ReleaseInstallReport {
   const run = options.run ?? nativeRun;
-  const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
   const report = initialInstallReport();
   let phase = "preflight";
   try {
@@ -92,11 +78,9 @@ export function verifyInstalledTarget(targetDirectory: string, options: ReleaseI
   assertSupportedEnvironment();
   // Before each package-manager operation, re-read the pinned record, projections, and tarball.
   let pin = readPinnedTarget(targetDirectory);
-  const p = paths(pin.targetDirectory);
   phase = "npm";
   runNpmCi(pin, run);
-  verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value!, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
-  report.npm = "passed"; report.html = "passed";
+  report.npm = "passed";
 
   pin = readPinnedTarget(targetDirectory);
   phase = "apm";
@@ -153,7 +137,7 @@ export function bootstrapAndVerifyTarget(targetDirectory: string, selected: Sele
   return stageAndVerify(targetDirectory, selected.record.apm.skills, () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory: string, selected: SelectedRelease, options: ReleaseInstallOptions = {}): StagedTarget & { report: ReleaseInstallReport } {
-  // Do not let staging overwrite a target whose installed runtime, HTML bytes, or deployed skill is already inconsistent.
+  // Do not let staging overwrite a target whose installed runtime or deployed skills are already inconsistent.
   try {
     verifyCurrentInstalledTarget(targetDirectory, options);
   } catch (failure) {

@@ -7,6 +7,8 @@ const mappings = [
   ["packages/assessment/skills/architecture-assessment", "packages/archie-context/.apm/skills/architecture-assessment"],
   ["packages/architecture-docs/skills/architecture-docs", "packages/archie-context/.apm/skills/architecture-docs"],
   ["packages/architecture-docs/skills/likec4-authoring", "packages/archie-context/.apm/skills/likec4-authoring"],
+  ["packages/architecture-review/skills/architecture-review", "packages/archie-context/.apm/skills/architecture-review"],
+  ["packages/html-design/skills/html-design", "packages/archie-context/.apm/skills/html-design"],
   ["packages/conformance/skills/architecture-conformance-onboarding", "packages/archie-context/.apm/skills/architecture-conformance-onboarding"],
   ["packages/conformance/skills/architecture-contracts", "packages/archie-context/.apm/skills/architecture-contracts"]
 ];

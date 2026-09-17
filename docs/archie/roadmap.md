@@ -7,7 +7,7 @@ Archie is one integrated private product. This roadmap sequences the work after 
 Foundation closes with:
 
 - one private monorepo and product version;
-- a project-local npm runtime plus an APM-deployed six-skill context;
+- a project-local npm runtime plus an APM-deployed skill context (eight skills since release record v3);
 - explicit local release selection with no authorization claim;
 - private Git SSH context identity, APM-native locks, frozen installation, replay, recovery, and byte-level deployment verification;
 - Architecture Docs owned and shipped as an Archie workspace;
@@ -20,9 +20,11 @@ The deployed skills are currently:
 3. `architecture-conformance-onboarding`
 4. `architecture-contracts`
 5. `architecture-docs`
-6. `likec4-authoring`
+6. `architecture-review`
+7. `html-design`
+8. `likec4-authoring`
 
-This membership is accepted for the Foundation release line. It can change only through an explicit product-boundary decision.
+Foundation shipped the first six. The developer added Architecture Review and HTML Design on 2026-09-17 through an explicit product-boundary decision; release record v3 pins the eight-skill set. Membership changes only through such a decision.
 
 ## Conformance consolidation status
 

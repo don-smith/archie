@@ -44,7 +44,7 @@ test("private-trial evaluation rejects tracked and untracked non-ignored source 
   }
 });
 
-test("retained private-trial evidence is reproduced by its recorded ancestor", { skip: retained.format !== "archie-private-trial-evidence-v2" }, () => {
+test("retained private-trial evidence is reproduced by its recorded ancestor", { skip: retained.format !== "archie-private-trial-evidence-v3" }, () => {
   const sourceCommit = retained.candidate.sourceCommit;
   run("git", ["cat-file", "-e", `${sourceCommit}^{commit}`], { cwd: repository });
   run("git", ["merge-base", "--is-ancestor", sourceCommit, "HEAD"], { cwd: repository });

@@ -19,7 +19,6 @@ const releaseInstall = await import("../dist/packages/archie-runtime/src/release
 const capabilities = await import("../dist/packages/capabilities/src/index.js");
 
 const fixture = resolve("test/fixtures/private-bundles/valid");
-const provenance = resolve("packages/archie-runtime/vendor/html-design.provenance.json");
 const output = process.argv[2] === "--output" && process.argv[3] && process.argv.length === 4
   ? resolve(process.argv[3])
   : process.argv.length === 2 ? resolve("evaluation/private-trials/latest.json") : undefined;
@@ -88,14 +87,14 @@ function artifact(tarball, expectedName, locator) {
       locator,
       lockIntegrity: sha512(bytes),
       tarballSha256: sha256(bytes),
-      requiredPlatformPayload: expectedName === "@archie/runtime" ? "vendor/html-design/SKILL.md" : "dist/cli.js",
+      requiredPlatformPayload: expectedName === "@archie/runtime" ? "dist/architecture-docs/bin/architecture-docs.mjs" : "dist/cli.js",
       dependencies: packageManifest.dependencies ?? {},
       engines: packageManifest.engines ?? {},
       binaries: packageManifest.bin ?? {}
     }
   };
 }
-function createV2Bundle(base, name, env) {
+function createBundle(base, name, env) {
   const bundle = join(base, name);
   mkdirSync(join(bundle, "npm"), { recursive: true });
   cpSync(join(fixture, "apm"), join(bundle, "apm"), { recursive: true });
@@ -104,27 +103,21 @@ function createV2Bundle(base, name, env) {
   const runtimeArtifact = artifact(runtimeTarball, "@archie/runtime", "file:npm/archie-runtime.tgz");
   const conformanceArtifact = artifact(conformanceTarball, "@archie/conformance", "file:npm/conformance.tgz");
   if (runtimeArtifact.packageManifest.version !== conformanceArtifact.packageManifest.version) throw new Error("packed artifact versions differ");
-  const recordLike = { schemaVersion: 2, version: runtimeArtifact.packageManifest.version, artifacts: [runtimeArtifact.record, conformanceArtifact.record] };
+  const recordLike = { version: runtimeArtifact.packageManifest.version, artifacts: [runtimeArtifact.record, conformanceArtifact.record] };
   const projection = runtime.npmProjection(recordLike);
   writeFileSync(join(bundle, "npm/archie-runtime.lock.json"), projection.lock);
   writeFileSync(join(bundle, "npm/conformance.lock.json"), projection.lock);
   const apm = JSON.parse(readFileSync(join(fixture, "bundle.json"), "utf8")).apm;
   writeFileSync(join(bundle, "bundle.json"), `${JSON.stringify({
-    format: "archie-private-bundle-input-v2",
+    format: "archie-private-bundle-input-v3",
     artifacts: [
       { package: "@archie/runtime", version: runtimeArtifact.packageManifest.version, locator: runtimeArtifact.record.locator, lockFile: "npm/archie-runtime.lock.json", tarball: "npm/archie-runtime.tgz", requiredPlatformPayload: runtimeArtifact.record.requiredPlatformPayload },
       { package: "@archie/conformance", version: conformanceArtifact.packageManifest.version, locator: conformanceArtifact.record.locator, lockFile: "npm/conformance.lock.json", tarball: "npm/conformance.tgz", requiredPlatformPayload: conformanceArtifact.record.requiredPlatformPayload }
     ],
     apm
   }, null, 2)}\n`);
-  const finalized = runtime.finalizeRelease({ bundleDirectory: bundle, sourceCommit, htmlProvenancePath: provenance });
+  const finalized = runtime.finalizeRelease({ bundleDirectory: bundle, sourceCommit });
   return { bundle, finalized, selected: runtime.selectLocalRelease(bundle) };
-}
-function createV1Bundle(base) {
-  const bundle = join(base, "v1-bundle");
-  cpSync(fixture, bundle, { recursive: true });
-  runtime.finalizeRelease({ bundleDirectory: bundle, sourceCommit, htmlProvenancePath: provenance });
-  return { bundle, selected: runtime.selectLocalRelease(bundle) };
 }
 function selectedApmSkill(skillName) {
   const skill = resolve("packages/archie-context/.apm/skills", skillName);
@@ -156,9 +149,7 @@ function runner(bundle, env, { policy = "passed", failApmInstall = false } = {})
     }
     if (args[0] === "install") {
       if (failApmInstall) return { exitCode: 9, stdout: "", stderr: "injected APM installation failure" };
-      const recordPath = existsSync(join(cwd, ".archie/release/release-record-v2.json"))
-        ? join(cwd, ".archie/release/release-record-v2.json")
-        : join(cwd, ".archie/release/release-record-v1.json");
+      const recordPath = join(cwd, ".archie/release", runtime.RELEASE_RECORD_FILE);
       installSkillProjection(cwd, JSON.parse(readFileSync(recordPath, "utf8")).apm.skills);
       return { exitCode: 0, stdout: "local RC skill projection installed", stderr: "" };
     }
@@ -235,13 +226,13 @@ function preparePolicyTarget(base, selected, bundle, env, policy) {
 const root = temporary("archie-private-rc-");
 try {
   const env = isolatedOfflineEnvironment(root);
-  const first = createV2Bundle(root, "first-bundle", env);
-  const second = createV2Bundle(root, "second-bundle", env);
+  const first = createBundle(root, "first-bundle", env);
+  const second = createBundle(root, "second-bundle", env);
   const firstManifest = fullManifest(first.bundle);
   const secondManifest = fullManifest(second.bundle);
   const deterministic = readFileSync(first.finalized.recordPath, "utf8") === readFileSync(second.finalized.recordPath, "utf8")
     && firstManifest.digest === secondManifest.digest;
-  if (!deterministic) throw new Error("two clean v2 finalizations produced different records or artifact manifests");
+  if (!deterministic) throw new Error("two clean finalizations produced different records or artifact manifests");
 
   const target = join(root, "target");
   mkdirSync(target);
@@ -261,16 +252,21 @@ try {
   if (!Object.values(packageProjection).every(entry => entry.exact) || !Object.values(skillProjection).every(entry => entry.exact)) throw new Error("installed RC bytes differ from selected artifacts");
   const binaries = smokeBinaries(target, env);
 
-  const v1 = createV1Bundle(root);
-  const upgradeTarget = join(root, "upgrade-target");
-  mkdirSync(upgradeTarget);
-  runtime.bootstrapAndVerifyTarget(upgradeTarget, v1.selected, { run: runner(v1.bundle, env) });
-  const upgraded = runtime.upgradeAndVerifyTarget(upgradeTarget, first.selected, { run: native });
-  if (upgraded.record.schemaVersion !== 2) throw new Error("v1-to-v2 upgrade did not install v2");
+  const legacyTarget = join(root, "legacy-target");
+  mkdirSync(join(legacyTarget, ".archie/release"), { recursive: true });
+  writeFileSync(join(legacyTarget, ".archie/release/release-record-v2.json"), "{}\n");
+  let legacyPin;
+  try {
+    runtime.bootstrapAndVerifyTarget(legacyTarget, first.selected, { run: native });
+    legacyPin = { rejected: false, error: "bootstrap unexpectedly accepted a pre-v3 pin" };
+  } catch (error) {
+    legacyPin = { rejected: /pre-v3 Archie release pin/.test(error?.cause?.message ?? error?.message ?? ""), error: error?.cause?.message ?? error?.message };
+  }
+  if (!legacyPin.rejected) throw new Error("a pre-v3 target pin was not refused");
 
   const recoveryTarget = join(root, "recovery-target");
   mkdirSync(recoveryTarget);
-  runtime.bootstrapAndVerifyTarget(recoveryTarget, v1.selected, { run: runner(v1.bundle, env) });
+  runtime.bootstrapAndVerifyTarget(recoveryTarget, first.selected, { run: native });
   const beforeRecovery = pinnedStateSummary(recoveryTarget);
   let recovery;
   try {
@@ -280,7 +276,7 @@ try {
     const afterRecovery = pinnedStateSummary(recoveryTarget);
     recovery = { rejected: true, compensation: error?.report?.compensation ?? "blocked", restored: beforeRecovery.digest === afterRecovery.digest, before: beforeRecovery, after: afterRecovery };
   }
-  if (recovery.compensation !== "passed" || !recovery.restored) throw new Error("failed v1-to-v2 upgrade did not restore its verified v1 state");
+  if (recovery.compensation !== "passed" || !recovery.restored) throw new Error("a failed upgrade did not restore its verified installed state");
 
   const mutations = {
     "runtime-tarball": mutationResult(target, "runtime-tarball", mutated => writeFileSync(join(mutated, ".archie/runtime/npm/archie-runtime.tgz"), "changed")),
@@ -288,7 +284,8 @@ try {
     "npm-lock": mutationResult(target, "npm-lock", mutated => writeFileSync(join(mutated, ".archie/runtime/package-lock.json"), "{}\n")),
     "installed-runtime": mutationResult(target, "installed-runtime", mutated => writeFileSync(join(mutated, ".archie/runtime/node_modules/@archie/runtime/package.json"), "{}\n")),
     "installed-conformance": mutationResult(target, "installed-conformance", mutated => writeFileSync(join(mutated, ".archie/runtime/node_modules/@archie/conformance/package.json"), "{}\n")),
-    "html-byte": mutationResult(target, "html-byte", mutated => writeFileSync(join(mutated, ".archie/runtime/node_modules/@archie/runtime/vendor/html-design/SKILL.md"), "changed\n")),
+    "deployed-html-design": mutationResult(target, "deployed-html-design", mutated => writeFileSync(join(mutated, ".agents/skills/html-design/scripts/check-artifact.mjs"), "changed\n")),
+    "deployed-architecture-review": mutationResult(target, "deployed-architecture-review", mutated => writeFileSync(join(mutated, ".agents/skills/architecture-review/SKILL.md"), "changed\n")),
     "apm-lock": mutationResult(target, "apm-lock", mutated => writeFileSync(join(mutated, "apm.lock.yaml"), readFileSync(join(mutated, "apm.lock.yaml"), "utf8").replace(first.selected.record.apm.contentHash, "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"))),
     "deployed-skill": mutationResult(target, "deployed-skill", mutated => writeFileSync(join(mutated, ".agents/skills/archie/SKILL.md"), "changed\n"))
   };
@@ -313,23 +310,23 @@ try {
   if (!exactLock || !Object.values(stagedArtifacts).every(item => item.sha256 === item.recordedSha256)) throw new Error("staged npm evidence differs from the finalized RC");
 
   const evidence = {
-    format: "archie-private-trial-evidence-v2",
+    format: "archie-private-trial-evidence-v3",
     candidate: { status: "local-only", version: record.version, sourceCommit: record.sourceCommit, schemaVersion: record.schemaVersion, authorization: "not-assessed" },
     environment: { node: process.version, platform: process.platform, architecture: process.arch, npm: version("npm"), apm: version("apm"), git: version("git") },
     finalization: { deterministic, recordSha256: first.finalized.recordSha256, artifactManifest: summary(firstManifest), repeatedArtifactManifest: summary(secondManifest), orderedArtifacts: record.artifacts.map(item => item.package) },
     installation: { bootstrap: bootstrap.report, firstVerify, secondVerify, sameVersionReplay: sameVersion.report, replay, byteStable: [afterFirstVerify, afterSecondVerify, afterSameVersion, afterReplay].every(item => item.digest === afterBootstrap.digest), manifests: { bootstrap: afterBootstrap, firstVerify: afterFirstVerify, secondVerify: afterSecondVerify, sameVersion: afterSameVersion, replay: afterReplay } },
-    v1ToV2Upgrade: { passed: upgraded.record.schemaVersion === 2, report: upgraded.report },
+    legacyPin,
     recovery,
     integrity: { exactNpmLock: exactLock, stagedArtifacts, packages: packageProjection, skills: skillProjection, skillCount: Object.keys(skillProjection).length, binaries, architectureDocsEmbedded: packageProjection["@archie/runtime"].exact },
     mutations,
     policy,
     capabilities: { count: capabilities.capabilityContracts.length, authorityStopsPreserved: capabilities.capabilityContracts.every(capability => typeof capability.authorityStop === "string" && capability.authorityStop.length > 0) },
-    externalGates: { githubSshPreflight: "not-run-without-developer-approval", immutableContextRef: "not-created", push: "not-authorized", tag: "not-authorized", note: "The local RC uses retained deterministic APM fixture identity while deploying and byte-checking the current six-skill context. A real immutable private ref and native APM lock remain manual gates." },
+    externalGates: { githubSshPreflight: "not-run-without-developer-approval", immutableContextRef: "not-created", push: "not-authorized", tag: "not-authorized", note: "The local RC uses retained deterministic APM fixture identity while deploying and byte-checking the current eight-skill context. A real immutable private ref and native APM lock remain manual gates." },
     textReport: runtime.formatInstallReport(replay)
   };
   mkdirSync(dirname(output), { recursive: true });
   writeFileSync(output, `${JSON.stringify(evidence, null, 2)}\n`);
-  process.stdout.write(`Private-trial v2 evidence written to ${output}\n`);
+  process.stdout.write(`Private-trial evidence written to ${output}\n`);
 } finally {
   rmSync(root, { recursive: true, force: true });
 }

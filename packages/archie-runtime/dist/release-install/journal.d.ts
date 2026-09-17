@@ -2,6 +2,7 @@ export type JournalPhase = "prepared" | "staging" | "native-verification" | "com
 type BackupEntry = {
     path: string;
     bytes?: string;
+    symlink?: string;
 };
 export interface InstallJournal {
     format: "archie-release-install-journal-v1";

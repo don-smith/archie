@@ -36,7 +36,7 @@ for (const [name] of packages) {
   const forbidden = packed.filter((file) => /(^|\/)(\.myflow|test|tests|codebase-locator|codebase-analyzer|release-record-v[12]\.json)(\/|$)/i.test(file) && !(name === "@archie/context" && file.startsWith(".apm/skills/")));
   if (forbidden.length) throw new Error(`${name} would ship forbidden paths: ${forbidden.join(", ")}`);
   if (name === "@archie/context") {
-    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs", ".apm/skills/architecture-conformance-onboarding/SKILL.md", ".apm/skills/architecture-contracts/SKILL.md"]) {
+    for (const required of ["apm.yml", "apm.lock.yaml", ".apm/skills/archie/SKILL.md", ".apm/skills/archie/scripts/dispatch-runtime.mjs", ".apm/skills/architecture-assessment/scripts/check-model.mjs", ".apm/skills/architecture-assessment/scripts/check-assessment.mjs", ".apm/skills/architecture-conformance-onboarding/SKILL.md", ".apm/skills/architecture-contracts/SKILL.md", ".apm/skills/architecture-review/SKILL.md", ".apm/skills/html-design/SKILL.md", ".apm/skills/html-design/scripts/lib/check-artifact.mjs"]) {
       if (!packed.includes(required)) throw new Error(`Context package omits required APM asset: ${required}`);
     }
   }
@@ -69,7 +69,7 @@ for (const [name] of packages) {
     "@archie/conformance": "dist/cli.js"
   }[name];
   if (expectedEntry && !packed.includes(expectedEntry)) throw new Error(`${name} lacks ${expectedEntry}`);
-  if (name === "@archie/runtime" && !packed.includes("vendor/html-design/SKILL.md")) throw new Error("Runtime package must carry the immutable HTML snapshot");
+  if (name === "@archie/runtime" && packed.some((file) => file.startsWith("vendor/html-design"))) throw new Error("Runtime package must not carry an HTML Design snapshot; html-design ships as an APM skill");
   if (name === "@archie/runtime" && !packed.includes("vendor/release-npm-lock-v2.json")) throw new Error("Runtime package omits the v2 dependency lock template");
   if (name === "@archie/runtime" && !packed.includes("dist/architecture-docs/scripts/check-final-site-browser.mjs")) throw new Error("Runtime package omits the complete Architecture Docs command implementation");
   if (name === "@archie/runtime" && !packed.includes("dist/schemas/architecture-status-v1.schema.json")) throw new Error("Runtime package must carry architecture-status-v1 schema");

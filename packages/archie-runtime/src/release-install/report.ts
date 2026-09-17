@@ -6,7 +6,6 @@ export interface ReleaseInstallReport {
   npm: CheckStatus;
   apm: { frozen: CheckStatus; baseline: CheckStatus; policy: CheckStatus; content: CheckStatus };
   analyzerCompatibility: CheckStatus;
-  html: CheckStatus;
   replay: CheckStatus;
   compensation: CheckStatus;
   failedPhase?: string;
@@ -16,7 +15,7 @@ export function initialInstallReport(): ReleaseInstallReport {
   return {
     authorization: "not-assessed", recordConsistency: "passed", npm: "not-run",
     apm: { frozen: "not-run", baseline: "not-run", policy: "not-run", content: "not-run" },
-    analyzerCompatibility: "passed", html: "not-run", replay: "not-run", compensation: "not-run"
+    analyzerCompatibility: "passed", replay: "not-run", compensation: "not-run"
   };
 }
 
@@ -26,7 +25,7 @@ export function formatInstallReport(report: ReleaseInstallReport): string {
     `Record consistency: ${report.recordConsistency}`, `npm: ${report.npm}`,
     `APM frozen install: ${report.apm.frozen}`, `APM baseline audit: ${report.apm.baseline}`,
     `APM policy: ${report.apm.policy}`, `APM content: ${report.apm.content}`,
-    `Analyzer compatibility: ${report.analyzerCompatibility}`, `HTML: ${report.html}`,
+    `Analyzer compatibility: ${report.analyzerCompatibility}`,
     `Replay: ${report.replay}`, `Compensation: ${report.compensation}`,
     ...(report.failedPhase ? [`Failed phase: ${report.failedPhase}`] : [])
   ].join("\n");

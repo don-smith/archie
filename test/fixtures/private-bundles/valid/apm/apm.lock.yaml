@@ -16,5 +16,7 @@ dependencies:
   - architecture-conformance-onboarding
   - architecture-contracts
   - architecture-docs
+  - architecture-review
+  - html-design
   - likec4-authoring
 deployments: []

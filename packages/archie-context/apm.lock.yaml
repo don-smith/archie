@@ -65,7 +65,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:0dc39b5e84bdad2d3b86d5d080e4354a4f05dc40fda95136bdf1e3867457fd2c
+  content_hash: sha256:11ee7129d3408325dda8f8dae172f654f61eeb613d1614bbefbf96af1ae15399
 - kind: project-relative
   target: agents
   value: .agents/skills/architecture-assessment
@@ -266,6 +266,375 @@ deployments:
   content_hash: sha256:c68ff828cb32080e7162b1a8a1e7f06891b2949008574fe77780dc201a850113
 - kind: project-relative
   target: agents
+  value: .agents/skills/architecture-review
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/architecture-review/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:af721d2368a610a2863068bdd811f51df52f8271aec2bcc7034e2c3f371dd74f
+- kind: project-relative
+  target: agents
+  value: .agents/skills/architecture-review/references/deep-module-vocabulary.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6f58750209d773a90f9cb7b57e9eb6c9d5dadf465ca01b7ae9b18526f73b10a7
+- kind: project-relative
+  target: agents
+  value: .agents/skills/architecture-review/templates/architecture-review.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:690495a7db5f319947cd05e16936cec9b6ff4b5d1139bd55465562df76d837ec
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b7bcf64625da2122cefc6f591b8abee80604eee064bcf22ef2dd18d5b21d117d
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6cdabe977ce74d5b5a35acca2e3542a054a2ac82aa63187a085304e0a0951b5a
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/THIRD_PARTY_NOTICES.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5c571e555ae02bd074eb9e391eb231809353c4c9432306d74eda134ff1fec656
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/design-system.css
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9a9844ee59ebd354de2bc13bc566c42e44b640e4fac24cf7d3c89933464e4e33
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/palette.css
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9e9fb36f1aba323c49f3049f6ac613d8f2db04a96ef9e915ad5524a4b9875f76
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/palettes/moss-paper.css
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9e9fb36f1aba323c49f3049f6ac613d8f2db04a96ef9e915ad5524a4b9875f76
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/palettes/slate-copper.css
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ab5dd4618f69dd62eee1672f48329fdc141e6b9a4fffa938c18e460c2c67d2d5
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/theme.js
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3a86245bb592fbb9d19c2ad62bc108e6dc903f4fe50107593200bbdec6e3d568
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/assets/tokens.css
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:0ab2dc4dc1eeebb5b28258c890666e217afaaac19862e771d549cc0ffef02a18
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/config/palette.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:57313ce9abbab56f506f3621a2fd8349f8cdd252c7d180dfcbfcd803ddb38c1a
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/config/profiles.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:db8211b7c1680dda20bee9a8395a0748c22df1cb7a2f3ea202851d3919cc457e
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/diagram-selection.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b5cd0e0daa1137587a7928b78feedc8ae55751261e57c68e8117f68deadc76ae
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a8c7d3934bac11e12786cf1befb0e7afd425fcb466ad28d5963580c623e19734
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/diagrams/lifecycle.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8f8f1c32ba479cb6497055eb8f80a9c510a76483c6380989f9ea9ee86a7787f7
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/diagrams/system-context.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:dbbda8a0d0f0c7e53536b33216432ccb9b36c85c3317307c807c49327de226e6
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/patterns/empty-state.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:f487b13da6398c90a4b36df594f7e6b740ccb574182758de0ca6cd6917e7e3c3
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/patterns/evidence-matrix.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9beb64929615f75ea47a33d57c67b6e54eaa14f27064afeeed064d249877ede2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/patterns/form-field.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:f2b8ea7d8a78412a4926b505cab597d3bdc92d22427c58170361f0722c363c13
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/patterns/statement-hero.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b19ee8d7a3ae25f7dacbc73b9057e86b95759026e90d41b7ebda36042904f268
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/examples/patterns/status-banner.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1f3ba26713944f3f8e977b2ae4c4542ac87a2a938d6cd2ae545c9c62e26bd713
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/foundations.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1b3b26119d42106e17adfb0672b0b73d36a0727d56a66def2b6c65f333689e2b
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/pattern-selection.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c4e4cda2c2eee9ed99d5b83862dfe1bf254ad303c3d3f8d242a6d9b051a05551
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/profiles.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2e5798b1320af919ee54e6f4a21ada7310bfaf611a4b37e11e29d3318edd0e69
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/quality-checklist.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7ac1a4d0a402136b96e9fbf02e6adcf9414c5c3d8d164d7573c21da19eca1b59
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/apply-palette.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:312ceeefae4aacf1ea299ef7c9396a0f8eb886a31c3cf5a85839a42a6f96a9ce
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/check-artifact.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3979fc9088a7e22767dfbe52f608ac68121a32d12fa722d43e2c0a4cf6a1e891
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/lib/apply-palette.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3e021d8df9b61cbe2a486a892dbe0819c12421588ccb6e849874b2fbc85ff891
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/lib/check-artifact.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e0ee68f9128c0d78c45387e2efadb7fc91c9d31e330c5eb61652c0fcc733a174
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/lib/palette-assets.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c27de70e424f6638b8348cec5927da24f7aa9e4c4f9fc947428ab2fe8545492f
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/lib/refresh-artifact-assets.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:44259639fc0349dc054480993840c54fdb4d46d32d53aa1482bc89b5b744dfb5
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/lib/scaffold-artifact.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:29c9d6df3ed2444580890e028bd5eaef921980f6ba0ed6bc7337560411b3d626
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/refresh-artifact-assets.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:dd4b66b57112ae352337221c19c8d263b66d87ae5345aa783c2bdc0613dac035
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/scripts/scaffold-artifact.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:85e4cdbaee45bb137799ee7c7351c61e390c79b9505248c1b05daf56025d1695
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/templates/application-shell.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a2a668dc841554b126fe5225fcd254b2c2f5fe3ba05974a08b8f1fac7d419b97
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/templates/rail-document.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7d1d6ead36c5c65d403e191274637638061de8475efec988707e01b1d66b27fa
+- kind: project-relative
+  target: agents
+  value: .agents/skills/html-design/templates/review-packet.html
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:be53886ce1f234966fc8d27411e3bfd01fa9eded5e0d33f533dee01189d6ca1f
+- kind: project-relative
+  target: agents
   value: .agents/skills/likec4-authoring
   runtime: null
   scope: project
@@ -339,6 +708,47 @@ local_deployed_files:
 - .agents/skills/architecture-docs
 - .agents/skills/architecture-docs/SKILL.md
 - .agents/skills/architecture-docs/package-commands.md
+- .agents/skills/architecture-review
+- .agents/skills/architecture-review/SKILL.md
+- .agents/skills/architecture-review/references/deep-module-vocabulary.md
+- .agents/skills/architecture-review/templates/architecture-review.md
+- .agents/skills/html-design
+- .agents/skills/html-design/LICENSE
+- .agents/skills/html-design/SKILL.md
+- .agents/skills/html-design/THIRD_PARTY_NOTICES.md
+- .agents/skills/html-design/assets/design-system.css
+- .agents/skills/html-design/assets/palette.css
+- .agents/skills/html-design/assets/palettes/moss-paper.css
+- .agents/skills/html-design/assets/palettes/slate-copper.css
+- .agents/skills/html-design/assets/theme.js
+- .agents/skills/html-design/assets/tokens.css
+- .agents/skills/html-design/config/palette.json
+- .agents/skills/html-design/config/profiles.json
+- .agents/skills/html-design/diagram-selection.md
+- .agents/skills/html-design/examples.md
+- .agents/skills/html-design/examples/diagrams/lifecycle.html
+- .agents/skills/html-design/examples/diagrams/system-context.html
+- .agents/skills/html-design/examples/patterns/empty-state.html
+- .agents/skills/html-design/examples/patterns/evidence-matrix.html
+- .agents/skills/html-design/examples/patterns/form-field.html
+- .agents/skills/html-design/examples/patterns/statement-hero.html
+- .agents/skills/html-design/examples/patterns/status-banner.html
+- .agents/skills/html-design/foundations.md
+- .agents/skills/html-design/pattern-selection.md
+- .agents/skills/html-design/profiles.md
+- .agents/skills/html-design/quality-checklist.md
+- .agents/skills/html-design/scripts/apply-palette.mjs
+- .agents/skills/html-design/scripts/check-artifact.mjs
+- .agents/skills/html-design/scripts/lib/apply-palette.mjs
+- .agents/skills/html-design/scripts/lib/check-artifact.mjs
+- .agents/skills/html-design/scripts/lib/palette-assets.mjs
+- .agents/skills/html-design/scripts/lib/refresh-artifact-assets.mjs
+- .agents/skills/html-design/scripts/lib/scaffold-artifact.mjs
+- .agents/skills/html-design/scripts/refresh-artifact-assets.mjs
+- .agents/skills/html-design/scripts/scaffold-artifact.mjs
+- .agents/skills/html-design/templates/application-shell.html
+- .agents/skills/html-design/templates/rail-document.html
+- .agents/skills/html-design/templates/review-packet.html
 - .agents/skills/likec4-authoring
 - .agents/skills/likec4-authoring/SKILL.md
 - .agents/skills/likec4-authoring/c4-method.md
@@ -350,7 +760,7 @@ local_deployed_file_hashes:
   .agents/skills/archie/references/drift-detection.md: sha256:04f8030956dd23ab8a4fa9e02a8ecc84732a84aa200183f6b96f5f33a24a5214
   .agents/skills/archie/references/managed-site-guide.md: sha256:80600556ce31ea3fc87584eafda5ca5650f5fa859df02a3c6eba148a6bb0acbd
   .agents/skills/archie/references/operating-contract.md: sha256:3c00bdc0d46636aa434023a88d1a3dd69d3a1b4bc96d4b27fe5cccc5275b964a
-  .agents/skills/archie/scripts/dispatch-runtime.mjs: sha256:0dc39b5e84bdad2d3b86d5d080e4354a4f05dc40fda95136bdf1e3867457fd2c
+  .agents/skills/archie/scripts/dispatch-runtime.mjs: sha256:11ee7129d3408325dda8f8dae172f654f61eeb613d1614bbefbf96af1ae15399
   .agents/skills/architecture-assessment/SKILL.md: sha256:aa685325e739e83c56c6817607a67638c5e059defdbf4495032a4d82449b1126
   .agents/skills/architecture-assessment/references/artifact-contract.md: sha256:33911cc8a13cc8d58b30578340573c7f93ff5d3ef2fab7f6498602c8252c231d
   .agents/skills/architecture-assessment/references/assessment-lenses.md: sha256:d7b2504e7d07b6bdc849cf87c29a3f2de97077dd4f2cf08e1bdb87b4378196d1
@@ -369,6 +779,45 @@ local_deployed_file_hashes:
   .agents/skills/architecture-contracts/SKILL.md: sha256:b9030f14e233b7690f3a1369cba824a03849d8e2ee119737bfd88090710fc4b3
   .agents/skills/architecture-docs/SKILL.md: sha256:73cddfec404361ce8432590255e41c342a2d39e0118140760e354240c88d9888
   .agents/skills/architecture-docs/package-commands.md: sha256:c68ff828cb32080e7162b1a8a1e7f06891b2949008574fe77780dc201a850113
+  .agents/skills/architecture-review/SKILL.md: sha256:af721d2368a610a2863068bdd811f51df52f8271aec2bcc7034e2c3f371dd74f
+  .agents/skills/architecture-review/references/deep-module-vocabulary.md: sha256:6f58750209d773a90f9cb7b57e9eb6c9d5dadf465ca01b7ae9b18526f73b10a7
+  .agents/skills/architecture-review/templates/architecture-review.md: sha256:690495a7db5f319947cd05e16936cec9b6ff4b5d1139bd55465562df76d837ec
+  .agents/skills/html-design/LICENSE: sha256:b7bcf64625da2122cefc6f591b8abee80604eee064bcf22ef2dd18d5b21d117d
+  .agents/skills/html-design/SKILL.md: sha256:6cdabe977ce74d5b5a35acca2e3542a054a2ac82aa63187a085304e0a0951b5a
+  .agents/skills/html-design/THIRD_PARTY_NOTICES.md: sha256:5c571e555ae02bd074eb9e391eb231809353c4c9432306d74eda134ff1fec656
+  .agents/skills/html-design/assets/design-system.css: sha256:9a9844ee59ebd354de2bc13bc566c42e44b640e4fac24cf7d3c89933464e4e33
+  .agents/skills/html-design/assets/palette.css: sha256:9e9fb36f1aba323c49f3049f6ac613d8f2db04a96ef9e915ad5524a4b9875f76
+  .agents/skills/html-design/assets/palettes/moss-paper.css: sha256:9e9fb36f1aba323c49f3049f6ac613d8f2db04a96ef9e915ad5524a4b9875f76
+  .agents/skills/html-design/assets/palettes/slate-copper.css: sha256:ab5dd4618f69dd62eee1672f48329fdc141e6b9a4fffa938c18e460c2c67d2d5
+  .agents/skills/html-design/assets/theme.js: sha256:3a86245bb592fbb9d19c2ad62bc108e6dc903f4fe50107593200bbdec6e3d568
+  .agents/skills/html-design/assets/tokens.css: sha256:0ab2dc4dc1eeebb5b28258c890666e217afaaac19862e771d549cc0ffef02a18
+  .agents/skills/html-design/config/palette.json: sha256:57313ce9abbab56f506f3621a2fd8349f8cdd252c7d180dfcbfcd803ddb38c1a
+  .agents/skills/html-design/config/profiles.json: sha256:db8211b7c1680dda20bee9a8395a0748c22df1cb7a2f3ea202851d3919cc457e
+  .agents/skills/html-design/diagram-selection.md: sha256:b5cd0e0daa1137587a7928b78feedc8ae55751261e57c68e8117f68deadc76ae
+  .agents/skills/html-design/examples.md: sha256:a8c7d3934bac11e12786cf1befb0e7afd425fcb466ad28d5963580c623e19734
+  .agents/skills/html-design/examples/diagrams/lifecycle.html: sha256:8f8f1c32ba479cb6497055eb8f80a9c510a76483c6380989f9ea9ee86a7787f7
+  .agents/skills/html-design/examples/diagrams/system-context.html: sha256:dbbda8a0d0f0c7e53536b33216432ccb9b36c85c3317307c807c49327de226e6
+  .agents/skills/html-design/examples/patterns/empty-state.html: sha256:f487b13da6398c90a4b36df594f7e6b740ccb574182758de0ca6cd6917e7e3c3
+  .agents/skills/html-design/examples/patterns/evidence-matrix.html: sha256:9beb64929615f75ea47a33d57c67b6e54eaa14f27064afeeed064d249877ede2
+  .agents/skills/html-design/examples/patterns/form-field.html: sha256:f2b8ea7d8a78412a4926b505cab597d3bdc92d22427c58170361f0722c363c13
+  .agents/skills/html-design/examples/patterns/statement-hero.html: sha256:b19ee8d7a3ae25f7dacbc73b9057e86b95759026e90d41b7ebda36042904f268
+  .agents/skills/html-design/examples/patterns/status-banner.html: sha256:1f3ba26713944f3f8e977b2ae4c4542ac87a2a938d6cd2ae545c9c62e26bd713
+  .agents/skills/html-design/foundations.md: sha256:1b3b26119d42106e17adfb0672b0b73d36a0727d56a66def2b6c65f333689e2b
+  .agents/skills/html-design/pattern-selection.md: sha256:c4e4cda2c2eee9ed99d5b83862dfe1bf254ad303c3d3f8d242a6d9b051a05551
+  .agents/skills/html-design/profiles.md: sha256:2e5798b1320af919ee54e6f4a21ada7310bfaf611a4b37e11e29d3318edd0e69
+  .agents/skills/html-design/quality-checklist.md: sha256:7ac1a4d0a402136b96e9fbf02e6adcf9414c5c3d8d164d7573c21da19eca1b59
+  .agents/skills/html-design/scripts/apply-palette.mjs: sha256:312ceeefae4aacf1ea299ef7c9396a0f8eb886a31c3cf5a85839a42a6f96a9ce
+  .agents/skills/html-design/scripts/check-artifact.mjs: sha256:3979fc9088a7e22767dfbe52f608ac68121a32d12fa722d43e2c0a4cf6a1e891
+  .agents/skills/html-design/scripts/lib/apply-palette.mjs: sha256:3e021d8df9b61cbe2a486a892dbe0819c12421588ccb6e849874b2fbc85ff891
+  .agents/skills/html-design/scripts/lib/check-artifact.mjs: sha256:e0ee68f9128c0d78c45387e2efadb7fc91c9d31e330c5eb61652c0fcc733a174
+  .agents/skills/html-design/scripts/lib/palette-assets.mjs: sha256:c27de70e424f6638b8348cec5927da24f7aa9e4c4f9fc947428ab2fe8545492f
+  .agents/skills/html-design/scripts/lib/refresh-artifact-assets.mjs: sha256:44259639fc0349dc054480993840c54fdb4d46d32d53aa1482bc89b5b744dfb5
+  .agents/skills/html-design/scripts/lib/scaffold-artifact.mjs: sha256:29c9d6df3ed2444580890e028bd5eaef921980f6ba0ed6bc7337560411b3d626
+  .agents/skills/html-design/scripts/refresh-artifact-assets.mjs: sha256:dd4b66b57112ae352337221c19c8d263b66d87ae5345aa783c2bdc0613dac035
+  .agents/skills/html-design/scripts/scaffold-artifact.mjs: sha256:85e4cdbaee45bb137799ee7c7351c61e390c79b9505248c1b05daf56025d1695
+  .agents/skills/html-design/templates/application-shell.html: sha256:a2a668dc841554b126fe5225fcd254b2c2f5fe3ba05974a08b8f1fac7d419b97
+  .agents/skills/html-design/templates/rail-document.html: sha256:7d1d6ead36c5c65d403e191274637638061de8475efec988707e01b1d66b27fa
+  .agents/skills/html-design/templates/review-packet.html: sha256:be53886ce1f234966fc8d27411e3bfd01fa9eded5e0d33f533dee01189d6ca1f
   .agents/skills/likec4-authoring/SKILL.md: sha256:2b0689a74688f0fabefcf51715b7c38a826a51425d04eee7aa95585e865b1dea
   .agents/skills/likec4-authoring/c4-method.md: sha256:6227f58f9d04e4997985049c712a9aaa689c8c5c09aab7f378205ce9aaeb724b
   .agents/skills/likec4-authoring/diagram-review-checklist.md: sha256:9684aa1ba8809f1318f2fe3c3fc8cf22ef7f6d9a91c54cb57b741fec6f088670

@@ -10,7 +10,6 @@ export interface ReleaseInstallReport {
         content: CheckStatus;
     };
     analyzerCompatibility: CheckStatus;
-    html: CheckStatus;
     replay: CheckStatus;
     compensation: CheckStatus;
     failedPhase?: string;

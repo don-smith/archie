@@ -1,17 +1,15 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { canonicalize } from "../analysis/canonical-json.js";
-import { type ReleaseRecordV1 } from "../release-record/release-record-v1.js";
-import { parseReleaseRecordEvidence, type ReleaseRecordV2 } from "../release-record/release-record-v2.js";
+import { parseReleaseRecord, RELEASE_RECORD_FILE, type ReleaseRecord, type SelectedRelease } from "../release-record/release-record-v3.js";
 import { assertPinnedApmProjection, planApmProjection, type ApmProjection } from "./apm-projection.js";
 import { npmProjection, tarballSha256, validateNpmProjection, type NpmProjection } from "./npm-projection.js";
-import type { SelectedRelease } from "./selection.js";
 
 const readOptional = (path: string): string | undefined => existsSync(path) ? readFileSync(path, "utf8") : undefined;
 
 export interface PinnedTarget {
   targetDirectory: string;
-  record: ReleaseRecordV1 | ReleaseRecordV2;
+  record: ReleaseRecord;
   recordBytes: string;
   apm: Required<ApmProjection>;
   npm: NpmProjection;
@@ -26,10 +24,15 @@ function paths(targetDirectory: string) {
   const archie = join(target, ".archie");
   return {
     target, archie, release: join(archie, "release"), runtime: join(archie, "runtime"), runtimeNpm: join(archie, "runtime", "npm"),
-    version: join(archie, "version"), record: join(archie, "release", "release-record-v1.json"), recordV2: join(archie, "release", "release-record-v2.json"), receipt: join(archie, "release", "selection-receipt.json"),
+    version: join(archie, "version"), record: join(archie, "release", RELEASE_RECORD_FILE), legacyRecords: [join(archie, "release", "release-record-v1.json"), join(archie, "release", "release-record-v2.json")], receipt: join(archie, "release", "selection-receipt.json"),
     manifest: join(archie, "runtime", "package.json"), lock: join(archie, "runtime", "package-lock.json"),
     apmManifest: join(target, "apm.yml"), apmLock: join(target, "apm.lock.yaml")
   };
+}
+
+/** Release records before v3 are not upgraded in place: their skill set and runtime payload differ. */
+function assertNoLegacyPin(p: ReturnType<typeof paths>): void {
+  if (p.legacyRecords.some(existsSync)) throw new Error("target has a pre-v3 Archie release pin; remove .archie/release, .archie/runtime, and .archie/version, then bootstrap the v3 release");
 }
 
 function receipt(selected: SelectedRelease): string {
@@ -38,47 +41,40 @@ function receipt(selected: SelectedRelease): string {
 
 export function readPinnedTarget(targetDirectory: string): PinnedTarget {
   const p = paths(targetDirectory);
-  for (const required of [p.version, p.manifest, p.lock, p.apmManifest, p.apmLock]) if (!existsSync(required)) throw new Error(`pinned target state is incomplete: ${required}`);
-  if (!existsSync(p.record) && !existsSync(p.recordV2)) throw new Error(`pinned target state is incomplete: ${p.record}`);
-  if (existsSync(p.record) && existsSync(p.recordV2)) throw new Error("pinned target contains duplicate release records");
-  const recordPath = existsSync(p.recordV2) ? p.recordV2 : p.record;
-  const recordBytes = readFileSync(recordPath, "utf8");
-  const record = parseReleaseRecordEvidence(recordBytes);
+  assertNoLegacyPin(p);
+  for (const required of [p.version, p.record, p.manifest, p.lock, p.apmManifest, p.apmLock]) if (!existsSync(required)) throw new Error(`pinned target state is incomplete: ${required}`);
+  const recordBytes = readFileSync(p.record, "utf8");
+  const record = parseReleaseRecord(recordBytes);
   if (readFileSync(p.version, "utf8") !== `${record.version}\n`) throw new Error("target release pin differs from the pinned record");
   const npm = { manifest: readFileSync(p.manifest, "utf8"), lock: readFileSync(p.lock, "utf8") };
   validateNpmProjection(npm, record);
-  if (record.schemaVersion === 2) {
-    for (const artifact of record.artifacts) { const tarball = join(p.runtimeNpm, artifact.locator.replace(/^file:npm\//, "")); if (!existsSync(tarball) || tarballSha256(readFileSync(tarball)) !== artifact.tarballSha256) throw new Error(`target ${artifact.package} tarball differs from the pinned record`); }
-  } else {
-    const tarball = join(p.runtimeNpm, record.npm.locator.replace(/^file:npm\//, ""));
-    if (!record.npm.locator.startsWith("file:npm/") || !existsSync(tarball) || tarballSha256(readFileSync(tarball)) !== record.npm.tarballSha256) throw new Error("target runtime tarball differs from the pinned record");
+  for (const artifact of record.artifacts) {
+    const tarball = join(p.runtimeNpm, artifact.locator.replace(/^file:npm\//, ""));
+    if (!existsSync(tarball) || tarballSha256(readFileSync(tarball)) !== artifact.tarballSha256) throw new Error(`target ${artifact.package} tarball differs from the pinned record`);
   }
   const apm = { manifest: readFileSync(p.apmManifest, "utf8"), lock: readFileSync(p.apmLock, "utf8") };
-  assertPinnedApmProjection(record as ReleaseRecordV1, apm);
+  assertPinnedApmProjection(record, apm);
   return { targetDirectory: p.target, record, recordBytes, npm, apm };
 }
 
 /** Stages only Archie-owned state and a safely merged APM projection. Native installation is deferred to Phase 5. */
-export function stageSelectedRelease(targetDirectory: string, selected: SelectedRelease, previous?: ReleaseRecordV1 | ReleaseRecordV2): StagedTarget {
+export function stageSelectedRelease(targetDirectory: string, selected: SelectedRelease, previous?: ReleaseRecord): StagedTarget {
   const p = paths(targetDirectory);
   const existingManifest = readOptional(p.apmManifest);
   const existingLock = readOptional(p.apmLock);
   if ((existingManifest === undefined) !== (existingLock === undefined)) throw new Error("APM target projection is incomplete; cannot safely preserve shared state");
   const generatedNpm = npmProjection(selected.record);
-  const npm = { manifest: generatedNpm.manifest, lock: selected.record.schemaVersion === 2 ? generatedNpm.lock : selected.npmLockBytes };
+  const npm = { manifest: generatedNpm.manifest, lock: generatedNpm.lock };
   validateNpmProjection(npm, selected.record);
-  const apm = planApmProjection(selected.record as ReleaseRecordV1, { manifest: existingManifest, lock: existingLock }, previous as ReleaseRecordV1 | undefined);
+  const apm = planApmProjection(selected.record, { manifest: existingManifest, lock: existingLock }, previous);
   mkdirSync(p.release, { recursive: true });
   mkdirSync(p.runtimeNpm, { recursive: true });
   writeFileSync(p.version, `${selected.record.version}\n`);
-  if (selected.record.schemaVersion === 2) { writeFileSync(p.recordV2, selected.recordBytes); if (existsSync(p.record)) rmSync(p.record); }
-  else { writeFileSync(p.record, selected.recordBytes); if (existsSync(p.recordV2)) rmSync(p.recordV2); }
+  writeFileSync(p.record, selected.recordBytes);
   writeFileSync(p.receipt, receipt(selected));
   writeFileSync(p.manifest, npm.manifest);
   writeFileSync(p.lock, npm.lock);
-  if ("artifacts" in selected) {
-    for (const artifact of selected.artifacts) copyFileSync(artifact.tarballPath, join(p.runtimeNpm, artifact.tarballName));
-  } else copyFileSync(selected.tarballPath, join(p.runtimeNpm, selected.tarballName));
+  for (const artifact of selected.artifacts) copyFileSync(artifact.tarballPath, join(p.runtimeNpm, artifact.tarballName));
   writeFileSync(p.apmManifest, apm.manifest);
   // APM rejects an empty lockfile; only preserve an existing preimage until native `apm lock` replaces it.
   if (apm.lock !== undefined) writeFileSync(p.apmLock, apm.lock);
@@ -87,7 +83,8 @@ export function stageSelectedRelease(targetDirectory: string, selected: Selected
 
 export function bootstrapTarget(targetDirectory: string, selected: SelectedRelease): StagedTarget {
   const p = paths(targetDirectory);
-  if (existsSync(p.record) || existsSync(p.recordV2) || existsSync(p.version)) throw new Error("target already has a release pin; use upgrade with an explicit local release");
+  assertNoLegacyPin(p);
+  if (existsSync(p.record) || existsSync(p.version)) throw new Error("target already has a release pin; use upgrade with an explicit local release");
   return stageSelectedRelease(targetDirectory, selected);
 }
 

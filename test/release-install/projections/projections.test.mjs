@@ -4,17 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
-import { finalizeRelease } from "../../../dist/packages/archie-runtime/src/release-record/release-record-v1.js";
-import { selectLocalRelease } from "../../../dist/packages/archie-runtime/src/release-install/selection.js";
+import { RELEASE_RECORD_FILE, selectLocalRelease } from "../../../dist/packages/archie-runtime/src/index.js";
 import { bootstrapTarget, readPinnedTarget, verifyPinnedTarget } from "../../../dist/packages/archie-runtime/src/release-install/target-state.js";
 import { assertPinnedApmProjection, planApmProjection } from "../../../dist/packages/archie-runtime/src/release-install/apm-projection.js";
 import * as runtime from "../../../dist/packages/archie-runtime/src/index.js";
+import { finalizedBundle, makeBundle } from "../../support/release-bundle.mjs";
 
-const fixture = "test/fixtures/private-bundles/valid";
-const provenance = "packages/archie-runtime/vendor/html-design.provenance.json";
-const sourceCommit = "abcdef0123456789abcdef0123456789abcdef01";
 function root() { return mkdtempSync(join(tmpdir(), "archie-projections-")); }
-function bundle(base) { const path = join(base, "bundle"); cpSync(fixture, path, { recursive: true }); finalizeRelease({ bundleDirectory: path, sourceCommit, htmlProvenancePath: provenance }); return path; }
+function bundle(base) { return finalizedBundle(base); }
 function target(base) {
   const path = join(base, "target");
   // The fixture has an application package and unrelated APM policy, dependency, and deployment.
@@ -38,11 +35,11 @@ test("bootstrap pins a finalized local bundle without mutating application npm s
     assert.equal(readFileSync(join(project, "package.json"), "utf8"), appManifest);
     assert.equal(readFileSync(join(project, "package-lock.json"), "utf8"), appLock);
     assert.equal(readFileSync(join(project, ".archie/version"), "utf8"), `${selected.record.version}\n`);
-    assert.equal(readFileSync(join(project, ".archie/release/release-record-v1.json"), "utf8"), selected.recordBytes);
+    assert.equal(readFileSync(join(project, `.archie/release/${RELEASE_RECORD_FILE}`), "utf8"), selected.recordBytes);
     const receipt = JSON.parse(readFileSync(join(project, ".archie/release/selection-receipt.json"), "utf8"));
     assert.deepEqual(Object.keys(receipt).sort(), ["format", "recordSha256", "selectedPath", "version"]);
     assert.equal(receipt.selectedPath, selected.bundleDirectory);
-    assert.equal(readFileSync(join(project, ".archie/runtime/package.json"), "utf8").includes(selected.record.npm.locator), true);
+    assert.equal(readFileSync(join(project, ".archie/runtime/package.json"), "utf8").includes(selected.record.artifacts[0].locator), true);
     assert.equal(existsSync(join(project, ".archie/runtime/npm/archie-runtime.tgz")), true);
     assert.match(readFileSync(join(project, "apm.yml"), "utf8"), /fetch_failure_default: block/);
     assert.match(readFileSync(join(project, "apm.yml"), "utf8"), /file:unrelated\/context/);
@@ -57,7 +54,7 @@ test("selection and CLI enforce explicit local selection while verify consumes o
   const base = root();
   try {
     assert.throws(() => selectLocalRelease("latest"), /explicit local directory/);
-    const incomplete = join(base, "incomplete"); cpSync(fixture, incomplete, { recursive: true });
+    const incomplete = makeBundle(base, "incomplete");
     assert.throws(() => selectLocalRelease(incomplete), /incomplete/);
     const selected = selectLocalRelease(bundle(base));
     const project = target(base);

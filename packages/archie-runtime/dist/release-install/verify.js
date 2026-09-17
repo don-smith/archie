@@ -1,18 +1,12 @@
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { verifyHtmlSnapshot } from "../html-snapshot/verify.js";
 import { assertSupportedEnvironment } from "../analysis/contracts.js";
 import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget } from "./target-state.js";
 import { initialInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi } from "./run-npm.js";
 import { generateApmLock, runApmChecks } from "./run-apm.js";
-function paths(targetDirectory) {
-    const runtime = join(targetDirectory, ".archie", "runtime");
-    return { runtime, installedPackage: (name) => join(runtime, "node_modules", name) };
-}
-function runtimePackage(record) { return record.schemaVersion === 2 ? "@archie/runtime" : record.npm.package; }
 function deployedFiles(targetDirectory, record) {
     const files = [];
     const visit = (path) => {
@@ -71,18 +65,14 @@ export class ReleaseVerificationFailure extends Error {
 }
 /** Validates the installed projection without allowing a package-manager command to repair it. */
 export function verifyCurrentInstalledTarget(targetDirectory, options = {}) {
-    const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
     assertSupportedEnvironment();
     const pin = readPinnedTarget(targetDirectory);
     assertInstalledNpm(pin);
-    const p = paths(pin.targetDirectory);
-    verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
     verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
 }
 /** Executes the native, pinned-state-only checks in their required order. */
 export function verifyInstalledTarget(targetDirectory, options = {}) {
     const run = options.run ?? nativeRun;
-    const verifyHtml = options.verifyHtml ?? ((root, expected) => { verifyHtmlSnapshot(root, expected); });
     const report = initialInstallReport();
     let phase = "preflight";
     try {
@@ -90,12 +80,9 @@ export function verifyInstalledTarget(targetDirectory, options = {}) {
         assertSupportedEnvironment();
         // Before each package-manager operation, re-read the pinned record, projections, and tarball.
         let pin = readPinnedTarget(targetDirectory);
-        const p = paths(pin.targetDirectory);
         phase = "npm";
         runNpmCi(pin, run);
-        verifyHtml(join(p.installedPackage(runtimePackage(pin.record)), "vendor", "html-design"), { digest: pin.record.htmlDesignSnapshot.digest.value, fileCount: pin.record.htmlDesignSnapshot.digest.fileCount });
         report.npm = "passed";
-        report.html = "passed";
         pin = readPinnedTarget(targetDirectory);
         phase = "apm";
         report.apm = runApmChecks(pin, run);
@@ -162,7 +149,7 @@ export function bootstrapAndVerifyTarget(targetDirectory, selected, options = {}
     return stageAndVerify(targetDirectory, selected.record.apm.skills, () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory, selected, options = {}) {
-    // Do not let staging overwrite a target whose installed runtime, HTML bytes, or deployed skill is already inconsistent.
+    // Do not let staging overwrite a target whose installed runtime or deployed skills are already inconsistent.
     try {
         verifyCurrentInstalledTarget(targetDirectory, options);
     }
