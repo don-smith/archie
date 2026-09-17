@@ -1,0 +1,57 @@
+specification {
+  element actor {
+    style {
+      shape person
+    }
+  }
+  element system
+  element container
+  element component {
+    style {
+      shape component
+    }
+  }
+}
+
+model {
+  maintainer = actor "Maintainer" {
+    description "Reads the architecture site."
+  }
+
+  fixture = system "Fixture system" {
+    description "A small system used to test the architecture site builder."
+
+    worker = container "Worker" {
+      description "Runs fixture work."
+      technology "Node.js"
+      link ./src/worker.mjs "Source"
+
+      engine = component "Engine" {
+        description "Executes one unit of work."
+        link https://example.com/external "External reference"
+      }
+    }
+  }
+
+  maintainer -> fixture "Uses"
+}
+
+views {
+  view systemContext of fixture {
+    title "System context"
+    description "The fixture and its maintainer."
+    include maintainer, fixture
+  }
+
+  view containers of fixture {
+    title "Containers"
+    description "The fixture containers."
+    include fixture.*
+  }
+
+  view components of fixture.worker {
+    title "Worker components"
+    description "The components inside the worker."
+    include *
+  }
+}

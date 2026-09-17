@@ -68,6 +68,13 @@ try {
     const route = configuredPage.id === config.pages.home.id ? "/" : `/${configuredPage.slug}/`;
     await checkRoute(page, `${base}${route}`, configuredPage);
   }
-  console.log(`Browser checks passed for ${config.repository.name}: ${pages.length} generated pages, themes, narrow layout, keyboard-ready controls, and print.`);
+  if (config.architectureStatus) {
+    await page.goto(`${base}/architecture-status/`, { waitUntil: "networkidle" });
+    assert.equal(await page.locator("h1").count(), 1);
+    assert.match(await page.locator("main").innerText(), /Architecture status/);
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "status page has narrow-layout overflow");
+  }
+  console.log(`Browser checks passed for ${config.repository.name}: ${pages.length + (config.architectureStatus ? 1 : 0)} generated pages, themes, narrow layout, keyboard-ready controls, and print.`);
   await context.close();
 } finally { await browser.close(); await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); }

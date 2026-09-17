@@ -5,7 +5,10 @@ export const COMPOSITION_GUIDE_VERSION = 1;
  * adapter contract between a handoff and the independently installed
  * html-design skill; it is not a copy of that skill.
  */
-export function buildCompositionGuide() {
+export function buildCompositionGuide({ archiePage = null } = {}) {
+  const archieMarkerInstruction = archiePage
+    ? `- When \`page-map.json\` includes the Archie area, preserve all \`archie-*\` comments from \`${archiePage.markdown}\` in the composed \`site/${archiePage.slug}/index.html\`. Keep them as HTML comments so they remain hidden while the final-site check can read the guide contract.\n`
+    : "";
   return `# Architecture handoff composition guide
 
 This handoff is the architecture source bundle for the independently installed \`html-design\` skill. Use the handoff as the only architecture-content input. Do not import the architecture builder, its source files, or its dependencies into the final site.
@@ -17,7 +20,7 @@ This handoff is the architecture source bundle for the independently installed \
 - \`site/\` is owned and published by the html-design consumer. An architecture rebuild must never replace it.
 - Start each update by reading \`delta.json\` and \`delta.md\`, then inspect the affected claims, pages, and view IDs.
 - Treat \`claims.json\` and \`page-map.json\` as the curated architecture contract. Treat copied Markdown as authored narrative. Presentation may add structure and styling, but must not alter claims, review status, evidence links, page intent, or view identity.
-- After composition, write \`site/assets/architecture-handoff.json\` with the current \`manifest.digests.handoff\`, \`manifest.version\`, and an HTML-design ownership marker. This receipt lets the architecture checker detect a presentation composed from an older handoff.
+${archieMarkerInstruction}- After composition, write \`site/assets/architecture-handoff.json\` with the current \`manifest.digests.handoff\`, \`manifest.version\`, and an HTML-design ownership marker. This receipt lets the architecture checker detect a presentation composed from an older handoff.
 
 ## Profile and page composition
 
@@ -53,8 +56,13 @@ Use these exact paths relative to the handoff directory:
 - \`assets/views.json\` — view metadata, parent navigation, and stable semantic digests.
 - \`assets/likec4-views.js\` — the compiled LikeC4 web component bundle.
 - \`delta.json\` and \`delta.md\` — baseline/update changes for incremental recomposition.
+- \`architecture-status.json\` — handoff v2's latest normalized deterministic-check snapshot when \`architectureStatus\` is configured; it may record an explicit missing snapshot, but it never contains raw stdout/stderr.
 
 When a final page is nested below \`site/\`, resolve handoff-derived resources into the final site's own copied \`assets/\` directory. Do not use absolute filesystem paths. Keep route-relative paths correct for every page depth.
+
+## Deterministic architecture status
+
+When configured, the generated \`architecture-status/index.html\` route is ordered after home and before area pages. Read the copied \`architecture-status.json\` as recorded evidence only: do not rerun checks, read Git, consult the current clock, or turn target-owned result codes into a universal verdict. Render the repository revision, generation time, independent incomplete states, check execution facts, result meaning, evidence links, limits, and the authority stop. A missing snapshot remains visible as absence. Build order is deterministic checks, runtime snapshot writer, existing architecture-docs build, then html-design composition.
 
 ## LikeC4 mounting adapter
 

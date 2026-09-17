@@ -84,6 +84,13 @@ try {
     console.log(`${configuredPage.id} ok · ${configuredPage.viewIds.length} declared views · initial fit · zoom · theme · narrow · print`);
     page.removeAllListeners();
   }
+  if (config.architectureStatus) {
+    await page.goto(`${base}/architecture-status/`, { waitUntil: "networkidle" });
+    assert.equal(await page.locator("h1").count(), 1, "status route must have one h1");
+    assert.match(await page.locator("main").innerText(), /Architecture status/);
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "status route narrow overflow");
+  }
   await context.close();
 } finally {
   await browser.close();

@@ -4,8 +4,10 @@ import path from "node:path";
 import { digest } from "./evidence-ledger.mjs";
 import { buildCompositionGuide } from "./composition-guide.mjs";
 import { buildHandoffDelta, deltaToMarkdown } from "./handoff-delta.mjs";
+import { isActiveArchieDocumentationPage } from "./archie-documentation.mjs";
 
 export const HANDOFF_VERSION = 1;
+export const HANDOFF_STATUS_VERSION = 2;
 
 export function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
@@ -42,7 +44,9 @@ export async function readHandoffSnapshot(directory) {
       readJson(path.join(directory, "page-map.json")),
       readJson(path.join(directory, "assets/views.json")),
     ]);
-    return { manifest, claims, pageMap, views };
+    let architectureStatus = null;
+    try { architectureStatus = await readJson(path.join(directory, "architecture-status.json")); } catch (error) { if (error.code !== "ENOENT") throw error; }
+    return { manifest, claims, pageMap, views, architectureStatus };
   } catch (error) {
     if (error.code === "ENOENT") return null;
     throw error;
@@ -57,14 +61,15 @@ export function calculateHandoffDigest(manifest) {
   return digest(stableManifest);
 }
 
-export async function writeHandoffBundle({ destination, config, compiled, pages, statuses, pagePaths, previous = null }) {
+export async function writeHandoffBundle({ destination, config, compiled, pages, statuses, pagePaths, archieDocumentationActive = false, previous = null, architectureStatus = { configured: false } }) {
   await mkdir(path.join(destination, "pages"), { recursive: true });
   await mkdir(path.join(destination, "assets"), { recursive: true });
 
   const pageMap = {
-    version: HANDOFF_VERSION,
+    version: architectureStatus.configured ? HANDOFF_STATUS_VERSION : HANDOFF_VERSION,
     home: pageRecord(pages[0], `pages/${pages[0].id}.md`),
     areas: pages.slice(1).map((page) => pageRecord(page, `pages/${page.id}.md`)),
+    ...(architectureStatus.configured ? { status: { id: "architecture-status", title: "Architecture status", route: "architecture-status/index.html", kind: "generated", availability: architectureStatus.snapshot ? "present" : "missing" } } : {}),
   };
   const claims = {
     version: config.ledger.version,
@@ -92,7 +97,9 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
     supplementalInputs.push({ id: input.id, source: input.source, destination: input.destination, sha256: sha256(bytes) });
   }
 
-  const guide = buildCompositionGuide();
+  const guide = buildCompositionGuide({
+    archiePage: pageMap.areas.find((page) => isActiveArchieDocumentationPage(archieDocumentationActive, page)),
+  });
   const guideBytes = Buffer.from(guide);
   await writeFile(path.join(destination, "composition-guide.md"), guideBytes);
   const claimsDigest = await writeJson(path.join(destination, "claims.json"), claims);
@@ -100,11 +107,17 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
   const viewsDigest = await writeJson(path.join(destination, "assets", "views.json"), views);
   const likec4Destination = path.join(destination, "assets", "likec4-views.js");
   await copyFile(compiled.bundlePath, likec4Destination);
+  let architectureStatusDigest;
+  if (architectureStatus.configured && architectureStatus.snapshot) {
+    const statusBytes = jsonBytes(architectureStatus.snapshot);
+    await writeFile(path.join(destination, "architecture-status.json"), statusBytes);
+    architectureStatusDigest = sha256(statusBytes);
+  }
 
   const manifest = {
     ownership: { product: "architecture-docs", artifact: "handoff", generated: true, markerVersion: 1 },
-    version: HANDOFF_VERSION,
-    guideVersion: 1,
+    version: architectureStatus.configured ? HANDOFF_STATUS_VERSION : HANDOFF_VERSION,
+    guideVersion: architectureStatus.configured ? 2 : 1,
     repository: config.publicConfig.repository,
     document: config.publicConfig.document,
     root: config.publicConfig.root,
@@ -135,8 +148,12 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       likec4: "assets/likec4-views.js",
       delta: "delta.json",
       deltaMarkdown: "delta.md",
+      ...(architectureStatus.configured && architectureStatus.snapshot ? { architectureStatus: "architecture-status.json" } : {}),
     },
     ...(supplementalInputs.length ? { supplementalInputs } : {}),
+    ...(architectureStatus.configured ? { architectureStatus: architectureStatus.snapshot
+      ? { source: config.publicConfig.architectureStatus.snapshot, destination: "architecture-status.json", sha256: architectureStatusDigest, available: true }
+      : { source: config.publicConfig.architectureStatus.snapshot, available: false } } : {}),
     digests: {
       guide: sha256(guideBytes),
       claims: claimsDigest,
@@ -145,11 +162,12 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       model: compiled.semanticData.modelDigest,
       workspace: compiled.semanticData.workspaceDigest,
       pages: pageDigests,
+      ...(architectureStatus.configured && architectureStatus.snapshot ? { architectureStatus: architectureStatusDigest } : {}),
     },
   };
   manifest.digests.handoff = calculateHandoffDigest(manifest);
 
-  const delta = buildHandoffDelta({ previous, current: { manifest, claims, pageMap, views } });
+  const delta = buildHandoffDelta({ previous, current: { manifest, claims, pageMap, views, architectureStatus: architectureStatus.configured ? architectureStatus.snapshot : null } });
   await writeJson(path.join(destination, "delta.json"), delta);
   const deltaMarkdown = deltaToMarkdown(delta);
   await writeFile(path.join(destination, "delta.md"), deltaMarkdown);
@@ -167,6 +185,7 @@ export async function writeHandoffBundle({ destination, config, compiled, pages,
       ...supplementalInputs.map((input) => input.destination),
       "assets/views.json",
       "assets/likec4-views.js",
+      ...(architectureStatus.configured && architectureStatus.snapshot ? ["architecture-status.json"] : []),
       "delta.json",
       "delta.md",
     ],

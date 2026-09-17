@@ -1,0 +1,14 @@
+{
+  "kind": "archie-architecture-status-report",
+  "version": 1,
+  "checkId": "fixture-check",
+  "observedAt": "2026-01-01T00:00:00.000Z",
+  "observedRevision": "fixture-revision",
+  "result": {
+    "code": "findings",
+    "label": "Findings",
+    "summary": "Target-owned findings are present.",
+    "counts": [{"id": "items", "value": 2}],
+    "findingIds": ["finding-1"]
+  }
+}

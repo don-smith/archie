@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "inventory": {
+    "existing-documentation": { "status": "examined", "paths": ["pages/home.md", "pages/archie.md"] },
+    "manifests": { "status": "examined", "paths": ["architecture-docs.config.json"] },
+    "runtime-entry-points": { "status": "examined", "paths": ["model/model.c4"] },
+    "deployment-definitions": { "status": "not-applicable", "paths": [], "reason": "The fixture is a static model." },
+    "persistence-definitions": { "status": "not-applicable", "paths": [], "reason": "The fixture has no persistence." },
+    "integration-clients": { "status": "not-applicable", "paths": [], "reason": "The fixture has no clients." },
+    "representative-tests": { "status": "examined", "paths": ["evidence/worker.txt"] },
+    "source-relationships": { "status": "examined", "paths": ["model/model.c4"] },
+    "glossary-or-domain-language": { "status": "not-applicable", "paths": [], "reason": "No glossary exists in this fixture." },
+    "adr-or-decision-sources": { "status": "not-applicable", "paths": [], "reason": "No ADRs exist in this fixture." }
+  },
+  "claims": [
+    { "id": "purpose", "statement": "The fixture demonstrates a worker architecture.", "basis": "confirmed-evidence", "topics": ["purpose", "actors", "boundary", "runtime-unit", "flow", "domain-language", "pattern", "navigation"], "evidence": [{ "path": "model/model.c4", "note": "The model names the fixture system." }], "targets": { "pages": ["home"], "elements": ["fixture"] }, "review": { "state": "pending" } },
+    { "id": "runtime", "statement": "The worker runs fixture work.", "basis": "confirmed-evidence", "topics": ["responsibility", "interface"], "evidence": [{ "path": "model/model.c4", "note": "The worker container description and relationship." }], "targets": { "pages": ["runtime"], "elements": ["fixture.worker"] }, "review": { "state": "pending" } },
+    { "id": "archie-guidance", "statement": "The target carries repository-specific Archie guidance.", "basis": "confirmed-evidence", "topics": ["responsibility"], "evidence": [{ "path": "pages/archie.md", "note": "The authored page adapts the deployed guide." }], "targets": { "pages": ["archie"], "elements": [] }, "review": { "state": "pending" } }
+  ],
+  "pageMapReview": { "state": "pending" }
+}

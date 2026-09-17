@@ -2,9 +2,10 @@ import { canonicalStyles, themeScript, viewerScript, viewerStyles } from "./site
 
 const escapeHtml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 const scriptData = (value) => JSON.stringify(value).replaceAll("<", "\\u003c").replaceAll("&", "\\u0026");
-function navigation(config, page, prefix) {
+function navigation(config, page, prefix, statusConfigured = false) {
   const home = config.pages.home;
   const links = [{ href: `${prefix}index.html`, label: home.title, current: page.id === home.id }];
+  if (statusConfigured) links.push({ href: `${prefix}architecture-status/index.html`, label: "Architecture status", current: false });
   for (const area of config.pages.areas) links.push({ href: `${prefix}${area.slug}/index.html`, label: area.title, current: page.id === area.id });
   return links.map((link) => `<li><a href="${escapeHtml(link.href)}"${link.current ? ' aria-current="page"' : ""}>${escapeHtml(link.label)}</a></li>`).join("\n");
 }
@@ -26,7 +27,7 @@ function claimMarkup(claims, browserRoot) {
     return `<article class="ds-content-card"><p class="ds-content-card__tag">${status} · ${escapeHtml(claim.id)}</p><p>${escapeHtml(claim.statement)}</p><p class="ds-muted">${evidence}</p></article>`;
   }).join("")}</div>`;
 }
-export function renderSite({ config, page, pageHtml, views, paletteCss, claimStatuses = [], assetPrefix = "" }) {
+export function renderSite({ config, page, pageHtml, views, paletteCss, claimStatuses = [], assetPrefix = "", statusConfigured = false }) {
   const hasViews = page.viewIds.length > 0;
   const initialId = hasViews ? page.initialViewId ?? page.viewIds[0] ?? config.model.initialView : null;
   const initial = hasViews ? views.find((view) => view.id === initialId) ?? views[0] : null;
@@ -56,7 +57,7 @@ export function renderSite({ config, page, pageHtml, views, paletteCss, claimSta
     <a class="ds-skip-link" href="#main">Skip to main content</a>
     <header class="ds-top-chrome"><strong>Architecture docs · ${escapeHtml(repositoryLabel)}</strong><div class="ds-theme-controls ds-no-print" aria-label="Theme"><button type="button" data-theme-choice="system" aria-pressed="true">System</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></header>
     <div class="ds-rail-document__layout">
-      <nav class="ds-rail-document__rail" aria-label="Architecture documentation pages"><p class="ds-label">Architecture map</p><ul>${navigation(config, page, assetPrefix)}</ul></nav>
+      <nav class="ds-rail-document__rail" aria-label="Architecture documentation pages"><p class="ds-label">Architecture map</p><ul>${navigation(config, page, assetPrefix, statusConfigured)}</ul></nav>
       <main class="ds-rail-document__main" id="main">
         <section class="ds-statement-hero" id="orientation" aria-labelledby="orientation-title"><div class="ds-statement-hero__inner ds-shell"><p class="ds-kicker">Architecture docs · ${page.id === config.pages.home.id ? "Orientation" : "Major area"}</p><h1 class="ds-display" id="orientation-title">${escapeHtml(page.title)}</h1><p class="ds-statement-hero__deck">${escapeHtml(page.summary)}</p>${provisional ? `<p class="ds-status-banner ds-status-banner--warning" role="status"><strong>Provisional documentation:</strong> ${provisional} claim${provisional === 1 ? " is" : "s are"} awaiting maintainer approval.</p>` : ""}</div></section>
         <section class="ds-rail-document__section" id="prose" aria-label="Reading guide"><div class="ds-reading-width ds-block-flow">${pageHtml}</div></section>

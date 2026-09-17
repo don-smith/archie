@@ -16,6 +16,12 @@ The root `architecture-docs.config.json` is strict JSON, version `1`, and is res
 
 Paths must be relative, cannot traverse, and model/output paths cannot overlap. Unknown fields are errors with stable JSON paths.
 
+## Archie-managed targets
+
+A target is Archie-managed when `<config-directory>/.archie/version` exists. This marker is outside the closed configuration schema and is the only activation signal. Managed targets should include exactly one `pages.areas` record with `id`, `title`, and `slug` set to `archie`, `Archie`, and `archie`.
+
+The Architecture Docs and final-site check reports expose `warnings` and `warningCount` for incomplete Archie material. These warnings are non-blocking: `ok`, `assertPublication`, thrown publication errors, and process exit codes depend only on `diagnostics`. The deployed Archie guide at `.agents/skills/archie/references/managed-site-guide.md` supplies the current guide version and required markers, so its version and marker inventory are not duplicated in this configuration contract.
+
 ## Evidence and publication
 
 `evidence/claims.json` records all ten discovery classes as `examined` or `not-applicable` with a reason. Each claim has a stable ID, statement, basis, topic tags, evidence entries, page targets, optional LikeC4 element targets, and review state. Bases are `confirmed-evidence`, `maintainer-provided-intent`, `inference-awaiting-confirmation`, or `unresolved`.

@@ -5,8 +5,10 @@ import path from "node:path";
 import test from "node:test";
 import { buildArchitectureDocs } from "../src/architecture-docs/index.mjs";
 import { ArchitectureDocsBuildError } from "../src/architecture-docs/errors.mjs";
+import { markdownToHtml } from "../src/architecture-docs/page-source.mjs";
 
 const fixture = path.resolve("test/fixtures/architecture-docs");
+const managedFixture = path.resolve("test/fixtures/architecture-docs-archie-managed");
 async function copyFixture() { const directory = await mkdtemp(path.join(process.cwd(), ".tmp-builder-")); await cp(fixture, directory, { recursive: true }); await rm(path.join(directory, "preview"), { recursive: true, force: true }); return { directory, config: path.join(directory, "architecture-docs.config.json"), root: directory, output: path.join(directory, "preview"), finalSite: path.join(directory, "site") }; }
 
 test("builds ordered preview routes and a self-contained handoff", async () => {
@@ -37,6 +39,94 @@ test("builds ordered preview routes and a self-contained handoff", async () => {
     assert.equal(await readFile(path.join(temporary.root, "handoff/pages/home.md"), "utf8"), "# Orientation\n\nA safe orientation.\n");
     assert.equal(await readFile(path.join(temporary.root, "pages/home.md"), "utf8"), "# Orientation\n\nA safe orientation.\n");
   } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+});
+
+test("builds an ordered Archie route through the preview and handoff", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".tmp-managed-builder-"));
+  try {
+    await cp(managedFixture, directory, { recursive: true });
+    const config = path.join(directory, "architecture-docs.config.json");
+    const result = await buildArchitectureDocs(config);
+
+    assert.deepEqual(result.generatedFiles.slice(0, 3), ["index.html", "runtime/index.html", "archie/index.html"]);
+    const preview = await readFile(path.join(directory, "preview/archie/index.html"), "utf8");
+    const authoredPage = await readFile(path.join(directory, "pages/archie.md"), "utf8");
+    const handoffPage = await readFile(path.join(directory, "handoff/pages/archie.md"), "utf8");
+    const pageMap = JSON.parse(await readFile(path.join(directory, "handoff/page-map.json"), "utf8"));
+    const guide = await readFile(path.join(directory, "handoff/composition-guide.md"), "utf8");
+    assert.match(preview, /<!-- archie-guide:v1 -->/);
+    assert.match(preview, /<!-- archie-capability:structural-inspection:start -->/);
+    assert.equal(handoffPage, authoredPage);
+    assert.match(handoffPage, /<!-- archie-topic:working-relationship -->/);
+    assert.deepEqual(pageMap.areas.map(({ id }) => id), ["runtime", "archie"]);
+    assert.deepEqual(pageMap.areas[1].viewIds, []);
+    assert.equal(pageMap.areas[1].initialViewId, null);
+    assert.match(guide, /preserve all `archie-\*` comments from `pages\/archie\.md`/);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test("uses the configured Archie page paths in composition guidance", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".tmp-custom-archie-slug-builder-"));
+  try {
+    await cp(managedFixture, directory, { recursive: true });
+    const configPath = path.join(directory, "architecture-docs.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    const archiePage = config.pages.areas.find((page) => page.id === "archie");
+    archiePage.slug = "team-archie";
+    await writeFile(configPath, JSON.stringify(config));
+
+    await buildArchitectureDocs(configPath);
+
+    const guide = await readFile(path.join(directory, "handoff/composition-guide.md"), "utf8");
+    assert.match(guide, /comments from `pages\/archie\.md` in the composed `site\/team-archie\/index\.html`/);
+    assert.doesNotMatch(guide, /site\/archie\/index\.html/);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test("treats an uninstalled Archie-ID page as ordinary Markdown", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".tmp-uninstalled-archie-builder-"));
+  try {
+    await cp(managedFixture, directory, { recursive: true });
+    await rm(path.join(directory, ".archie"), { recursive: true, force: true });
+    const pagePath = path.join(directory, "pages/archie.md");
+    await writeFile(pagePath, `${await readFile(pagePath, "utf8")}\n<aside>ordinary raw HTML</aside>\n`);
+
+    await buildArchitectureDocs(path.join(directory, "architecture-docs.config.json"));
+
+    const preview = await readFile(path.join(directory, "preview/archie/index.html"), "utf8");
+    const authoredPage = await readFile(pagePath, "utf8");
+    const handoffPage = await readFile(path.join(directory, "handoff/pages/archie.md"), "utf8");
+    const guide = await readFile(path.join(directory, "handoff/composition-guide.md"), "utf8");
+    assert.match(preview, /&lt;!-- archie-guide:v1 --&gt;/);
+    assert.match(preview, /&lt;!-- archie-capability:structural-inspection:start --&gt;/);
+    assert.match(preview, /&lt;aside&gt;ordinary raw HTML&lt;\/aside&gt;/);
+    assert.equal(handoffPage, authoredPage);
+    assert.doesNotMatch(guide, /preserve all `archie-\*` comments/);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test("preserves only valid Archie contract comments when explicitly enabled", () => {
+  const html = markdownToHtml([
+    "<!-- archie-guide:v1 -->",
+    "<!-- archie-topic:overview -->",
+    "<!-- archie-capability:assessment:when-to-use -->",
+    "<!-- archie-topic:bad value -->",
+    "<!-- archie-capability:assessment -->",
+    "<!-- archie-other:value -->",
+    "<aside>ordinary raw HTML</aside>",
+  ].join("\n"), { preserveArchieMarkers: true });
+  assert.match(html, /<!-- archie-guide:v1 -->/);
+  assert.match(html, /<!-- archie-topic:overview -->/);
+  assert.match(html, /<!-- archie-capability:assessment:when-to-use -->/);
+  assert.match(html, /&lt;!-- archie-topic:bad value --&gt;/);
+  assert.match(html, /&lt;!-- archie-capability:assessment --&gt;/);
+  assert.match(html, /&lt;!-- archie-other:value --&gt;/);
+  assert.match(html, /&lt;aside&gt;ordinary raw HTML&lt;\/aside&gt;/);
+});
+
+test("escapes Archie contract comments on non-Archie pages", () => {
+  const html = markdownToHtml("<!-- archie-topic:overview -->");
+  assert.match(html, /&lt;!-- archie-topic:overview --&gt;/);
 });
 
 test("builds a viewless page without an interactive model section", async () => {

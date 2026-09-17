@@ -67,7 +67,7 @@
     {
       "id": "architecture-docs-and-likec4",
       "repository": "/Users/don/projects/c4archviewer",
-      "revision": "f2b7c5f1353c5e76fe8739a657632edafc66580f",
+      "revision": "81a008e629de8ff28b5db01a436c4425827feff5",
       "owner": "developer-owned",
       "destination": "packages/architecture-docs",
       "included": [
@@ -85,7 +85,7 @@
         "architecture-docs.config.json",
         "package-lock.json"
       ],
-      "reason": "The former C4 Arch Viewer proof evolved into Architecture Docs and LikeC4 authoring. Archie now owns their canonical source, tests, command, and dependency contract; generated example-site output was deliberately not migrated."
+      "reason": "The former C4 Arch Viewer proof evolved into Architecture Docs and LikeC4 authoring. Archie now owns their canonical source, tests, command, and dependency contract; generated example-site output was deliberately not migrated. The initial migration was taken at f2b7c5f1353c5e76fe8739a657632edafc66580f; the Archie managed-site documentation warnings and the deterministic architecture status consumer were later ported from c4archviewer main at 81a008e629de8ff28b5db01a436c4425827feff5."
     }
   ],
   "excluded": [

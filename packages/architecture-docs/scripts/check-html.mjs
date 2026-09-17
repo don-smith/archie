@@ -15,6 +15,7 @@ function checkLinks(html, filename, diagnostics) {
 try {
   const config = await loadArchitectureDocsConfig(configPath);
   const routes = [{ page: config.pages.home, filename: path.join(config.paths.outputDirectory, "index.html") }, ...config.pages.areas.map((page) => ({ page, filename: path.join(config.paths.outputDirectory, page.slug, "index.html") }))];
+  const statusRoute = config.architectureStatus ? path.join(config.paths.outputDirectory, "architecture-status", "index.html") : null;
   const diagnostics = [];
   for (const { page, filename } of routes) {
     const html = await readFile(filename, "utf8");
@@ -33,8 +34,15 @@ try {
     }
     checkLinks(html, filename, diagnostics);
   }
+  if (statusRoute) {
+    try {
+      const html = await readFile(statusRoute, "utf8");
+      if (!html.includes('data-ds-profile="rail-document"') || !html.includes("Architecture status") || count(html, "main") !== 1 || count(html, "h1") !== 1) diagnostics.push(`${statusRoute}: invalid architecture status route contract`);
+      checkLinks(html, statusRoute, diagnostics);
+    } catch { diagnostics.push(`${statusRoute}: generated architecture status route is missing`); }
+  }
   if (diagnostics.length) { for (const diagnostic of diagnostics) process.stderr.write(`${diagnostic}\n`); process.exitCode = 1; }
-  else console.log(`Preview HTML checks passed for ${routes.length} architecture docs pages.`);
+  else console.log(`Preview HTML checks passed for ${routes.length + (statusRoute ? 1 : 0)} architecture docs pages.`);
 } catch (error) {
   process.stderr.write(`${error.code ?? "CHECK_FAILED"}: ${error.message}\n`);
   for (const issue of error.issues ?? []) process.stderr.write(`${issue.path}: ${issue.message} Expected: ${issue.expected}\n`);

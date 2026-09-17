@@ -27,7 +27,7 @@
     "build": "node scripts/build-architecture-docs.mjs",
     "check": "node scripts/check-architecture-docs.mjs",
     "test": "npm run test:builder && npm run test:skills && npm run test:browser",
-    "test:builder": "node --test test/architecture-docs-*.test.mjs test/evidence-ledger.test.mjs test/publication.test.mjs test/package.test.mjs",
+    "test:builder": "node --test test/architecture-docs-*.test.mjs test/architecture-status-consumer.test.mjs test/evidence-ledger.test.mjs test/publication.test.mjs test/package.test.mjs",
     "test:skills": "node --test test/skill-command.test.mjs test/deployment-adapters.test.mjs test/skills/skills.test.mjs",
     "test:browser": "node --test test/browser-overflow.test.mjs",
     "test:consumer": "node --test test/handoff-consumer.test.mjs",

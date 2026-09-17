@@ -1,0 +1,56 @@
+{
+  "kind": "archie-architecture-status",
+  "version": 1,
+  "repository": {
+    "name": "fixture-repository",
+    "revision": {
+      "commit": "fixture-revision",
+      "workingTree": "clean"
+    }
+  },
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "freshnessPolicy": {
+    "maxAgeSeconds": 86400
+  },
+  "checks": [
+    {
+      "id": "fixture-check",
+      "title": "Fixture check",
+      "authority": "fixture owner",
+      "resultMeaning": "The fixture owns this meaning.",
+      "limits": [],
+      "execution": {
+        "state": "completed",
+        "startedAt": "2026-01-01T00:00:00.000Z",
+        "finishedAt": "2026-01-01T00:00:01.000Z",
+        "exitCode": 0
+      },
+      "result": {
+        "state": "reported",
+        "code": "observed",
+        "label": "Observed",
+        "summary": "The fixture owns this meaning.",
+        "counts": [
+          {
+            "id": "items",
+            "value": 1
+          },
+          {
+            "id": "items",
+            "value": 2
+          }
+        ]
+      },
+      "evidence": {
+        "state": "missing",
+        "reason": "fixture-only"
+      },
+      "freshness": {
+        "state": "unknown",
+        "reasons": [
+          "evidence-missing"
+        ]
+      }
+    }
+  ]
+}

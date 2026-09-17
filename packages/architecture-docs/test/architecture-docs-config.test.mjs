@@ -35,6 +35,62 @@ test("rejects unknown fields, duplicate routes, and unsafe paths", async () => {
   } finally { await rm(temporary.directory, { recursive: true, force: true }); }
 });
 
+test("rejects duplicate Archie areas when the target is not installed", async () => {
+  const temporary = await copyFixture();
+  try {
+    const config = JSON.parse(await readFile(temporary.path, "utf8"));
+    config.pages.areas[0] = { ...config.pages.areas[0], id: "archie", slug: "archie", title: "Archie" };
+    config.pages.areas.push({ ...config.pages.areas[0] });
+    await writeFile(temporary.path, JSON.stringify(config));
+    const ledgerPath = path.join(temporary.directory, "evidence/claims.json");
+    const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
+    ledger.claims[1].targets.pages = ["archie"];
+    await writeFile(ledgerPath, JSON.stringify(ledger));
+
+    await assert.rejects(loadArchitectureDocsConfig(temporary.path), (error) => error instanceof ArchitectureDocsConfigurationError
+      && error.issues.some((issue) => issue.path === "$.pages" && issue.message === "contains duplicate page IDs")
+      && error.issues.some((issue) => issue.path === "$.pages" && issue.message === "contains duplicate page slugs"));
+  } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+});
+
+test("rejects an installed target with duplicate Archie page IDs", async () => {
+  const temporary = await copyFixture();
+  try {
+    await mkdir(path.join(temporary.directory, ".archie"));
+    await writeFile(path.join(temporary.directory, ".archie/version"), "1.0.0\n");
+    const config = JSON.parse(await readFile(temporary.path, "utf8"));
+    config.pages.areas[0] = { ...config.pages.areas[0], id: "archie", slug: "archie", title: "Archie" };
+    config.pages.areas.push({ ...config.pages.areas[0], slug: "archie-copy" });
+    await writeFile(temporary.path, JSON.stringify(config));
+    const ledgerPath = path.join(temporary.directory, "evidence/claims.json");
+    const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
+    ledger.claims[1].targets.pages = ["archie"];
+    await writeFile(ledgerPath, JSON.stringify(ledger));
+
+    await assert.rejects(loadArchitectureDocsConfig(temporary.path), (error) => error instanceof ArchitectureDocsConfigurationError
+      && error.issues.some((issue) => issue.path === "$.pages" && issue.message === "contains duplicate page IDs"));
+  } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+});
+
+test("rejects an installed target with duplicate Archie page slugs", async () => {
+  const temporary = await copyFixture();
+  try {
+    await mkdir(path.join(temporary.directory, ".archie"));
+    await writeFile(path.join(temporary.directory, ".archie/version"), "1.0.0\n");
+    const config = JSON.parse(await readFile(temporary.path, "utf8"));
+    config.pages.areas[0] = { ...config.pages.areas[0], id: "archie", slug: "archie", title: "Archie" };
+    config.pages.areas.push({ ...config.pages.areas[0], id: "archie-copy" });
+    await writeFile(temporary.path, JSON.stringify(config));
+    const ledgerPath = path.join(temporary.directory, "evidence/claims.json");
+    const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
+    ledger.claims[1].targets.pages = ["archie", "archie-copy"];
+    await writeFile(ledgerPath, JSON.stringify(ledger));
+
+    await assert.rejects(loadArchitectureDocsConfig(temporary.path), (error) => error instanceof ArchitectureDocsConfigurationError
+      && error.issues.some((issue) => issue.path === "$.pages" && issue.message === "contains duplicate page slugs"));
+  } finally { await rm(temporary.directory, { recursive: true, force: true }); }
+});
+
 test("rejects an initial view that is not listed for the page", async () => {
   const temporary = await copyFixture();
   try {
