@@ -17,6 +17,6 @@ APM deploys the context skills to `/path/to/project/.agents/skills/`. It has no 
 /skill:archie
 ```
 
-For runtime-heavy work, the deployed Archie skill runs `scripts/dispatch-runtime.mjs` against the project. The dispatcher refuses to use a global command and starts only `.archie/runtime/node_modules/<pinned-package>/dist/skill-runtime.js`.
+For runtime-heavy work, the deployed Archie skill runs `scripts/dispatch-runtime.mjs` against the project. The dispatcher refuses to use a global command and starts only `.archie/runtime/node_modules/<pinned-package>/dist/skill-runtime.js`. Conformance skills likewise invoke only `.archie/runtime/node_modules/.bin/architecture-conformance`, which the v2 release installs from the recorded `@archie/conformance` artifact.
 
 Keep `apm.yml`, `apm.lock.yaml`, and `.apm/skills/` together in the project. `apm install --frozen` is the replay path; it does not resolve a different context.

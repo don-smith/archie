@@ -1,6 +1,6 @@
 # Assessment artifact contract
 
-The bundle lives under the supplied workstream:
+The bundle lives in the resolved assessment directory: `--output`, then a repository instruction, then `.archie/assessments/<yyyymmdd>-<slug>/`. The repository decides whether that directory is tracked or ignored.
 
 ```text
 assessment/
@@ -23,10 +23,10 @@ Recommended progression:
 
 1. `in-progress`: approved inventory and scenarios exist.
 2. `in-progress`: recovered model, flows, current view, intended view, and gaps exist.
-3. `in-progress`: developer factual corrections are persisted.
-4. `in-progress`: strengths, non-risks, findings, trade-offs, and pending recommendations exist.
-5. `in-progress`: recommendation outcomes and packet exist.
-6. `ready`: all blockers are closed and both checkers pass.
+3. `in-progress`: developer factual corrections are persisted in `factualCorrection`.
+4. `in-progress`: strengths, non-risks, findings, trade-offs, and pending `recommendations` exist.
+5. `in-progress`: every recommendation has a developer outcome, reason, dependencies, and candidate checks, and the packet exists.
+6. `ready`: factual correction is completed, no recommendation remains pending, all blockers are closed, Markdown status agrees with model status, and both checkers pass.
 
 Use `blocked` only when an external action prevents useful progress. Keep the blocker actionable.
 
@@ -49,10 +49,10 @@ A ready bundle needs:
 
 ```text
 node <skill-dir>/scripts/check-model.mjs <assessment-dir>/architecture-model.json
-node <skill-dir>/scripts/check-assessment.mjs <assessment-dir> --html-skill-dir <html-design-dir>
+node <skill-dir>/scripts/check-assessment.mjs <assessment-dir> [--html-skill-dir <html-design-dir>]
 ```
 
-The second command delegates packet validation to:
+The second command defaults to the `html-design` skill deployed beside Assessment and delegates packet validation to:
 
 ```text
 node <html-design-dir>/scripts/check-artifact.mjs <assessment-dir>/packet.html --profile review-packet
@@ -60,10 +60,10 @@ node <html-design-dir>/scripts/check-artifact.mjs <assessment-dir>/packet.html -
 
 ## Source protection
 
-The assessment may write only inside its workstream directory until triage. Never edit assessed product source. Hash or diff approved production paths before and after controlled or high-risk runs.
+The assessment may write only inside its assessment directory until triage. Never edit assessed product source. Hash or diff approved production paths before and after controlled or high-risk runs.
 
-After triage, tracked architecture documentation remains a proposal unless repository policy and the developer authorize publication. Publish only validated facts, accepted direction, decisions, and status. Keep raw evidence, rejected findings, and detailed triage in the workstream.
+After triage, tracked architecture documentation remains a proposal unless repository policy and the developer authorize publication. Publish only validated facts, accepted direction, decisions, and status. Keep raw evidence, rejected findings, and detailed triage in the assessment directory.
 
 ## Handoff
 
-The ready assessment informs a separate Scope invocation. It does not authorize implementation. Preserve accepted, rejected, and deferred recommendation outcomes so later workstreams do not reopen settled triage by accident.
+The ready assessment informs the developer's own planning. It does not authorize implementation. Accepted recommendations become proposed work items for the repository's tracker or planning flow. Preserve accepted, rejected, and deferred recommendation outcomes so later work does not reopen settled triage by accident. Checker completeness never means that Archie approved a recommendation or judged its architectural quality.

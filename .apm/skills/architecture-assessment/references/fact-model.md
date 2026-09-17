@@ -83,6 +83,10 @@ For every change scenario, record:
 
 Counts describe observed work. They are not architecture scores. A central registration point may be a useful explicit policy seam.
 
+## Correction and recommendation records
+
+`factualCorrection` records whether the developer checkpoint is pending or completed and summarizes persisted corrections. Each `recommendations` item keeps its stable `rec-` ID, developer outcome, reason, dependencies, and candidate checks. A complete record proves triage happened. It does not approve the recommendation or replace developer judgment.
+
 ## Reference rule
 
-Markdown uses `[model:<id>]`. Each diagram lists `modelRefs`. The checker rejects dangling report references, diagram references, relationship endpoints, and incomplete approved-file inventory.
+Markdown uses `[model:<id>]`. Each diagram lists `modelRefs`. The checker rejects dangling report references, diagram references, scenario contract references, relationship endpoints, data owners, and incomplete approved-file inventory.

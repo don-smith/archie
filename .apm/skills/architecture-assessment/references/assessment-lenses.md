@@ -12,7 +12,7 @@ Inspect source direction, cycles, package rules, and facade bypass. Keep source 
 
 ## Modules and interfaces
 
-Use `codebase-design` terms. Ask what each module owns, what its interface makes callers learn, where the seam sits, and which adapters vary there. Judge depth by leverage and locality. A large implementation can be deep. A small file can be shallow.
+Use the deep-module vocabulary terms. Ask what each module owns, what its interface makes callers learn, where the seam sits, and which adapters vary there. Judge depth by leverage and locality. A large implementation can be deep. A small file can be shallow.
 
 ## Contract completeness
 

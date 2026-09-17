@@ -11,20 +11,15 @@ Use this skill for C4 model authoring only. `architecture-docs` owns repository 
 
 ## Package setup
 
-Resolve these paths before running commands:
-
-- `TARGET_DIR`: the repository being documented.
-- `SKILL_DIR`: the directory containing this `SKILL.md`.
-- `PACKAGE_DIR`: two directories above `SKILL_DIR`.
-
-The package command is:
+Set `TARGET_DIR` to the repository being documented and run commands there. The target's pinned Archie runtime provides the package command:
 
 ```bash
-node "$PACKAGE_DIR/bin/architecture-docs.mjs" <command> \
+ARCHIE_RUNTIME_DIR="$TARGET_DIR/.archie/runtime"
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" <command> \
   --config "$TARGET_DIR/architecture-docs.config.json"
 ```
 
-Do not run an unpinned global LikeC4 CLI when the package command can compile the workspace.
+Do not derive runtime code from the copied skill directory or run an unpinned global LikeC4 CLI.
 
 ## Method
 
@@ -38,7 +33,7 @@ Do not run an unpinned global LikeC4 CLI when the package command can compile th
 8. Compile and inspect the workspace through the package command:
 
    ```bash
-   node "$PACKAGE_DIR/bin/architecture-docs.mjs" build \
+   "$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" build \
      --config "$TARGET_DIR/architecture-docs.config.json"
    ```
 

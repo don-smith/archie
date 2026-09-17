@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 
 const [targetArgument, ...runtimeArgs] = process.argv.slice(2);
 const target = resolve(targetArgument ?? process.cwd());
-const recordPath = join(target, ".archie", "release", "release-record-v1.json");
+const recordPath = join(target, ".archie", "release", "release-record-v3.json");
 const runtimePath = join(target, ".archie", "runtime");
 
 if (!existsSync(recordPath) || !existsSync(join(runtimePath, "package-lock.json"))) {
@@ -14,7 +14,7 @@ if (!existsSync(recordPath) || !existsSync(join(runtimePath, "package-lock.json"
 let packageName;
 try {
   const record = JSON.parse(readFileSync(recordPath, "utf8"));
-  packageName = record?.npm?.package;
+  packageName = record?.schemaVersion === 3 ? record.artifacts?.[0]?.package : undefined;
 } catch {
   throw new Error("Pinned Archie release record is unreadable");
 }

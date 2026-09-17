@@ -20,6 +20,11 @@
       "message": "Resolve html-design and produce a checked review packet before marking this bundle ready."
     }
   ],
+  "factualCorrection": {
+    "status": "pending",
+    "summary": ""
+  },
+  "recommendations": [],
   "sources": [
     {
       "id": "src-code",

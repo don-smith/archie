@@ -1,22 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/don-smith/architecture-assessment/skills/architecture-assessment/architecture-model.schema.json",
+  "$id": "https://archie.local/schemas/architecture-assessment-model-v1.json",
   "title": "Architecture assessment fact index",
   "type": "object",
   "required": [
     "schemaVersion", "assessmentId", "status", "target", "scope", "blockers",
-    "sources", "inventory", "elements", "relationships", "interfaces", "flows",
-    "data", "terms", "scenarios", "divergences", "claims", "diagrams"
+    "factualCorrection", "recommendations", "sources", "inventory", "elements",
+    "relationships", "interfaces", "flows", "data", "terms", "scenarios",
+    "divergences", "claims", "diagrams"
   ],
   "properties": {
     "$schema": { "type": "string" },
     "schemaVersion": { "const": "1.0.0" },
-    "assessmentId": { "type": "string", "minLength": 1 },
+    "assessmentId": { "$ref": "#/$defs/nonEmptyString" },
     "status": { "enum": ["in-progress", "blocked", "ready"] },
     "target": {
       "type": "object",
       "required": ["name", "path"],
-      "properties": { "name": { "type": "string" }, "path": { "type": "string" } },
+      "properties": {
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" }
+      },
       "additionalProperties": false
     },
     "scope": {
@@ -25,44 +29,37 @@
       "properties": {
         "approvedPaths": { "type": "array", "items": { "type": "string" } },
         "excludedPaths": { "type": "array", "items": { "type": "string" } },
-        "expectedFiles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-        "drivers": { "type": "array", "items": { "type": "string" } },
-        "scenarioIds": { "type": "array", "items": { "type": "string", "pattern": "^scn-" } }
+        "expectedFiles": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" }, "uniqueItems": true },
+        "drivers": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" }, "minItems": 1 },
+        "scenarioIds": { "type": "array", "items": { "type": "string", "pattern": "^scn-" }, "minItems": 1, "uniqueItems": true }
       },
       "additionalProperties": false
     },
-    "blockers": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["kind", "message"],
-        "properties": {
-          "kind": { "enum": ["html-unavailable", "scope", "evidence", "factual-correction", "other"] },
-          "message": { "type": "string", "minLength": 1 }
-        },
-        "additionalProperties": false
-      }
-    },
+    "blockers": { "type": "array", "items": { "$ref": "#/$defs/blocker" } },
+    "factualCorrection": { "$ref": "#/$defs/factualCorrection" },
+    "recommendations": { "type": "array", "items": { "$ref": "#/$defs/recommendation" } },
     "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
     "inventory": { "type": "array", "items": { "$ref": "#/$defs/inventory" } },
-    "elements": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
+    "elements": { "type": "array", "items": { "$ref": "#/$defs/element" } },
     "relationships": { "type": "array", "items": { "$ref": "#/$defs/relationship" } },
-    "interfaces": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "flows": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "data": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "terms": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "scenarios": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "divergences": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
-    "claims": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
+    "interfaces": { "type": "array", "items": { "$ref": "#/$defs/interface" } },
+    "flows": { "type": "array", "items": { "$ref": "#/$defs/flow" } },
+    "data": { "type": "array", "items": { "$ref": "#/$defs/datum" } },
+    "terms": { "type": "array", "items": { "$ref": "#/$defs/term" } },
+    "scenarios": { "type": "array", "items": { "$ref": "#/$defs/scenario" } },
+    "divergences": { "type": "array", "items": { "$ref": "#/$defs/divergence" } },
+    "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
     "diagrams": { "type": "array", "items": { "$ref": "#/$defs/diagram" } }
   },
   "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "type": "string" } },
     "evidence": {
       "type": "object",
       "required": ["sourceId", "locator"],
       "properties": {
         "sourceId": { "type": "string", "pattern": "^src-" },
-        "locator": { "type": "string", "minLength": 1 },
+        "locator": { "$ref": "#/$defs/nonEmptyString" },
         "quote": { "type": "string" }
       },
       "additionalProperties": false
@@ -71,13 +68,44 @@
       "type": "object",
       "required": ["id", "state", "certainty", "evidence"],
       "properties": {
-        "id": { "type": "string" },
+        "id": { "$ref": "#/$defs/nonEmptyString" },
         "state": { "enum": ["current", "intended", "both"] },
         "certainty": { "enum": ["confirmed", "inferred", "unresolved"] },
         "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
-        "gap": { "type": "string", "minLength": 1 }
+        "gap": { "$ref": "#/$defs/nonEmptyString" }
       },
       "additionalProperties": true
+    },
+    "blocker": {
+      "type": "object",
+      "required": ["kind", "message"],
+      "properties": {
+        "kind": { "enum": ["html-unavailable", "scope", "evidence", "factual-correction", "recommendation-triage", "other"] },
+        "message": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "factualCorrection": {
+      "type": "object",
+      "required": ["status", "summary"],
+      "properties": {
+        "status": { "enum": ["pending", "completed"] },
+        "summary": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "recommendation": {
+      "type": "object",
+      "required": ["id", "title", "outcome", "reason", "dependencies", "candidateChecks"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^rec-" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "outcome": { "enum": ["pending", "accepted", "rejected", "deferred"] },
+        "reason": { "type": "string" },
+        "dependencies": { "$ref": "#/$defs/stringArray" },
+        "candidateChecks": { "$ref": "#/$defs/stringArray" }
+      },
+      "additionalProperties": false
     },
     "source": {
       "type": "object",
@@ -85,9 +113,9 @@
       "properties": {
         "id": { "type": "string", "pattern": "^src-" },
         "kind": { "enum": ["code", "configuration", "intent", "decision", "test", "history", "external", "developer"] },
-        "path": { "type": "string" },
-        "locator": { "type": "string" },
-        "summary": { "type": "string" }
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "locator": { "$ref": "#/$defs/nonEmptyString" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" }
       },
       "additionalProperties": false
     },
@@ -96,12 +124,26 @@
       "required": ["id", "path", "classification", "coverage", "reason"],
       "properties": {
         "id": { "type": "string", "pattern": "^inv-" },
-        "path": { "type": "string" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
         "classification": { "enum": ["included", "excluded", "generated", "test", "documentation"] },
         "coverage": { "enum": ["read", "not-read", "not-applicable"] },
-        "reason": { "type": "string" }
+        "reason": { "$ref": "#/$defs/nonEmptyString" }
       },
       "additionalProperties": false
+    },
+    "element": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "kind"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^el-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "kind": { "enum": ["person", "external-system", "software-system", "runtime-unit", "deploy-node", "package", "crate", "module", "store", "durable-artifact"] }
+          }
+        }
+      ]
     },
     "relationship": {
       "allOf": [
@@ -110,10 +152,170 @@
           "type": "object",
           "required": ["kind", "from", "to", "label"],
           "properties": {
+            "id": { "type": "string", "pattern": "^rel-" },
             "kind": { "enum": ["source-dependency", "call", "command", "event", "data-read", "data-write", "data-ownership", "lifecycle", "build", "deploy", "trust", "intended"] },
             "from": { "type": "string", "pattern": "^el-" },
             "to": { "type": "string", "pattern": "^el-" },
-            "label": { "type": "string" }
+            "label": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "interface": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "owner", "consumers", "inputs", "outputs", "invariants", "errors", "ordering", "consistency", "versioning", "trust", "adapters", "testSeam"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^if-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "owner": { "type": "string", "pattern": "^el-" },
+            "consumers": { "$ref": "#/$defs/stringArray" },
+            "inputs": { "$ref": "#/$defs/stringArray" },
+            "outputs": { "$ref": "#/$defs/stringArray" },
+            "invariants": { "$ref": "#/$defs/stringArray" },
+            "errors": { "$ref": "#/$defs/stringArray" },
+            "ordering": { "$ref": "#/$defs/nonEmptyString" },
+            "idempotency": { "type": "string" },
+            "consistency": { "$ref": "#/$defs/nonEmptyString" },
+            "timing": { "type": "string" },
+            "versioning": { "$ref": "#/$defs/nonEmptyString" },
+            "trust": { "$ref": "#/$defs/nonEmptyString" },
+            "adapters": { "$ref": "#/$defs/stringArray" },
+            "testSeam": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "flowStep": {
+      "type": "object",
+      "required": ["order", "actor", "action", "target"],
+      "properties": {
+        "order": { "type": "number" },
+        "actor": { "type": "string", "pattern": "^el-" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "target": { "type": "string", "pattern": "^el-" },
+        "relationshipId": { "type": "string", "pattern": "^rel-" }
+      },
+      "additionalProperties": false
+    },
+    "flow": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "kind", "steps"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^flow-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "kind": { "$ref": "#/$defs/nonEmptyString" },
+            "steps": { "type": "array", "items": { "$ref": "#/$defs/flowStep" }, "minItems": 1 }
+          }
+        }
+      ]
+    },
+    "datum": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "authority", "owners", "persistence", "replication", "retention"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^data-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "authority": { "type": "string", "pattern": "^el-" },
+            "owners": { "type": "array", "items": { "type": "string", "pattern": "^el-" }, "minItems": 1, "uniqueItems": true },
+            "persistence": { "$ref": "#/$defs/nonEmptyString" },
+            "replication": { "$ref": "#/$defs/nonEmptyString" },
+            "retention": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "term": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["canonical", "aliases", "contexts", "translations", "codeSpellings"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^term-" },
+            "canonical": { "$ref": "#/$defs/nonEmptyString" },
+            "aliases": { "$ref": "#/$defs/stringArray" },
+            "contexts": { "$ref": "#/$defs/stringArray" },
+            "translations": { "$ref": "#/$defs/stringArray" },
+            "codeSpellings": { "$ref": "#/$defs/stringArray" }
+          }
+        }
+      ]
+    },
+    "changeSurface": {
+      "type": "object",
+      "required": ["additions", "modifications", "deletions", "registrationPoints", "layers", "languages", "contracts", "documents", "owners"],
+      "properties": {
+        "additions": { "$ref": "#/$defs/stringArray" },
+        "modifications": { "$ref": "#/$defs/stringArray" },
+        "deletions": { "$ref": "#/$defs/stringArray" },
+        "registrationPoints": { "$ref": "#/$defs/stringArray" },
+        "layers": { "$ref": "#/$defs/stringArray" },
+        "packages": { "$ref": "#/$defs/stringArray" },
+        "crates": { "$ref": "#/$defs/stringArray" },
+        "languages": { "$ref": "#/$defs/stringArray" },
+        "repositories": { "$ref": "#/$defs/stringArray" },
+        "contracts": { "type": "array", "items": { "type": "string", "pattern": "^if-" } },
+        "tests": { "$ref": "#/$defs/stringArray" },
+        "documents": { "$ref": "#/$defs/stringArray" },
+        "owners": { "$ref": "#/$defs/stringArray" },
+        "migration": { "type": "string" },
+        "omissionPoints": { "$ref": "#/$defs/stringArray" }
+      },
+      "additionalProperties": false
+    },
+    "scenario": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "kind", "stimulus", "environment", "affectedArtifacts", "response", "responseMeasures", "changeSurface"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^scn-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "kind": { "$ref": "#/$defs/nonEmptyString" },
+            "stimulus": { "$ref": "#/$defs/nonEmptyString" },
+            "environment": { "$ref": "#/$defs/nonEmptyString" },
+            "affectedArtifacts": { "$ref": "#/$defs/stringArray" },
+            "response": { "$ref": "#/$defs/nonEmptyString" },
+            "responseMeasures": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" }, "minItems": 1 },
+            "changeSurface": { "$ref": "#/$defs/changeSurface" }
+          }
+        }
+      ]
+    },
+    "divergence": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["name", "currentClaim", "intendedClaim"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^div-" },
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "currentClaim": { "$ref": "#/$defs/nonEmptyString" },
+            "intendedClaim": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      ]
+    },
+    "claim": {
+      "allOf": [
+        { "$ref": "#/$defs/fact" },
+        {
+          "type": "object",
+          "required": ["text"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^claim-" },
+            "text": { "$ref": "#/$defs/nonEmptyString" }
           }
         }
       ]
@@ -123,12 +325,12 @@
       "required": ["id", "title", "question", "scope", "abstractionLevel", "relationshipType", "modelRefs"],
       "properties": {
         "id": { "type": "string", "pattern": "^diag-" },
-        "title": { "type": "string" },
-        "question": { "type": "string" },
-        "scope": { "type": "string" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "question": { "$ref": "#/$defs/nonEmptyString" },
+        "scope": { "$ref": "#/$defs/nonEmptyString" },
         "abstractionLevel": { "enum": ["system-context", "runtime-unit", "module", "interface", "flow", "data", "current-intended"] },
         "relationshipType": { "enum": ["boundary", "containment", "dependency", "sequence", "branching", "lifecycle", "comparison", "data"] },
-        "modelRefs": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true }
+        "modelRefs": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" }, "minItems": 1, "uniqueItems": true }
       },
       "additionalProperties": false
     }

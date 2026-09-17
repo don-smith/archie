@@ -26,7 +26,7 @@ Each finding must cite model IDs, impact, affected scenarios, trade-offs, confid
 
 ## Recommendation triage
 
-Leave recommendations pending until the developer accepts, rejects, or defers each candidate after factual validation.
+Leave recommendations pending until the developer accepts, rejects, or defers each candidate after factual validation. Keep each outcome, reason, dependencies, and candidate checks in the model's `recommendations` array.
 
 ## Packet readiness
 

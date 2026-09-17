@@ -11,16 +11,17 @@ This is the orchestration skill. It produces authored inputs under one root, an 
 
 ## Package setup
 
-Set `TARGET_DIR` to the repository being documented, normally the current working directory. Run commands from that directory. The target must already pin `architecture-docs`; every default command uses its local executable and never downloads a package or derives a source checkout from the copied skill location.
+Set `TARGET_DIR` to the repository being documented, normally the current working directory. Run commands from that directory. The target's pinned Archie runtime provides `architecture-docs`; every default command uses that project-local executable and never downloads a package or derives runtime code from the copied skill location.
 
 ```bash
-npx --no-install architecture-docs <command> \
+ARCHIE_RUNTIME_DIR="$TARGET_DIR/.archie/runtime"
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" <command> \
   --config "$TARGET_DIR/architecture-docs.config.json"
 ```
 
-If the reviewed target config declares `skillCommand`, invoke the same operation through `npx --no-install architecture-docs skill:run <command> --config ...`. The runner appends the command and its normal options as argv with no shell. It reports the selected override and fails if it cannot execute it.
+If the reviewed target config declares `skillCommand`, invoke the same operation through `"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" skill:run <command> --config ...`. The runner appends the command and its normal options as argv with no shell. It reports the selected override and fails if it cannot execute it.
 
-Read [package-commands.md](package-commands.md) for target-local installation, preview, approval, publication, HTML, browser, and handoff behavior. Do not assume that `npm run build` in the target repository invokes this package.
+Read [package-commands.md](package-commands.md) for Archie runtime resolution, preview, approval, publication, HTML, browser, and handoff behavior. Do not assume that `npm run build` in the target repository invokes this package.
 
 ## Handoff to html-design
 
@@ -41,15 +42,17 @@ handoff/
     └── likec4-views.js           # compiled LikeC4 web component bundle
 ```
 
-The handoff is self-contained for presentation work. Its paths are bundle-relative, its manifest contains no local absolute paths or secrets, and its digests identify the exact authored and semantic compiled inputs consumed. Each page record carries ordered `viewIds` and an `initialViewId`, so the consumer can mount every declared view without guessing. A page with `viewIds: []` is prose-only: omit its interactive-view section, selector, mount, and view metadata rather than falling back to a global model view. The generated LikeC4 JavaScript is a compiler artifact and is not assumed byte-for-byte deterministic; use `views.json` and semantic digests for identity. `architecture-docs` owns the model, evidence ledger, authored Markdown, page map, handoff, and `preview/`. `html-design` owns the final `site/` presentation and may restyle or restructure it without editing those inputs. Neither skill silently overwrites the other skill's owned files.
+The handoff is self-contained for presentation work. Its paths are bundle-relative, its manifest contains no local absolute paths or secrets, and its digests identify the exact authored and semantic compiled inputs consumed. Each page record carries ordered `viewIds` and an `initialViewId`, so the consumer can mount every declared view without guessing. A page with `viewIds: []` is prose-only: omit its interactive-view section, selector, mount, and view metadata rather than falling back to a global model view. The generated LikeC4 JavaScript is a compiler artifact and is not assumed byte-for-byte deterministic; use `views.json` and semantic digests for identity. When `architectureStatus` is configured, handoff version 2 also carries `architecture-status.json` and a generated `architecture-status/index.html` route between home and areas. The route displays recorded revision, generation time, check-owned meaning, evidence, limits, and all incomplete states; missing status is explicit, and there is no aggregate verdict or history. `architecture-docs` owns the model, evidence ledger, authored Markdown, page map, handoff, and `preview/`. `html-design` owns the final `site/` presentation and may restyle or restructure it without editing those inputs. Neither skill silently overwrites the other skill's owned files.
 
-Use this sequence:
+Use this sequence. Steps 1 and 2 apply only when `architectureStatus` is configured; otherwise begin at step 3.
 
-1. Build `architecture-docs` and inspect the handoff manifest.
-2. Invoke `html-design` with the handoff as its only architecture-content source; use the `rail-document` profile for long-form architecture docs.
-3. Let `html-design` publish the final `site/` output and run its artifact, browser, theme, narrow-layout, and print checks.
-4. Rebuild the handoff when claims, page order, Markdown, or LikeC4 views change; treat changed digests as a new composition input.
-5. Run architecture preview checks before maintainer approval, then run the final-site contract and browser checks against every composed route. Run publication checks only after the handoff and final site both pass.
+1. Run the repository's deterministic architecture checks.
+2. Have the runtime snapshot writer publish one normalized latest snapshot. The status snapshot retains target-owned result codes and does not approve intent.
+3. Build `architecture-docs` and inspect the handoff manifest. The build consumes the recorded snapshot when one is configured; it never reruns checks or consults Git or the current time.
+4. Invoke `html-design` with the handoff as its only architecture-content source; use the `rail-document` profile for long-form architecture docs.
+5. Let `html-design` publish the final `site/` output and run its artifact, browser, theme, narrow-layout, and print checks.
+6. Rebuild the handoff when claims, page order, Markdown, LikeC4 views, or the status snapshot change; treat changed digests as a new composition input.
+7. Run architecture preview checks before maintainer approval, then run the final-site contract and browser checks against every composed route. Run publication checks only after the handoff and final site both pass.
 
 The builder's `preview/` is disposable and is not the long-term presentation source. An existing `site/` is outside the architecture builder's destination set and remains untouched. After composition, `site/assets/architecture-handoff.json` records the handoff digest so publication checks can detect a stale presentation.
 
@@ -70,39 +73,39 @@ The builder's `preview/` is disposable and is not the long-term presentation sou
 From the target repository:
 
 ```bash
-npx --no-install architecture-docs build \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" build \
   --config "$TARGET_DIR/architecture-docs.config.json"
 
 # Update only the architecture input bundle; never replace site/.
-npx --no-install architecture-docs build \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" build \
   --config "$TARGET_DIR/architecture-docs.config.json" --handoff-only
 
-npx --no-install architecture-docs check \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check \
   --config "$TARGET_DIR/architecture-docs.config.json" \
   --mode preview
 
-npx --no-install architecture-docs check:html \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check:html \
   --config "$TARGET_DIR/architecture-docs.config.json"
 
-npx --no-install architecture-docs check:browser \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check:browser \
   --config "$TARGET_DIR/architecture-docs.config.json"
 
 # Validate the independently composed site after html-design publishes it.
-npx --no-install architecture-docs check:site \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check:site \
   --config "$TARGET_DIR/architecture-docs.config.json"
-npx --no-install architecture-docs check:site:browser \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check:site:browser \
   --config "$TARGET_DIR/architecture-docs.config.json"
 ```
 
 After the maintainer has reviewed the preview, record only the claims they explicitly approve:
 
 ```bash
-npx --no-install architecture-docs approve \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" approve \
   --config "$TARGET_DIR/architecture-docs.config.json" \
   --reviewer maintainer@example.com \
   --claims purpose,actors,boundary
 
-npx --no-install architecture-docs check \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check \
   --config "$TARGET_DIR/architecture-docs.config.json" \
   --mode publication
 ```

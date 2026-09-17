@@ -323,11 +323,11 @@ Layout is a review concern. Reordering declarations, adjusting view scope, and s
 From a target repository containing `architecture-docs.config.json`:
 
 ```bash
-# PACKAGE_DIR is the local c4archviewer checkout.
-node "$PACKAGE_DIR/bin/architecture-docs.mjs" build \
+ARCHIE_RUNTIME_DIR="$TARGET_DIR/.archie/runtime"
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" build \
   --config "$TARGET_DIR/architecture-docs.config.json"
 
-node "$PACKAGE_DIR/bin/architecture-docs.mjs" check \
+"$ARCHIE_RUNTIME_DIR/node_modules/.bin/architecture-docs" check \
   --config "$TARGET_DIR/architecture-docs.config.json" \
   --mode preview
 ```

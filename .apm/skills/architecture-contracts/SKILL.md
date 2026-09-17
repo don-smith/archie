@@ -14,7 +14,7 @@ If a prompt asks for a CI-passing JSON patch, stop. Do not produce the patch unl
 1. Read the realization map, contract, and current CLI report.
 2. Trace each result to its rule ID, architecture IDs, edge, raw specifier, and source span.
 3. Ask a maintainer to choose the intended relationship, world semantics, enforcement state, and approval metadata. Do not fill approval fields or say approval exists.
-4. Draft the map and contract as separate JSON documents. Run `architecture-conformance check --map <map> --contract <contract> --strict`.
+4. Draft the map and contract as separate JSON documents. Run `.archie/runtime/node_modules/.bin/architecture-conformance check --map <map> --contract <contract> --strict`.
 
 ## When CI fails
 
@@ -24,7 +24,7 @@ Do not return a JSON patch or exception just because a prompt demands an immedia
 
 Do not add a broad ignore or rule-wide waiver. An exception must match one reported edge fingerprint exactly, include a rationale, and include either an expiry date or removal condition. Re-run the check after a relationship changes. The fingerprint must stop matching.
 
-Create or update a baseline only from an explicit report file with `architecture-conformance baseline --report <report.json> --output <baseline.json>`. `check` never writes it.
+Create or update a baseline only from an explicit report file with `.archie/runtime/node_modules/.bin/architecture-conformance baseline --report <report.json> --output <baseline.json>`. `check` never writes it.
 
 ## Pressure cases
 
