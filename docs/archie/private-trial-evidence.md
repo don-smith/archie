@@ -6,7 +6,7 @@ Run the retained release-candidate evaluator from a clean checkout:
 npm run private-trial:evaluate
 ```
 
-The command first requires a clean Git worktree, then builds both private workspaces, creates two independent `release-record-v2` bundles from genuine npm packs, and writes `evaluation/private-trials/latest.json`. Tracked or non-ignored untracked changes fail before packing, so the recorded `sourceCommit` identifies the packaged source. Ignored dependency and build state remains constrained by package allowlists and the immutable HTML snapshot provenance. The packet records environment versions, deterministic record and bundle digests, clean bootstrap, two verify replays, same-version replay, v1-to-v2 upgrade, mutation rejection, policy outcomes, compensation, package and skill byte identity, both project-local commands, capability authority stops, and deferred external gates.
+The command builds both private workspaces first, then the evaluator requires a clean Git working tree before packing. The evaluator creates two independent `release-record-v2` bundles from genuine npm packs, and writes `evaluation/private-trials/latest.json`. Tracked or non-ignored untracked changes fail before packing, so the recorded `sourceCommit` identifies the packaged source. Ignored dependency and build state remains constrained by package allowlists and the immutable HTML snapshot provenance. The packet records environment versions, deterministic record and bundle digests, clean bootstrap, two verify replays, same-version replay, v1-to-v2 upgrade, mutation rejection, policy outcomes, compensation, package and skill byte identity, both project-local commands, capability authority stops, and deferred external gates.
 
 ## What runs natively
 

@@ -36,7 +36,3 @@ Do not make a report-format assertion stand in for architecture judgment. Determ
 ## Evidence retention
 
 Raw outputs remain under the ignored workstream evaluation directory. Track only fixtures, prompts, rubric data, runner code, and deterministic tests. Never put credentials or unredacted command secrets in run metadata.
-
-## Resonance trial
-
-The bounded Resonance recovery trial is an integration check, not the full assessment. Use the tracked trial scope. Hash included source before and after. Stop at the recovered-model checkpoint for developer factual correction. Do not assess findings or triage recommendations in that trial.

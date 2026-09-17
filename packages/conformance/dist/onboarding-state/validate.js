@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, relative, isAbsolute } from "node:path";
 import { sha256 } from "../artifacts/digest.js";
+import { exactKeys, fail, record, string } from "../formats/helpers.js";
 import { defaultOnboardingPaths } from "./defaults.js";
 const checkpoints = ["scope-selected", "evidence-generated", "classification-drafted", "proposed-contract-checked", "active-contract-checked", "baseline-created"];
 const evidenceNames = ["graph", "summary", "map", "contract", "report", "baseline"];
@@ -10,14 +11,6 @@ const requiredEvidence = {
     "proposed-contract-checked": ["graph", "summary", "map", "contract", "report"], "active-contract-checked": ["graph", "summary", "map", "contract", "report"],
     "baseline-created": ["graph", "summary", "map", "contract", "report", "baseline"]
 };
-function fail(message) { throw new TypeError(message); }
-function record(value, label) { if (!value || typeof value !== "object" || Array.isArray(value))
-    fail(`${label} must be an object`); return value; }
-function string(value, label) { if (typeof value !== "string" || value.length === 0)
-    fail(`${label} must be a non-empty string`); return value; }
-function exactKeys(raw, allowed, label) { for (const key of Object.keys(raw))
-    if (!allowed.includes(key))
-        fail(`${label} has unknown field ${key}`); }
 function path(value, label) { const result = string(value, label); if (isAbsolute(result) || result.split(/[\\/]/).includes("..") || result === ".")
     fail(`${label} must be a repository-relative path`); return result.replaceAll("\\", "/"); }
 function scope(value) {

@@ -1,3 +1,4 @@
+export * from "./analysis/canonical-json.js";
 export * from "./product-version.js";
 export * from "./analysis/contracts.js";
 export * from "./analysis/typescript-program-v1.js";

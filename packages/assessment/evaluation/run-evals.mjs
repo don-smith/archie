@@ -22,7 +22,6 @@ const knownCommands = new Set([
   "candidate",
   "verify-baseline",
   "compare",
-  "resonance-trial",
 ]);
 
 function sha256(value) {
@@ -461,7 +460,7 @@ async function main() {
   } else if (options.command === "compare") {
     await compareCampaigns(options.baseline, options.candidate);
   } else {
-    throw new Error("resonance-trial is added with the tracked trial definition in Phase 5");
+    throw new Error(`Unknown command: ${options.command}`);
   }
 }
 

@@ -59,11 +59,11 @@ function bundleInput(root) {
 export function selectLocalRelease(directory) {
     if (!directory || directory === "latest" || /^[a-z][a-z0-9+.-]*:\/\//i.test(directory))
         throw new Error("release selection must be an explicit local directory");
-    const candidate = resolve(directory);
-    if (existsSync(join(candidate, "bundle.json"))) {
+    let root = resolve(directory);
+    if (existsSync(join(root, "bundle.json"))) {
         let format;
         try {
-            format = JSON.parse(readFileSync(join(candidate, "bundle.json"), "utf8")).format;
+            format = JSON.parse(readFileSync(join(root, "bundle.json"), "utf8")).format;
         }
         catch {
             format = undefined;
@@ -71,7 +71,6 @@ export function selectLocalRelease(directory) {
         if (format === "archie-private-bundle-input-v2")
             return selectLocalReleaseV2(directory);
     }
-    const root = resolve(directory);
     if (!existsSync(root) || !statSync(root).isDirectory())
         throw new Error("release selection must be an existing local directory");
     validateBundleLayout(root);

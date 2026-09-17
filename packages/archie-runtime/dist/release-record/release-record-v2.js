@@ -91,7 +91,7 @@ export function selectLocalReleaseV2(directory) {
         throw new Error("release selection must be an existing local directory");
     validateBundleLayoutV2(root);
     const recordPath = join(root, "release-record-v2.json"), receiptPath = join(root, "release-review.txt");
-    if (!existsSync(recordPath) || !existsSync(receiptPath))
+    if (!existsSync(recordPath) || !statSync(recordPath).isFile() || !existsSync(receiptPath) || !statSync(receiptPath).isFile())
         throw new Error("release bundle is incomplete; v2 record and review receipt are required");
     const recordBytes = readFileSync(recordPath, "utf8"), record = parseReleaseRecordV2(recordBytes);
     if (!readFileSync(receiptPath, "utf8").includes("Archie authorization: NOT ASSESSED — locally reviewed private release selected."))

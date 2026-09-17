@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve, relative, isAbsolute } from "node:path";
 
 import { sha256 } from "../artifacts/digest.js";
+import { exactKeys, fail, record, string } from "../formats/helpers.js";
 import type { SourceScope } from "../formats/types.js";
 import { defaultOnboardingPaths } from "./defaults.js";
 import type { OnboardingCheckpoint, OnboardingEvidence, OnboardingPaths, OnboardingStateV1 } from "./types.js";
@@ -15,10 +16,6 @@ const requiredEvidence: Record<OnboardingCheckpoint, readonly OnboardingEvidence
   "baseline-created": ["graph", "summary", "map", "contract", "report", "baseline"]
 };
 
-function fail(message: string): never { throw new TypeError(message); }
-function record(value: unknown, label: string): Record<string, unknown> { if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label} must be an object`); return value as Record<string, unknown>; }
-function string(value: unknown, label: string): string { if (typeof value !== "string" || value.length === 0) fail(`${label} must be a non-empty string`); return value; }
-function exactKeys(raw: Record<string, unknown>, allowed: readonly string[], label: string): void { for (const key of Object.keys(raw)) if (!allowed.includes(key)) fail(`${label} has unknown field ${key}`); }
 function path(value: unknown, label: string): string { const result = string(value, label); if (isAbsolute(result) || result.split(/[\\/]/).includes("..") || result === ".") fail(`${label} must be a repository-relative path`); return result.replaceAll("\\", "/"); }
 function scope(value: unknown): SourceScope {
   const raw = record(value, "scope"); exactKeys(raw, ["rootConfigs", "include", "exclusions"], "scope");

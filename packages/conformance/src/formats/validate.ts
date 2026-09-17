@@ -1,13 +1,5 @@
 import type { ArchitectureActiveResultSetV1, ArchitectureContractV1, ArchitectureDriftRecordV1, BaselineV1, ConformanceReportV1, NormalizedGraphV1, RealizationMapV1, Rule } from "./types.js";
-
-function fail(message: string): never { throw new TypeError(message); }
-function record(value: unknown, label: string): Record<string, unknown> { if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label} must be an object`); return value as Record<string, unknown>; }
-function array(value: unknown, label: string): unknown[] { if (!Array.isArray(value)) fail(`${label} must be an array`); return value; }
-function string(value: unknown, label: string): string { if (typeof value !== "string" || value.length === 0) fail(`${label} must be a non-empty string`); return value; }
-function strings(value: unknown, label: string): string[] { return array(value, label).map((item, index) => string(item, `${label}[${index}]`)); }
-function oneOf<T extends string>(value: unknown, choices: readonly T[], label: string): T { const result = string(value, label) as T; if (!choices.includes(result)) fail(`${label} must be one of ${choices.join(", ")}`); return result; }
-function version(value: Record<string, unknown>, expected: string): void { if (value.version !== expected) fail(`unsupported document version: ${String(value.version)}`); }
-function exactKeys(raw: Record<string, unknown>, allowed: readonly string[], label: string): void { for (const key of Object.keys(raw)) if (!allowed.includes(key)) fail(`${label} has unknown field ${key}`); }
+import { array, exactKeys, fail, oneOf, record, string, strings, version } from "./helpers.js";
 
 export function validateRealizationMap(value: unknown): RealizationMapV1 {
   const raw = record(value, "realization map"); version(raw, "realization-map/v1");

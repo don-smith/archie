@@ -5,6 +5,8 @@ import { join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 
+import { canonicalize } from "../dist/packages/archie-runtime/src/analysis/canonical-json.js";
+
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const fixtureRoot = resolve(repositoryRoot, "packages/conformance/test/fixtures/parity");
 const manifest = JSON.parse(readFileSync(join(fixtureRoot, "cases.json"), "utf8"));
@@ -20,11 +22,6 @@ if (!existsSync(localCli)) throw new Error(`missing Archie CLI at ${localCli}; r
 if (!existsSync(upstreamCli)) throw new Error(`missing upstream CLI at ${upstreamCli}; build the pinned upstream checkout first`);
 
 function sha256(value) { return createHash("sha256").update(value).digest("hex"); }
-function canonicalize(value) {
-  if (value === null || typeof value === "boolean" || typeof value === "number" || typeof value === "string") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
-  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(",")}}`;
-}
 function writeJson(path, value) { mkdirSync(resolve(path, ".."), { recursive: true }); writeFileSync(path, `${canonicalize(value)}\n`); }
 function filesUnder(root) {
   const result = [];

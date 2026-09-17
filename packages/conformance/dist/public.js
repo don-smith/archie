@@ -4,26 +4,15 @@ export const CONFORMANCE_REPORT_V1 = "conformance-report/v1";
 export const ONBOARDING_STATE_V1 = "onboarding-state/v1";
 export const CONFORMANCE_REPORT_CONTRACT_V1 = "conformance-report-contract/v1";
 export const CONFORMANCE_STATE_CONTRACT_V1 = "conformance-state-contract/v1";
-function fail(message) { throw new TypeError(message); }
-function record(value, label) { if (!value || typeof value !== "object" || Array.isArray(value))
-    fail(`${label} must be an object`); return value; }
-function exact(raw, allowed, label) { for (const key of Object.keys(raw))
-    if (!allowed.includes(key))
-        fail(`${label} has unknown field ${key}`); }
-function string(value, label) { if (typeof value !== "string" || value.length === 0)
-    fail(`${label} must be a non-empty string`); return value; }
-function strings(value, label) { if (!Array.isArray(value))
-    fail(`${label} must be an array`); return value.map((item, index) => string(item, `${label}[${index}]`)); }
-function choice(value, values, label) { const result = string(value, label); if (!values.includes(result))
-    fail(`${label} must be one of ${values.join(", ")}`); return result; }
+import { exactKeys, fail, oneOf, record, string } from "./formats/helpers.js";
 function paths(value, label) {
     const raw = record(value, label);
-    exact(raw, ["state", "graph", "summary", "map", "contract", "report", "baseline"], label);
+    exactKeys(raw, ["state", "graph", "summary", "map", "contract", "report", "baseline"], label);
     return { state: string(raw.state, `${label}.state`), graph: string(raw.graph, `${label}.graph`), summary: string(raw.summary, `${label}.summary`), map: string(raw.map, `${label}.map`), contract: string(raw.contract, `${label}.contract`), report: string(raw.report, `${label}.report`), baseline: string(raw.baseline, `${label}.baseline`) };
 }
 function evidence(value, label) {
     const raw = record(value, label);
-    exact(raw, ["graph", "summary", "map", "contract", "report", "baseline"], label);
+    exactKeys(raw, ["graph", "summary", "map", "contract", "report", "baseline"], label);
     const result = {};
     for (const key of ["graph", "summary", "map", "contract", "report", "baseline"])
         if (raw[key] !== undefined)
@@ -32,13 +21,13 @@ function evidence(value, label) {
 }
 function freshness(value, label) {
     const raw = record(value, label);
-    exact(raw, ["status", "inputs", "reason"], label);
-    return { status: choice(raw.status, ["fresh", "stale", "unavailable", "unknown"], `${label}.status`), inputs: (Array.isArray(raw.inputs) ? raw.inputs : fail(`${label}.inputs must be an array`)).map((item, index) => { const input = record(item, `${label}.inputs[${index}]`); exact(input, ["kind", "path", "digest"], `${label}.inputs[${index}]`); return { kind: string(input.kind, `${label}.inputs[${index}].kind`), path: string(input.path, `${label}.inputs[${index}].path`), digest: string(input.digest, `${label}.inputs[${index}].digest`) }; }), reason: string(raw.reason, `${label}.reason`) };
+    exactKeys(raw, ["status", "inputs", "reason"], label);
+    return { status: oneOf(raw.status, ["fresh", "stale", "unavailable", "unknown"], `${label}.status`), inputs: (Array.isArray(raw.inputs) ? raw.inputs : fail(`${label}.inputs must be an array`)).map((item, index) => { const input = record(item, `${label}.inputs[${index}]`); exactKeys(input, ["kind", "path", "digest"], `${label}.inputs[${index}]`); return { kind: string(input.kind, `${label}.inputs[${index}].kind`), path: string(input.path, `${label}.inputs[${index}].path`), digest: string(input.digest, `${label}.inputs[${index}].digest`) }; }), reason: string(raw.reason, `${label}.reason`) };
 }
-function checkpoint(value, label) { return choice(value, ["scope-selected", "evidence-generated", "classification-drafted", "proposed-contract-checked", "active-contract-checked", "baseline-created"], label); }
+function checkpoint(value, label) { return oneOf(value, ["scope-selected", "evidence-generated", "classification-drafted", "proposed-contract-checked", "active-contract-checked", "baseline-created"], label); }
 function stateReference(value, label) {
     const raw = record(value, label);
-    exact(raw, ["version", "identity", "checkpoint", "paths", "evidence"], label);
+    exactKeys(raw, ["version", "identity", "checkpoint", "paths", "evidence"], label);
     if (raw.version !== ONBOARDING_STATE_V1)
         fail(`unsupported state version: ${String(raw.version)}`);
     const selectedCheckpoint = checkpoint(raw.checkpoint, `${label}.checkpoint`);
@@ -57,19 +46,19 @@ export function readConformanceReport(value) { return validateConformanceReport(
 export function readOnboardingState(value, repositoryRoot) { return validateOnboardingState(value, repositoryRoot); }
 export function readConformanceReportContract(value) {
     const raw = record(value, "conformance report contract");
-    exact(raw, ["version", "report", "state"], "conformance report contract");
+    exactKeys(raw, ["version", "report", "state"], "conformance report contract");
     if (raw.version !== CONFORMANCE_REPORT_CONTRACT_V1)
         fail(`unsupported document version: ${String(raw.version)}`);
     const reportRaw = record(raw.report, "report");
-    exact(reportRaw, ["version", "identity", "result", "evidence", "freshness"], "report");
+    exactKeys(reportRaw, ["version", "identity", "result", "evidence", "freshness"], "report");
     if (reportRaw.version !== CONFORMANCE_REPORT_V1)
         fail(`unsupported report version: ${String(reportRaw.version)}`);
     const identity = record(reportRaw.identity, "report.identity");
-    exact(identity, ["id", "producer", "outputDigest"], "report.identity");
+    exactKeys(identity, ["id", "producer", "outputDigest"], "report.identity");
     if (identity.producer !== "@archie/conformance")
         fail("report.identity.producer must be @archie/conformance");
     const result = record(reportRaw.result, "report.result");
-    exact(result, ["code", "meaning", "status"], "report.result");
+    exactKeys(result, ["code", "meaning", "status"], "report.result");
     const code = result.code;
     if (!Number.isInteger(code) || code < 0 || code > 3)
         fail("report.result.code must be 0, 1, 2, or 3");
@@ -77,15 +66,15 @@ export function readConformanceReportContract(value) {
     const codeStatuses = ["pass", "violation", "incomplete", "invalid"];
     if (result.meaning !== codeMeanings[code])
         fail("report.result meaning does not match result code");
-    const parsedResult = { code: code, meaning: result.meaning, status: choice(result.status, codeStatuses, "report.result.status") };
+    const parsedResult = { code: code, meaning: result.meaning, status: oneOf(result.status, codeStatuses, "report.result.status") };
     const evidenceRaw = record(reportRaw.evidence, "report.evidence");
-    exact(evidenceRaw, ["realizationMap", "contract", "graph", "provenance"], "report.evidence");
+    exactKeys(evidenceRaw, ["realizationMap", "contract", "graph", "provenance"], "report.evidence");
     const parsedEvidence = { realizationMap: string(evidenceRaw.realizationMap, "report.evidence.realizationMap"), contract: string(evidenceRaw.contract, "report.evidence.contract"), graph: string(evidenceRaw.graph, "report.evidence.graph"), provenance: string(evidenceRaw.provenance, "report.evidence.provenance") };
     return { version: CONFORMANCE_REPORT_CONTRACT_V1, report: { version: CONFORMANCE_REPORT_V1, identity: { id: string(identity.id, "report.identity.id"), producer: "@archie/conformance", outputDigest: string(identity.outputDigest, "report.identity.outputDigest") }, result: parsedResult, evidence: parsedEvidence, freshness: freshness(reportRaw.freshness, "report.freshness") }, state: stateReference(raw.state, "state") };
 }
 export function readConformanceStateContract(value) {
     const raw = record(value, "conformance state contract");
-    exact(raw, ["version", "stateVersion", "identity", "checkpoint", "paths", "evidence", "freshness"], "conformance state contract");
+    exactKeys(raw, ["version", "stateVersion", "identity", "checkpoint", "paths", "evidence", "freshness"], "conformance state contract");
     if (raw.version !== CONFORMANCE_STATE_CONTRACT_V1)
         fail(`unsupported document version: ${String(raw.version)}`);
     if (raw.stateVersion !== ONBOARDING_STATE_V1)
