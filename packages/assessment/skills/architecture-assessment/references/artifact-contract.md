@@ -1,6 +1,6 @@
 # Assessment artifact contract
 
-The bundle lives under the supplied workstream:
+The bundle lives in the resolved assessment directory: `--output`, then a repository instruction, then `.archie/assessments/<yyyymmdd>-<slug>/`. The repository decides whether that directory is tracked or ignored.
 
 ```text
 assessment/
@@ -49,10 +49,10 @@ A ready bundle needs:
 
 ```text
 node <skill-dir>/scripts/check-model.mjs <assessment-dir>/architecture-model.json
-node <skill-dir>/scripts/check-assessment.mjs <assessment-dir> --html-skill-dir <html-design-dir>
+node <skill-dir>/scripts/check-assessment.mjs <assessment-dir> [--html-skill-dir <html-design-dir>]
 ```
 
-The second command delegates packet validation to:
+The second command defaults to the `html-design` skill deployed beside Assessment and delegates packet validation to:
 
 ```text
 node <html-design-dir>/scripts/check-artifact.mjs <assessment-dir>/packet.html --profile review-packet
@@ -60,10 +60,10 @@ node <html-design-dir>/scripts/check-artifact.mjs <assessment-dir>/packet.html -
 
 ## Source protection
 
-The assessment may write only inside its workstream directory until triage. Never edit assessed product source. Hash or diff approved production paths before and after controlled or high-risk runs.
+The assessment may write only inside its assessment directory until triage. Never edit assessed product source. Hash or diff approved production paths before and after controlled or high-risk runs.
 
-After triage, tracked architecture documentation remains a proposal unless repository policy and the developer authorize publication. Publish only validated facts, accepted direction, decisions, and status. Keep raw evidence, rejected findings, and detailed triage in the workstream.
+After triage, tracked architecture documentation remains a proposal unless repository policy and the developer authorize publication. Publish only validated facts, accepted direction, decisions, and status. Keep raw evidence, rejected findings, and detailed triage in the assessment directory.
 
 ## Handoff
 
-The ready assessment informs a separate Scope invocation. It does not authorize implementation. Preserve accepted, rejected, and deferred recommendation outcomes so later workstreams do not reopen settled triage by accident. Checker completeness never means that Archie approved a recommendation or judged its architectural quality.
+The ready assessment informs the developer's own planning. It does not authorize implementation. Accepted recommendations become proposed work items for the repository's tracker or planning flow. Preserve accepted, rejected, and deferred recommendation outcomes so later work does not reopen settled triage by accident. Checker completeness never means that Archie approved a recommendation or judged its architectural quality.

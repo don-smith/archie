@@ -27,7 +27,7 @@ The developer or maintainer keeps decision authority. Before a capability applie
 **Result.** The Architecture Assessment skill produces a validated fact model and assessment. It remains read-only over product source. The developer corrects recovered facts and triages recommendations, so completeness does not mean that every recommendation is approved.
 
 <!-- archie-capability:assessment:start -->
-**Start.** Ask Archie for a whole-system Assessment and supply the Architecture Assessment skill with a planning artifact that names the workstream, drivers, scope, and acceptance criteria. Assessment cannot become ready when its required skill or presentation check is unavailable.
+**Start.** Ask Archie for a whole-system Assessment and give the Architecture Assessment skill an optional brief with drivers, scope, and scenarios; without one it agrees them with you at its first checkpoint. Results go to `.archie/assessments/` unless you choose another location. Assessment cannot become ready when its required skill or presentation check is unavailable.
 
 ### Architecture Docs
 

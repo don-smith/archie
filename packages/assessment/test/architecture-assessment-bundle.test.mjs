@@ -141,3 +141,21 @@ test("delegates ready packet validation to the explicitly resolved html-design s
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /valid ready assessment bundle/);
 });
+
+test("defaults ready packet validation to the html-design skill deployed beside Assessment", async () => {
+  const directory = await makeBundle();
+  await markReady(directory);
+  await writeFile(path.join(directory, "packet.html"), "<!doctype html><title>Checked packet</title>\n");
+
+  const skillsRoot = await tempDir();
+  await cp(skill, path.join(skillsRoot, "architecture-assessment"), { recursive: true });
+  const deployedChecker = path.join(skillsRoot, "architecture-assessment/scripts/check-assessment.mjs");
+  const withoutSibling = spawnSync(process.execPath, [deployedChecker, directory], { encoding: "utf8" });
+  assert.equal(withoutSibling.status, 1);
+  assert.match(withoutSibling.stderr, /requires the html-design skill/);
+
+  await cp(await fakeHtmlSkill(), path.join(skillsRoot, "html-design"), { recursive: true });
+  const withSibling = spawnSync(process.execPath, [deployedChecker, directory], { encoding: "utf8" });
+  assert.equal(withSibling.status, 0, withSibling.stderr);
+  assert.match(withSibling.stdout, /valid ready assessment bundle/);
+});

@@ -35,7 +35,8 @@ test("managed-site guide covers the registered capabilities and marker contract"
       assert.equal(markerCount(guide, marker), 1, `${capability.id} ${fieldId}`);
     }
   }
-  assert.match(guide, /Architecture Assessment skill[\s\S]*planning artifact/i);
+  assert.match(guide, /Architecture Assessment skill[\s\S]*optional brief/i);
+  assert.doesNotMatch(guide, /planning artifact|workstream/i);
   assert.match(guide, /exact target-local `architecture-conformance` devDependency/);
   assert.match(guide, /Structural inspection starts through Archie[\s\S]*no available owner/i);
   assert.match(guide, /observed import graph/);

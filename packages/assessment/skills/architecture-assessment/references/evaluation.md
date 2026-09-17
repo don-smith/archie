@@ -35,4 +35,4 @@ Do not make a report-format assertion stand in for architecture judgment. Determ
 
 ## Evidence retention
 
-Raw outputs remain under the ignored workstream evaluation directory. Track only fixtures, prompts, rubric data, runner code, and deterministic tests. Never put credentials or unredacted command secrets in run metadata.
+Raw outputs remain under an ignored evaluation output directory. Track only fixtures, prompts, rubric data, runner code, and deterministic tests. Never put credentials or unredacted command secrets in run metadata.

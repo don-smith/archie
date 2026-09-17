@@ -1,7 +1,7 @@
 ---
 name: architecture-assessment
 description: Use when a developer needs an evidence-led, whole-system architecture explanation and assessment before redesign, alignment, or refactoring.
-argument-hint: <alignment-or-research-artifact> [target]
+argument-hint: [target] [--brief <file>] [--output <dir>]
 ---
 
 # Architecture assessment
@@ -11,14 +11,14 @@ Recover and assess a software system without changing product source. One typed 
 Invocation:
 
 ```text
-architecture-assessment <alignment-or-research-artifact> [target]
+architecture-assessment [target] [--brief <file>] [--output <dir>]
 ```
 
-The input artifact supplies the workstream, drivers, acceptance criteria, repository map, and artifact root. `target` defaults to the Git root only when the artifact clearly requests a whole-system assessment.
+`target` defaults to the Git root for a whole-system assessment. An optional brief supplies drivers, audience, scope, exclusions, scenarios, and linked intent sources. Without a brief, establish them with the developer at Checkpoint 1. `--output` chooses the assessment directory; otherwise use a repository instruction, then the default `.archie/assessments/<yyyymmdd>-<slug>/`.
 
 ## Required composition
 
-**REQUIRED BACKGROUND: `architecture-review`.** Read it when available for inspection and triage discipline. Do not invoke `architecture-review` or nest its per-layer workflow. Reuse these invariants directly:
+**RELATED CAPABILITY: `architecture-review`.** Architecture Review inspects one bounded module layer by layer; Assessment explains and judges the whole system. Do not invoke `architecture-review` or nest its per-layer workflow. Reuse these shared invariants directly:
 
 - enumerate the full approved scope;
 - read every included production file;
@@ -27,21 +27,21 @@ The input artifact supplies the workstream, drivers, acceptance criteria, reposi
 - present findings for explicit developer triage;
 - never edit assessed product source.
 
-**REQUIRED BACKGROUND: `codebase-design`.** Read it when interfaces or seams are in scope. Use its terms exactly. A module hides implementation behind an interface at a seam. An adapter satisfies that interface where behavior varies. Judge depth by caller leverage and maintainer locality, not file size or interface line counts.
+**REQUIRED REFERENCE: [the deep-module vocabulary](references/deep-module-vocabulary.md).** Read it when interfaces or seams are in scope. Use its terms exactly. A module hides implementation behind an interface at a seam. An adapter satisfies that interface where behavior varies. Judge depth by caller leverage and maintainer locality, not file size or interface line counts.
 
-**CONDITIONAL BACKGROUND: `domain-modeling`.** Load it only when code and tracked language leave a same-name, synonym, homonym, or context translation unresolved. Do not create or update a glossary during factual recovery without the developer checkpoint that skill requires.
+**CONDITIONAL GLOSSARY WORK.** Only when code and tracked language leave a same-name, synonym, homonym, or context translation unresolved, use a host glossary or domain-language skill if one is available; otherwise record the unresolved terms in the model. Do not create or update a repository glossary during factual recovery without an explicit developer checkpoint.
 
-**REQUIRED SUB-SKILL: `html-design`.** Use it for `packet.html`. Read its profile, pattern, diagram, foundation, example, and quality guidance selected by the packet's content. Run `html-design/scripts/check-artifact.mjs <packet> --profile review-packet`. Without this skill and a passing check, the assessment cannot become `ready`.
+**REQUIRED SUB-SKILL: `html-design`.** Archie ships it beside this skill. Use it for `packet.html`. Read its profile, pattern, diagram, foundation, example, and quality guidance selected by the packet's content. Run `html-design/scripts/check-artifact.mjs <packet> --profile review-packet`. Without this skill and a passing check, the assessment cannot become `ready`.
 
-The controlled evaluation exception is narrow. A fixed fixture prompt may provide approved drivers, scenarios, target, and `assessment/` output without a product workstream. During a controlled evaluation, do not search for or load `html-design`, omit `packet.html`, and do not run build or package commands in the target. Hash approved source before and after the run. Use an isolated copy if later verification needs those commands. Never use this exception for a product repository.
+The controlled evaluation exception is narrow. A fixed fixture prompt may provide approved drivers, scenarios, target, and `assessment/` output without a developer brief. During a controlled evaluation, do not search for or load `html-design`, omit `packet.html`, and do not run build or package commands in the target. Hash approved source before and after the run. Use an isolated copy if later verification needs those commands. Never use this exception for a product repository.
 
 ## Rehydrate and validate the input
 
-1. Inspect repository-local instructions and the supplied artifact.
-2. Read its `workstream.md` and linked intent, design, research, glossary, decision, and architecture sources.
+1. Inspect repository-local instructions and the brief when one is supplied.
+2. Read the intent, design, research, glossary, decision, and architecture sources the brief links or the repository tracks.
 3. Read `git status --short`. Record applicable repository instructions and current Git state.
-4. Confirm the workstream exists and the input names drivers, audience, scope, exclusions, and expected-change or quality scenarios. If there is no workstream, missing workstream context, unclear scope, or absent drivers, return to Scope. Do not invent an unindexed assessment.
-5. Resolve the workstream directory and create this bundle from the templates:
+4. Establish drivers, audience, scope, exclusions, and expected-change or quality scenarios from the brief, or propose them for approval at Checkpoint 1. If the developer cannot supply drivers or the scope stays unclear, stop and state exactly what is missing. Do not invent an unindexed assessment.
+5. Resolve the assessment directory (`--output`, then a repository instruction, then `.archie/assessments/<yyyymmdd>-<slug>/`). If the repository has not recorded whether `.archie/assessments/` is tracked or ignored, ask once and follow that decision. Create this bundle from the templates:
 
    ```text
    assessment/assessment.md
@@ -51,6 +51,8 @@ The controlled evaluation exception is narrow. A fixed fixture prompt may provid
    assessment/evidence/evolution.md
    assessment/packet.html
    ```
+
+   Here `assessment/` stands for the resolved assessment directory.
 
 Read [the artifact contract](references/artifact-contract.md) before the first write.
 
@@ -157,19 +159,21 @@ If `html-design` is unavailable, keep the model and Markdown `in-progress`, omit
 Run:
 
 ```text
-node "$SKILL_DIR/scripts/check-assessment.mjs" <assessment-dir> --html-skill-dir <resolved-html-design-dir>
+node "$SKILL_DIR/scripts/check-assessment.mjs" <assessment-dir>
 ```
+
+The checker uses the `html-design` skill deployed beside this skill. Pass `--html-skill-dir <dir>` only when html-design is installed elsewhere.
 
 ## Checkpoint 3: triage recommendations
 
 After factual validation and complete judgment, present each recommendation for the developer to accept, reject, or defer. Persist every item under `recommendations` with a stable `rec-` ID, title, outcome, reason, dependencies, and candidate checks. Never auto-accept a recommendation.
 
-Assessment remains source-read-only. Never edit product source. Write only inside the resolved workstream assessment directory until triage. If the repository map names tracked architecture documentation, prepare a separate documentation proposal containing only validated facts, accepted direction, decisions, and status.
+Assessment remains source-read-only. Never edit product source. Write only inside the resolved assessment directory until triage. If the repository tracks architecture documentation, prepare a separate documentation proposal containing only validated facts, accepted direction, decisions, and status.
 
 Rerun both checkers after triage and packet updates. Mark the bundle `ready` only when factual correction is completed, no recommendation remains pending, no blockers remain, the Markdown and model status agree, every reference resolves, and the HTML check passes.
 
 ## Handoff
 
-Read [the artifact contract](references/artifact-contract.md) for status and publication rules. The ready assessment is evidence for a separate alignment workstream. Return accepted recommendations to Scope rather than implementing them here.
+Read [the artifact contract](references/artifact-contract.md) for status and publication rules. The ready assessment is evidence for the developer's own planning. Offer accepted recommendations as proposed work items for the repository's tracker or planning flow rather than implementing them here. With developer approval, route validated facts to `architecture-docs` and accepted measurable rules to `architecture-contracts`.
 
 Read [the evaluation guide](references/evaluation.md) only when maintaining this skill, its fixtures, runner, or model matrix.

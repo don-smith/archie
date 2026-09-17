@@ -38,12 +38,18 @@ async function readModel(file) {
   }
 }
 
+// Archie deploys html-design as a sibling of this skill, so it is the default.
+async function defaultHtmlSkillDir() {
+  const sibling = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../html-design");
+  return (await exists(path.join(sibling, "scripts", "check-artifact.mjs"))) ? sibling : undefined;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const assessmentArgument = args.find((argument, index) => !argument.startsWith("--") && args[index - 1] !== "--html-skill-dir");
-  if (!assessmentArgument) throw new Error("Usage: check-assessment.mjs <assessment-dir> --html-skill-dir <path>");
+  if (!assessmentArgument) throw new Error("Usage: check-assessment.mjs <assessment-dir> [--html-skill-dir <path>]");
   const htmlFlag = args.indexOf("--html-skill-dir");
-  const htmlSkillDir = htmlFlag >= 0 ? path.resolve(args[htmlFlag + 1]) : undefined;
+  const htmlSkillDir = htmlFlag >= 0 ? path.resolve(args[htmlFlag + 1]) : await defaultHtmlSkillDir();
   const directory = path.resolve(assessmentArgument);
   const errors = [];
 
@@ -83,7 +89,7 @@ async function main() {
     const packetExists = await exists(packet);
     if (model.status === "ready") {
       if (!packetExists) errors.push("packet.html: a ready bundle requires a self-contained packet");
-      if (!htmlSkillDir) errors.push("--html-skill-dir: a ready bundle requires an explicitly resolved html-design skill directory");
+      if (!htmlSkillDir) errors.push("--html-skill-dir: a ready bundle requires the html-design skill; install it beside this skill or pass --html-skill-dir");
     } else if (!packetExists && !model.blockers.some((blocker) => blocker.kind === "html-unavailable" && blocker.message.trim())) {
       errors.push("$.blockers: a non-ready bundle without packet.html requires an actionable html-unavailable blocker");
     }

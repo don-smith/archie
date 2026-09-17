@@ -38,7 +38,7 @@ The packaged managed-site Archie page is the sole narrow exception. Archie suppl
 
 | Capability | Use it for | Result | Authority | Dependencies and gaps |
 |---|---|---|---|---|
-| `assessment` | A whole-system, evidence-led architecture assessment | Validated fact model and assessment | The developer corrects facts and triages recommendations. Product source stays read-only. | Requires the Architecture Assessment skill, a planning artifact, and its stated presentation checks. |
+| `assessment` | A whole-system, evidence-led architecture assessment | Validated fact model and assessment | The developer corrects facts and triages recommendations. Product source stays read-only. | Requires the Architecture Assessment skill, approved drivers and scope (from a brief or its first checkpoint), and its stated presentation checks. |
 | `architecture-docs` | Evidence-backed architecture documentation | Claims, authored pages, ordered page map, preview, and handoff | A maintainer approves claims. HTML Design owns the final site. | Requires the Architecture Docs command from the target's project-local Archie runtime and repository evidence. |
 | `likec4-authoring` | C4 model and view work for Architecture Docs | Compiled model and selected views | Returns claims and unresolved gaps to Architecture Docs. Compilation does not establish architectural truth. | Requires the Architecture Docs evidence inventory, claims ledger, and target config. |
 | `conformance-onboarding` | Deterministic TypeScript dependency evidence and conformance setup | Observed import graph, onboarding summary, and setup proposal | The maintainer chooses architecture intent and approval. | Requires an exact target-local `architecture-conformance` dependency. |

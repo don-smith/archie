@@ -17,18 +17,19 @@ test("declares valid discovery metadata and invocation shape", async () => {
   assert.ok(frontmatter, "missing YAML frontmatter");
   assert.match(frontmatter[1], /^name: architecture-assessment$/m);
   assert.match(frontmatter[1], /^description: Use when .+$/m);
-  assert.match(frontmatter[1], /^argument-hint: <alignment-or-research-artifact> \[target\]$/m);
-  assert.match(text, /architecture-assessment <alignment-or-research-artifact> \[target\]/);
+  assert.match(frontmatter[1], /^argument-hint: \[target\] \[--brief <file>\] \[--output <dir>\]$/m);
+  assert.match(text, /architecture-assessment \[target\] \[--brief <file>\] \[--output <dir>\]/);
 });
 
 test("uses product-local policy and refuses unindexed or unclear assessments", async () => {
   const text = await skillText();
-  assert.doesNotMatch(text, /myflow/i);
+  assert.doesNotMatch(text, /myflow|workstream|return to Scope/i);
   assert.match(text, /repository-local instructions/);
   assert.match(text, /applicable repository instructions/);
-  assert.match(text, /return to Scope/i);
-  assert.match(text, /missing workstream|no workstream/i);
-  assert.match(text, /unclear scope|absent drivers/i);
+  assert.match(text, /optional brief/i);
+  assert.match(text, /cannot supply drivers or the scope stays unclear, stop/i);
+  assert.match(text, /\.archie\/assessments\/<yyyymmdd>-<slug>\//);
+  assert.match(text, /tracked or ignored/);
 });
 
 test("requires exhaustive read-only recovery with progressive evidence", async () => {
@@ -57,13 +58,14 @@ test("keeps factual validation before judgment and triage at the end", async () 
 
 test("composes architecture skills without nesting their workflows", async () => {
   const text = await skillText();
-  assert.match(text, /REQUIRED BACKGROUND.*architecture-review/i);
+  assert.match(text, /RELATED CAPABILITY.*architecture-review/i);
   assert.match(text, /Do not invoke `architecture-review`/);
-  assert.match(text, /REQUIRED BACKGROUND.*codebase-design/i);
+  assert.match(text, /REQUIRED REFERENCE.*deep-module vocabulary/i);
+  assert.doesNotMatch(text, /codebase-design|domain-modeling/);
   for (const term of ["module", "interface", "seam", "adapter", "depth", "leverage", "locality"]) {
     assert.match(text, new RegExp(`\\b${term}\\b`, "i"));
   }
-  assert.match(text, /CONDITIONAL BACKGROUND.*domain-modeling/i);
+  assert.match(text, /CONDITIONAL GLOSSARY WORK/i);
   assert.match(text, /same-name|synonym|homonym|context translation/i);
   assert.match(text, /REQUIRED SUB-SKILL.*html-design/i);
   assert.match(text, /check-artifact\.mjs.*--profile review-packet/is);
@@ -73,7 +75,7 @@ test("composes architecture skills without nesting their workflows", async () =>
   assert.match(text, /controlled evaluation.*do not run.*build|package commands/is);
 });
 
-test("defines the workstream-local bundle and checker commands", async () => {
+test("defines the assessment bundle and checker commands", async () => {
   const text = await skillText();
   for (const relative of [
     "assessment/assessment.md",
@@ -106,4 +108,10 @@ test("keeps every reference one hop away and the main skill under budget", async
     if (reference.trimEnd().split("\n").length > 100) assert.match(reference, /^# .+\n\n## Contents/m);
     assert.doesNotMatch(reference, /\]\(\.\.\/references\//, `${file} creates nested reference navigation`);
   }
+});
+
+test("hands accepted recommendations to the developer's planning instead of implementing them", async () => {
+  const text = await skillText();
+  assert.match(text, /proposed work items for the repository's tracker or planning flow/);
+  assert.match(text, /rather than implementing them here/);
 });

@@ -12,6 +12,7 @@ const mappings = [
 ];
 const fileMappings = [
   ["docs/archie/managed-site-guide.md", "skills/archie/references/managed-site-guide.md"],
+  ["docs/archie/deep-module-vocabulary.md", "packages/assessment/skills/architecture-assessment/references/deep-module-vocabulary.md"],
   ["packages/archie-context/scripts/dispatch-runtime.mjs", "skills/archie/scripts/dispatch-runtime.mjs"]
 ];
 
