@@ -75,6 +75,10 @@ test("reviewed source imports, completed migrations, and exclusions are recorded
   const manifest = JSON.parse(readFileSync("source-import-manifest.json"));
   assert.deepEqual(manifest.imports, []);
   for (const migration of manifest.migrations) {
+    assert.ok(migration.gateEvidence?.automated.length > 0, `${migration.id} records automated gate evidence`);
+    assert.equal(migration.gateEvidence.manualReview, "not-performed: verified through use until an evaluation system exists", `${migration.id} records that manual review was not performed`);
+  }
+  for (const migration of manifest.migrations) {
     if (migration.legacyDestination) assert.equal(existsSync(migration.legacyDestination), false, `${migration.id} legacy assets remain`);
     if (!migration.inventory) continue;
     const inventory = JSON.parse(readFileSync(migration.inventory));
@@ -96,7 +100,7 @@ test("reviewed source imports, completed migrations, and exclusions are recorded
     assert.equal(migration.destination, destination);
     assert.equal(migration.inventory, inventory);
     assert.ok(migration.gateEvidence.automated.length > 0);
-    assert.equal(migration.gateEvidence.manualReview, "deferred-to-phase-8-release-candidate-trial");
+    assert.equal(migration.gateEvidence.manualReview, "not-performed: verified through use until an evaluation system exists");
   }
   assert.ok(existsSync("packages/architecture-docs/test/architecture-docs-builder.test.mjs"));
   assert.ok(existsSync("packages/assessment/skills/architecture-assessment/SKILL.md"));

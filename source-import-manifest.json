@@ -23,7 +23,7 @@
           "e64175b3c0ddd6194fd772b99f76c44efb770923 canonical, projected, packed, and frozen-installed validation",
           "7567334f892fcf902a6ff85fe91fc5b0c9855e0c closed public evidence contract"
         ],
-        "manualReview": "deferred-to-phase-8-release-candidate-trial"
+        "manualReview": "not-performed: verified through use until an evaluation system exists"
       },
       "reason": "Archie owns the canonical Assessment skill, schemas, validators, deterministic tests, controlled evaluation assets, package contract, and generated APM projection."
     },
@@ -49,7 +49,7 @@
           "7567334f892fcf902a6ff85fe91fc5b0c9855e0c closed report and state contracts",
           "a3601253b656b4ceffcf2ecdc6dcd7cdc70ba289 ordered local release artifact and project-local binary verification"
         ],
-        "manualReview": "deferred-to-phase-8-release-candidate-trial"
+        "manualReview": "not-performed: verified through use until an evaluation system exists"
       },
       "reason": "Archie owns the canonical Conformance engine, formats, CLI, reports, replay, reconciliation, onboarding state, skills, tests, and release artifact."
     },
@@ -74,7 +74,15 @@
         "architecture-docs.config.json",
         "package-lock.json"
       ],
-      "reason": "The former C4 Arch Viewer proof evolved into Architecture Docs and LikeC4 authoring. Archie now owns their canonical source, tests, command, and dependency contract; generated example-site output was deliberately not migrated. The initial migration was taken at f2b7c5f1353c5e76fe8739a657632edafc66580f; the Archie managed-site documentation warnings and the deterministic architecture status consumer were later ported from c4archviewer main at 81a008e629de8ff28b5db01a436c4425827feff5."
+      "reason": "The former C4 Arch Viewer proof evolved into Architecture Docs and LikeC4 authoring. Archie now owns their canonical source, tests, command, and dependency contract; generated example-site output was deliberately not migrated. The initial migration was taken at f2b7c5f1353c5e76fe8739a657632edafc66580f; the Archie managed-site documentation warnings and the deterministic architecture status consumer were later ported from c4archviewer main at 81a008e629de8ff28b5db01a436c4425827feff5.",
+      "gateEvidence": {
+        "automated": [
+          "packages/architecture-docs/test (builder, publication, receipt, managed-site, and architecture-status consumer suites)",
+          "test/product/architecture-docs-integration.test.mjs",
+          "test/product/architecture-docs-managed-site.test.mjs"
+        ],
+        "manualReview": "not-performed: verified through use until an evaluation system exists"
+      }
     },
     {
       "id": "html-design",
@@ -98,7 +106,15 @@
         "examples/",
         "skills/"
       ],
-      "reason": "Archie ships HTML Design as a first-class capability. The standalone repository's portable skill bundle became Archie-owned source; its design-system records, generators, site, and evaluations stay in the standalone repository, which continues separately. The parse5 dependency is bundled into scripts/lib/check-artifact.mjs from packages/html-design/src/check-artifact.mjs so the deployed skill needs no installed dependencies."
+      "reason": "Archie ships HTML Design as a first-class capability. The standalone repository's portable skill bundle became Archie-owned source; its design-system records, generators, site, and evaluations stay in the standalone repository, which continues separately. The parse5 dependency is bundled into scripts/lib/check-artifact.mjs from packages/html-design/src/check-artifact.mjs so the deployed skill needs no installed dependencies.",
+      "gateEvidence": {
+        "automated": [
+          "packages/html-design/test/html-design-skill.test.mjs (portable skill, checker rules, dependency-free bundle)",
+          "test/context/context.test.mjs",
+          "test/e2e/private-trials/private-trials.test.mjs (deployed html-design byte identity and tamper rejection)"
+        ],
+        "manualReview": "not-performed: verified through use until an evaluation system exists"
+      }
     },
     {
       "id": "architecture-review",
@@ -118,7 +134,15 @@
         "agents/codebase-analyzer.md",
         "skills/_shared/"
       ],
-      "reason": "Archie owns Architecture Review as its proactive-improvement capability. The review method was kept; MyFlow repository maps, shared metadata scripts, Pi's question tool, named subagents, and design/plan chaining were replaced with plain Git commands, host-neutral checkpoints, optional parallel analysis, .archie/reviews/ artifacts, and a work-item hand-off. Codebase Design's SKILL.md and DEEPENING.md became docs/archie/deep-module-vocabulary.md."
+      "reason": "Archie owns Architecture Review as its proactive-improvement capability. The review method was kept; MyFlow repository maps, shared metadata scripts, Pi's question tool, named subagents, and design/plan chaining were replaced with plain Git commands, host-neutral checkpoints, optional parallel analysis, .archie/reviews/ artifacts, and a work-item hand-off. Codebase Design's SKILL.md and DEEPENING.md became docs/archie/deep-module-vocabulary.md.",
+      "gateEvidence": {
+        "automated": [
+          "packages/architecture-review/test/architecture-review-skill-contract.test.mjs",
+          "test/context/context.test.mjs",
+          "test/e2e/private-trials/private-trials.test.mjs (deployed architecture-review byte identity and tamper rejection)"
+        ],
+        "manualReview": "not-performed: verified through use until an evaluation system exists"
+      }
     }
   ],
   "excluded": [

@@ -34,6 +34,8 @@ The text receipt must contain:
 Archie authorization: NOT ASSESSED — locally reviewed private release selected.
 ```
 
+Manual review is recorded honestly rather than left pending: every migration's `gateEvidence.manualReview` in `source-import-manifest.json` reads `not-performed: verified through use until an evaluation system exists`. Archie is verified by installing it into real repositories and using it; findings from that use become backlog items.
+
 This packet proves local byte consistency and recovery behavior. It does not approve the candidate, verify a real immutable private context ref, exercise a substantial external repository, or claim signing, publisher identity, public-release trust, controller distribution, or permission to publish.
 
 Use [the substantial-repository trial checklist](substantial-repository-trial-checklist.md) for the developer-owned manual trial. Record findings before any push, tag, archival, or release decision.
