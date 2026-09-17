@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><body><main>
+<!-- archie-guide:v1 -->
+<h1>Working with Archie</h1>
+<p>Archie coordinates evidence-led architecture work in this repository. It helps developers choose the right workflow, keeps authority with maintainers, and turns reviewed results into durable architecture stewardship.</p>
+<!-- archie-topic:overview -->
+<h2>What Archie is</h2><p>Archie is a coordinating agent, not a replacement for repository owners or the tools that produce architecture evidence. Start with <code>/skill:archie</code>, describe the decision or change, and let Archie route the request to the capability that owns the next step.</p><p>The developer remains the authority for intent, boundaries, approvals, and adoption. Archie proposes; the repository's maintainers decide what becomes true.</p>
+<!-- archie-topic:working-relationship -->
+<h2>How developers work with Archie</h2><p>Bring a concrete question, the relevant repository context, and any planning artifact the workflow requires. Archie explains the selected capability, records evidence and uncertainty, and pauses for developer decisions instead of silently applying architectural changes.</p>
+<!-- archie-topic:stewardship -->
+<h2>After onboarding: ongoing stewardship</h2><p>Keep the architecture model, claims, contracts, and documentation close to the code they describe. Re-run the owning workflow when boundaries change, review the resulting evidence, and use the managed site as the durable record of current intent rather than a one-time report.</p>
+<!-- archie-topic:observed-import-graph -->
+<h2>Observed import graph</h2><p>Conformance onboarding can produce an observed TypeScript import graph to make current relationships visible. It is evidence for a maintainer conversation, not an architectural truth claim and not a standalone Archie command. The target must provide the exact local <code>architecture-conformance</code> dependency before analysis can run.</p>
+<!-- archie-topic:c4-view-selection -->
+<h2>Choosing and reading C4 views</h2><p>Use a view whose scope matches the decision: context for boundaries, containers for responsibilities, and components only when a bounded implementation detail matters. LikeC4 compilation proves syntax and references; it does not prove that the architecture is correct. Read each view alongside its claims and evidence.</p>
+<h2>Capabilities</h2>
+<!-- archie-capability:assessment:problem -->
+<!-- archie-capability:assessment:when-to-use -->
+<!-- archie-capability:assessment:result -->
+<!-- archie-capability:assessment:start -->
+<h3>Assessment</h3><ul><li><strong>Problem:</strong> Whole-system architecture questions need evidence, not a quick opinion.</li><li><strong>When to use:</strong> Use it when the decision spans the repository or several system boundaries.</li><li><strong>Result:</strong> An evidence-led assessment with findings, uncertainty, and developer checkpoints.</li><li><strong>Start:</strong> Start Archie with the Architecture Assessment skill and provide a planning artifact.</li></ul>
+<!-- archie-capability:architecture-docs:problem -->
+<!-- archie-capability:architecture-docs:when-to-use -->
+<!-- archie-capability:architecture-docs:result -->
+<!-- archie-capability:architecture-docs:start -->
+<h3>Architecture Docs</h3><ul><li><strong>Problem:</strong> Architecture knowledge drifts when prose, models, and evidence are maintained separately.</li><li><strong>When to use:</strong> Use it to curate the model, claims ledger, page map, and handoff for this site.</li><li><strong>Result:</strong> Reviewed Markdown, LikeC4 views, provenance, and an HTML Design handoff.</li><li><strong>Start:</strong> Use the target-local Architecture Docs commands; HTML Design owns the final <code>site/</code> presentation.</li></ul>
+<!-- archie-capability:likec4-authoring:problem -->
+<!-- archie-capability:likec4-authoring:when-to-use -->
+<!-- archie-capability:likec4-authoring:result -->
+<!-- archie-capability:likec4-authoring:start -->
+<h3>LikeC4 authoring</h3><ul><li><strong>Problem:</strong> Readers need stable, named views of system relationships at the right level.</li><li><strong>When to use:</strong> Use it when model structure or a view needs to be created or changed.</li><li><strong>Result:</strong> A compilable model and selected views that support the authored explanation.</li><li><strong>Start:</strong> Start the LikeC4 authoring workflow and validate references before relying on a view.</li></ul>
+<!-- archie-capability:conformance-onboarding:problem -->
+<!-- archie-capability:conformance-onboarding:when-to-use -->
+<!-- archie-capability:conformance-onboarding:result -->
+<!-- archie-capability:conformance-onboarding:start -->
+<h3>Conformance onboarding</h3><ul><li><strong>Problem:</strong> Existing code relationships and intended boundaries are often not recorded together.</li><li><strong>When to use:</strong> Use it when a repository is adopting conformance checks or needs current relationship evidence.</li><li><strong>Result:</strong> An observed import graph and a setup proposal for maintainer review.</li><li><strong>Start:</strong> Install the exact target-local <code>architecture-conformance</code> dependency first; Archie does not substitute a different package.</li></ul>
+<!-- archie-capability:architecture-contracts:problem -->
+<!-- archie-capability:architecture-contracts:when-to-use -->
+<!-- archie-capability:architecture-contracts:result -->
+<!-- archie-capability:architecture-contracts:start -->
+<h3>Architecture Contracts</h3><ul><li><strong>Problem:</strong> Maintainer-approved boundaries need deterministic checks that stay close to the code.</li><li><strong>When to use:</strong> Use it after intent and evidence have been reviewed and a realization map is ready.</li><li><strong>Result:</strong> Contracts, exceptions, and strict checks for the approved architecture.</li><li><strong>Start:</strong> Begin with the maintainer-approved map and contract; the strict check belongs to Architecture Contracts.</li></ul>
+<!-- archie-capability:structural-inspection:problem -->
+<!-- archie-capability:structural-inspection:when-to-use -->
+<!-- archie-capability:structural-inspection:result -->
+<!-- archie-capability:structural-inspection:start -->
+<h3>Structural inspection</h3><ul><li><strong>Problem:</strong> A bounded module question may need focused structural evidence without a whole-system assessment.</li><li><strong>When to use:</strong> Use it for advisory inspection of a defined module or seam.</li><li><strong>Result:</strong> A bounded finding set with evidence and clear limits.</li><li><strong>Start:</strong> Ask Archie to route the inspection. If its owner is unavailable, Archie reports that boundary rather than promising a standalone command.</li></ul>
+</main></body></html>

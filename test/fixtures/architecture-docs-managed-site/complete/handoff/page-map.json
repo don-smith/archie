@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "home": {
+    "id": "home",
+    "title": "Orientation",
+    "summary": "A managed-site orientation.",
+    "markdown": "pages/home.md",
+    "viewIds": [],
+    "claimIds": [],
+    "initialViewId": null
+  },
+  "areas": [
+    {
+      "id": "repository",
+      "title": "Repository",
+      "summary": "Repository architecture guidance.",
+      "markdown": "pages/repository.md",
+      "viewIds": [],
+      "claimIds": [],
+      "initialViewId": null,
+      "slug": "repository"
+    },
+    {
+      "id": "archie",
+      "title": "Archie",
+      "summary": "How this repository works with Archie.",
+      "markdown": "pages/archie.md",
+      "viewIds": [],
+      "claimIds": ["archie-guidance"],
+      "initialViewId": null,
+      "slug": "archie"
+    }
+  ]
+}

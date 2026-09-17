@@ -63,5 +63,9 @@ test("frozen APM context deployment is replayable and deploys the canonical skil
     const invalidBundle = spawnSync(process.execPath, [bundleChecker, bundle], { encoding: "utf8" });
     assert.equal(invalidBundle.status, 1, invalidBundle.stderr);
     assert.match(invalidBundle.stderr, /status ready does not agree/);
+
+    const deployedGuide = join(project, ".agents", "skills", "archie", "references", "managed-site-guide.md");
+    assert.ok(existsSync(deployedGuide), "APM did not deploy the managed-site guide");
+    assert.equal(readFileSync(deployedGuide, "utf8"), readFileSync("docs/archie/managed-site-guide.md", "utf8"));
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

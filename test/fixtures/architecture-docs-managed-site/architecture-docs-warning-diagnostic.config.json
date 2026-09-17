@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "repository": { "name": "Managed fixture docs", "shortLabel": "Managed fixture" },
+  "root": "warning-diagnostic",
+  "model": { "workspace": "model", "initialView": "systemContext" },
+  "document": { "title": "Managed fixture architecture docs" },
+  "pages": {
+    "home": { "id": "home", "title": "Orientation", "summary": "A managed-site orientation.", "markdown": "pages/home.md", "viewIds": [], "claimIds": [] },
+    "areas": [
+      { "id": "repository", "slug": "repository", "title": "Repository", "summary": "Repository architecture guidance.", "markdown": "pages/repository.md", "viewIds": [], "claimIds": [] },
+      { "id": "archie", "slug": "archie", "title": "Archie", "summary": "How this repository works with Archie.", "markdown": "pages/archie.md", "viewIds": [], "claimIds": ["archie-guidance"] }
+    ]
+  },
+  "evidence": { "ledger": "evidence/claims.json" },
+  "palette": {
+    "document": {
+      "light": { "canvas": "#f7f5ef", "surface": "#fffdf8", "raisedSurface": "#ffffff", "text": "#17211d", "mutedText": "#4f6059", "border": "#c7d2cc", "action": "#205c49", "warning": "#8a4b08", "focus": "#0066cc" },
+      "dark": { "canvas": "#111713", "surface": "#17211d", "raisedSurface": "#202b26", "text": "#f4f1e8", "mutedText": "#bdc8c1", "border": "#4f6059", "action": "#8fc9ae", "warning": "#f2b866", "focus": "#70b7ff" }
+    },
+    "diagram": { "primaryFill": "#205c49", "primaryStroke": "#164737", "primaryText": "#fffdf8", "neutralFill": "#4f6059", "neutralStroke": "#17211d", "neutralText": "#fffdf8", "relationshipLine": "#205c49", "relationshipLabelBackground": "#fffdf8" }
+  },
+  "sourceLinks": { "browserRoot": "https://example.com/fixture/blob/main/" }
+}

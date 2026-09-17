@@ -62,6 +62,12 @@ test("Archie ships the canonical Drift Detection playbook route and reference", 
   assert.equal(readFileSync(join(context, ".apm", "skills", "archie", "references", "drift-detection.md"), "utf8"), canonicalReference);
 });
 
+test("managed-site guide projections match the authoritative documentation", () => {
+  const authoritative = readFileSync("docs/archie/managed-site-guide.md");
+  assert.deepEqual(readFileSync("skills/archie/references/managed-site-guide.md"), authoritative);
+  assert.deepEqual(readFileSync(join(context, ".apm", "skills", "archie", "references", "managed-site-guide.md")), authoritative);
+});
+
 test("runtime dispatcher invokes only the pinned project-local runtime", () => {
   const base = mkdtempSync(join(tmpdir(), "archie-context-dispatch-"));
   try {

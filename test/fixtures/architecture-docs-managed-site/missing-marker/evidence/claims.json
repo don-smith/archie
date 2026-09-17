@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "inventory": {
+    "existing-documentation": { "status": "examined", "paths": ["complete/pages/archie.md"] },
+    "manifests": { "status": "examined", "paths": ["architecture-docs.config.json"] },
+    "runtime-entry-points": { "status": "not-applicable", "paths": [], "reason": "The fixture has no runtime." },
+    "deployment-definitions": { "status": "not-applicable", "paths": [], "reason": "The fixture is static." },
+    "persistence-definitions": { "status": "not-applicable", "paths": [], "reason": "The fixture has no persistence." },
+    "integration-clients": { "status": "not-applicable", "paths": [], "reason": "The fixture has no clients." },
+    "representative-tests": { "status": "examined", "paths": ["evidence/source.txt"] },
+    "source-relationships": { "status": "not-applicable", "paths": [], "reason": "The fixture has no source relationships." },
+    "glossary-or-domain-language": { "status": "not-applicable", "paths": [], "reason": "The fixture has no glossary." },
+    "adr-or-decision-sources": { "status": "not-applicable", "paths": [], "reason": "The fixture has no ADRs." }
+  },
+  "claims": [
+    {
+      "id": "archie-guidance",
+      "statement": "The target carries repository-specific Archie guidance.",
+      "basis": "confirmed-evidence",
+      "topics": ["responsibility"],
+      "evidence": [{ "path": "evidence/source.txt", "note": "Fixture evidence for the authored page." }],
+      "targets": { "pages": ["archie"], "elements": [] },
+      "review": { "state": "pending" }
+    }
+  ],
+  "pageMapReview": { "state": "pending" }
+}
