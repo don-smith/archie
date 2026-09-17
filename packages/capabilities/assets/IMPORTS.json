@@ -19,9 +19,9 @@
       "legacyDestination": "packages/capabilities/assets/assessment",
       "gateEvidence": {
         "automated": [
-          "314430b650d4c7e511cebc352faf266c63661a7b migration inventory and pinned fixtures",
-          "2f23d24ef7ed2fd003fa46b4dbb4fc177a6f15e3 canonical, projected, packed, and frozen-installed validation",
-          "08343371b04f0b1cdc9277a57dcc1df5c33319a2 closed public evidence contract"
+          "808670f01868dbac440f2bb73e9ab4db56543373 migration inventory and pinned fixtures",
+          "e64175b3c0ddd6194fd772b99f76c44efb770923 canonical, projected, packed, and frozen-installed validation",
+          "7567334f892fcf902a6ff85fe91fc5b0c9855e0c closed public evidence contract"
         ],
         "manualReview": "deferred-to-phase-8-release-candidate-trial"
       },
@@ -43,11 +43,11 @@
       "legacyDestination": "packages/capabilities/assets/conformance",
       "gateEvidence": {
         "automated": [
-          "314430b650d4c7e511cebc352faf266c63661a7b migration inventory and frozen CLI fixtures",
-          "77aa84bcf6a5c74e794be71522aa035dec7f4568 complete engine, CLI, skills, and tests",
-          "9eee8ca030fb40323f3f726f658d23341ba7b0b2 parity report a82cc8161e64c8f67f684ca9f1e696ee31c2da26d66cd310863b14f1cb1756a9",
-          "08343371b04f0b1cdc9277a57dcc1df5c33319a2 closed report and state contracts",
-          "51a91883a99e4c3f1230168553b1371e1f33aa0c ordered local release artifact and project-local binary verification"
+          "808670f01868dbac440f2bb73e9ab4db56543373 migration inventory and frozen CLI fixtures",
+          "fa3cc518e6ccd973f5259a725caf19e7e0ef2b4c complete engine, CLI, skills, and tests",
+          "b40dfa4445d100e3ffc1d2f259a20b094c97faf8 parity report a82cc8161e64c8f67f684ca9f1e696ee31c2da26d66cd310863b14f1cb1756a9",
+          "7567334f892fcf902a6ff85fe91fc5b0c9855e0c closed report and state contracts",
+          "a3601253b656b4ceffcf2ecdc6dcd7cdc70ba289 ordered local release artifact and project-local binary verification"
         ],
         "manualReview": "deferred-to-phase-8-release-candidate-trial"
       },
