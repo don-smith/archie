@@ -60,6 +60,7 @@ function replace(lines, area, indent, owned, next, label) {
 const dependency = (record) => [
     `    - git: ${scalar(record.apm.locator, "APM locator")}`,
     `      ref: ${scalar(record.apm.ref, "APM ref")}`,
+    ...(record.apm.path === undefined ? [] : [`      path: ${scalar(record.apm.path, "APM path")}`]),
     "      skills:",
     ...record.apm.skills.map(skill => `        - ${scalar(skill, "APM skill")}`)
 ];
@@ -93,12 +94,12 @@ function requiredEntry(lines, area, indent, owned, label) {
 export function assertPinnedApmProjection(record, projection) {
     const manifest = projection.manifest.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
     const manifestDependency = requiredEntry(manifest, nestedSection(manifest, section(manifest, "dependencies", "APM manifest"), "apm", "APM manifest"), "    ", entry => ownsDependency(record, entry), "APM manifest dependencies");
-    if (field(manifestDependency, "ref") !== record.apm.ref || !sameSkills(manifestDependency, record.apm.skills, "skills"))
+    if (field(manifestDependency, "ref") !== record.apm.ref || field(manifestDependency, "path") !== record.apm.path || !sameSkills(manifestDependency, record.apm.skills, "skills"))
         throw new Error("pinned Archie APM manifest has drifted");
     const lock = projection.lock.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
     const dependencies = section(lock, "dependencies", "APM lock");
     const entry = requiredEntry(lock, dependencies, "", lines => field(lines, "name") === record.apm.package && field(lines, "repo_url") === repoUrl(record.apm.locator), "APM lock dependencies");
-    if (field(entry, "resolved_ref") !== record.apm.ref || field(entry, "resolved_commit") !== record.apm.resolvedCommit || field(entry, "content_hash") !== record.apm.contentHash || !sameSkills(entry, record.apm.skills, "skill_subset"))
+    if (field(entry, "resolved_ref") !== record.apm.ref || field(entry, "resolved_commit") !== record.apm.resolvedCommit || field(entry, "content_hash") !== record.apm.contentHash || field(entry, "virtual_path") !== record.apm.path || !sameSkills(entry, record.apm.skills, "skill_subset"))
         throw new Error("pinned Archie APM lock has drifted");
 }
 //# sourceMappingURL=apm-projection.js.map

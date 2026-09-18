@@ -40,6 +40,13 @@ function exactKeys(value, keys, label) {
     if (JSON.stringify(Object.keys(value).sort()) !== JSON.stringify([...keys].sort()))
         throw new Error(`${label} has unsupported or missing fields`);
 }
+function supportedKeys(value, required, optional, label) {
+    const present = Object.keys(value).sort();
+    const allowed = new Set([...required, ...optional]);
+    const missing = required.filter(key => !(key in value));
+    if (missing.length || present.some(key => !allowed.has(key)))
+        throw new Error(`${label} has unsupported or missing fields`);
+}
 function parseJson(bytes, label) {
     try {
         return JSON.parse(bytes);
@@ -74,6 +81,18 @@ function githubSshRepository(locator) {
         throw new Error("APM locator must be a GitHub SSH repository URL");
     return repository;
 }
+/** The APM virtual path is a repository-relative subfolder, so it must stay simple and contained. */
+function virtualPath(value, label) {
+    const path = text(value, label);
+    if (path.startsWith("/") || path.endsWith("/") || path.split("/").some(segment => !segment || segment === "." || segment === "..")) {
+        throw new Error(`${label} must be a plain repository-relative subfolder`);
+    }
+    return path;
+}
+/** A version tag and a full commit SHA are both immutable; a SHA is what a build from a clone can supply. */
+function isImmutableRef(value, version) {
+    return value === `v${version}` || (typeof value === "string" && /^[a-f0-9]{40}$/i.test(value));
+}
 function bundleInput(root) {
     const value = object(parseJson(readFileSync(join(root, "bundle.json"), "utf8"), "bundle input"), "bundle input");
     exactKeys(value, ["format", "artifacts", "apm"], "bundle input");
@@ -91,13 +110,14 @@ function bundleInput(root) {
         };
     });
     const apm = object(value.apm, "bundle APM input");
-    exactKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
+    supportedKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], ["path"], "bundle APM input");
     return {
         format: BUNDLE_INPUT_FORMAT,
         artifacts,
         apm: {
             package: text(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: text(apm.locator, "bundle APM locator"),
-            ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile")
+            ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile"),
+            ...(apm.path === undefined ? {} : { path: virtualPath(apm.path, "bundle APM path") })
         }
     };
 }
@@ -135,13 +155,20 @@ function apmEvidence(root, input) {
         throw new Error("APM lock repository differs from bundle input");
     if (field(lock, "resolved_ref", "APM lock") !== input.ref)
         throw new Error("APM lock ref differs from bundle input");
+    if (input.path === undefined) {
+        if (/^\s*(?:-\s*)?virtual_path:/m.test(lock))
+            throw new Error("APM lock pins a virtual path the bundle input does not declare");
+    }
+    else if (field(manifest, "path", "APM manifest") !== input.path || field(lock, "virtual_path", "APM lock") !== input.path || field(lock, "is_virtual", "APM lock") !== "true") {
+        throw new Error("APM virtual path differs from bundle input");
+    }
     if (JSON.stringify(skillSubset(lock, "skill_subset", "APM lock")) !== JSON.stringify(input.skills))
         throw new Error("APM lock skill subset differs from bundle input");
     const resolvedCommit = field(lock, "resolved_commit", "APM lock");
     const contentHash = field(lock, "content_hash", "APM lock");
     if (!/^[a-f0-9]{40}$/i.test(resolvedCommit) || !/^sha256:[a-f0-9]{64}$/i.test(contentHash))
         throw new Error("APM lock evidence is malformed");
-    return { package: input.package, skills: input.skills, locator: input.locator, ref: input.ref, resolvedCommit, contentHash };
+    return { package: input.package, skills: input.skills, locator: input.locator, ref: input.ref, ...(input.path === undefined ? {} : { path: input.path }), resolvedCommit, contentHash };
 }
 function artifactEvidence(root, input) {
     if (!input.locator.startsWith("file:npm/") || input.locator.includes(".."))
@@ -191,11 +218,13 @@ function validateRecord(record) {
         throw new Error("release record artifacts must be ordered runtime then conformance at the product version");
     record.artifacts.forEach(artifact => validateArtifact(artifact, "release record artifact"));
     const apm = object(record.apm, "release record APM");
-    exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
+    supportedKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], ["path"], "release record APM");
+    if (apm.path !== undefined)
+        virtualPath(apm.path, "release record APM path");
     text(apm.package, "release record APM package");
     githubSshRepository(text(apm.locator, "release record APM locator"));
-    if (apm.ref !== `v${record.version}`)
-        throw new Error("release record APM ref must be the immutable version tag");
+    if (!isImmutableRef(apm.ref, String(record.version)))
+        throw new Error("release record APM ref must be the immutable version tag or a full commit SHA");
     if (!/^[a-f0-9]{40}$/i.test(String(apm.resolvedCommit)) || !/^sha256:[a-f0-9]{64}$/i.test(String(apm.contentHash)))
         throw new Error("release record APM evidence is malformed");
     skills(apm.skills, "release record APM skills");
@@ -234,7 +263,7 @@ export function finalizeRelease(request) {
     if (!/^[a-f0-9]{40}$/i.test(request.sourceCommit))
         throw new Error("sourceCommit must be a 40-character Git commit");
     const input = bundleInput(root);
-    if (input.apm.ref !== `v${PRODUCT_VERSION}` || input.artifacts.some(artifact => artifact.version !== PRODUCT_VERSION))
+    if (!isImmutableRef(input.apm.ref, PRODUCT_VERSION) || input.artifacts.some(artifact => artifact.version !== PRODUCT_VERSION))
         throw new Error("bundle version does not match the Archie product version authority");
     const artifacts = input.artifacts.map(artifact => artifactEvidence(root, artifact));
     if (JSON.stringify(artifacts.map(artifact => artifact.package)) !== JSON.stringify(RELEASE_ARTIFACT_PACKAGES))

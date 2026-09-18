@@ -32,6 +32,7 @@ export interface ReleaseRecord {
         skills: ArchieSkill[];
         locator: string;
         ref: string;
+        path?: string;
         resolvedCommit: string;
         contentHash: string;
     };

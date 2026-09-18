@@ -43,7 +43,7 @@ export interface ReleaseRecord {
   sourceCommit: string;
   authorization: { kind: "none"; claim: typeof LOCAL_REVIEW_CLAIM };
   artifacts: [ReleaseArtifact, ReleaseArtifact];
-  apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; resolvedCommit: string; contentHash: string };
+  apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; path?: string; resolvedCommit: string; contentHash: string };
   analyzerCompatibility: { adapter: string; typescript: string; nodeMajor: number; platform: string; architecture: string; platformPackage: string; knownDefects: string[] };
 }
 export interface FinalizeReleaseRequest { bundleDirectory: string; sourceCommit: string; }
@@ -58,7 +58,7 @@ export interface SelectedRelease {
 }
 
 type BundleArtifact = { package: string; version: string; locator: string; lockFile: string; tarball: string; requiredPlatformPayload: string };
-type BundleInput = { format: typeof BUNDLE_INPUT_FORMAT; artifacts: BundleArtifact[]; apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; manifest: string; lockFile: string } };
+type BundleInput = { format: typeof BUNDLE_INPUT_FORMAT; artifacts: BundleArtifact[]; apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; path?: string; manifest: string; lockFile: string } };
 
 const REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
 const sha256 = (bytes: string | Buffer) => createHash("sha256").update(bytes).digest("hex");
@@ -75,6 +75,12 @@ function text(value: unknown, label: string): string {
 }
 function exactKeys(value: Record<string, unknown>, keys: string[], label: string): void {
   if (JSON.stringify(Object.keys(value).sort()) !== JSON.stringify([...keys].sort())) throw new Error(`${label} has unsupported or missing fields`);
+}
+function supportedKeys(value: Record<string, unknown>, required: string[], optional: string[], label: string): void {
+  const present = Object.keys(value).sort();
+  const allowed = new Set([...required, ...optional]);
+  const missing = required.filter(key => !(key in value));
+  if (missing.length || present.some(key => !allowed.has(key))) throw new Error(`${label} has unsupported or missing fields`);
 }
 function parseJson(bytes: string, label: string): unknown {
   try { return JSON.parse(bytes); } catch { throw new Error(`${label} is not valid JSON`); }
@@ -101,6 +107,19 @@ function githubSshRepository(locator: string): string {
   return repository;
 }
 
+/** The APM virtual path is a repository-relative subfolder, so it must stay simple and contained. */
+function virtualPath(value: unknown, label: string): string {
+  const path = text(value, label);
+  if (path.startsWith("/") || path.endsWith("/") || path.split("/").some(segment => !segment || segment === "." || segment === "..")) {
+    throw new Error(`${label} must be a plain repository-relative subfolder`);
+  }
+  return path;
+}
+/** A version tag and a full commit SHA are both immutable; a SHA is what a build from a clone can supply. */
+function isImmutableRef(value: unknown, version: string): boolean {
+  return value === `v${version}` || (typeof value === "string" && /^[a-f0-9]{40}$/i.test(value));
+}
+
 function bundleInput(root: string): BundleInput {
   const value = object(parseJson(readFileSync(join(root, "bundle.json"), "utf8"), "bundle input"), "bundle input");
   exactKeys(value, ["format", "artifacts", "apm"], "bundle input");
@@ -116,13 +135,14 @@ function bundleInput(root: string): BundleInput {
     };
   });
   const apm = object(value.apm, "bundle APM input");
-  exactKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], "bundle APM input");
+  supportedKeys(apm, ["package", "skills", "locator", "ref", "manifest", "lockFile"], ["path"], "bundle APM input");
   return {
     format: BUNDLE_INPUT_FORMAT,
     artifacts,
     apm: {
       package: text(apm.package, "bundle APM package"), skills: skills(apm.skills, "bundle APM skills"), locator: text(apm.locator, "bundle APM locator"),
-      ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile")
+      ref: text(apm.ref, "bundle APM ref"), manifest: text(apm.manifest, "bundle APM manifest"), lockFile: text(apm.lockFile, "bundle APM lockFile"),
+      ...(apm.path === undefined ? {} : { path: virtualPath(apm.path, "bundle APM path") })
     }
   };
 }
@@ -152,11 +172,16 @@ function apmEvidence(root: string, input: BundleInput["apm"]): ReleaseRecord["ap
   if (JSON.stringify(skillSubset(manifest, "skills", "APM manifest")) !== JSON.stringify(input.skills)) throw new Error("APM manifest skill subset differs from bundle input");
   if (field(lock, "name", "APM lock") !== input.package || field(lock, "repo_url", "APM lock") !== repository || field(lock, "host", "APM lock") !== "github.com") throw new Error("APM lock repository differs from bundle input");
   if (field(lock, "resolved_ref", "APM lock") !== input.ref) throw new Error("APM lock ref differs from bundle input");
+  if (input.path === undefined) {
+    if (/^\s*(?:-\s*)?virtual_path:/m.test(lock)) throw new Error("APM lock pins a virtual path the bundle input does not declare");
+  } else if (field(manifest, "path", "APM manifest") !== input.path || field(lock, "virtual_path", "APM lock") !== input.path || field(lock, "is_virtual", "APM lock") !== "true") {
+    throw new Error("APM virtual path differs from bundle input");
+  }
   if (JSON.stringify(skillSubset(lock, "skill_subset", "APM lock")) !== JSON.stringify(input.skills)) throw new Error("APM lock skill subset differs from bundle input");
   const resolvedCommit = field(lock, "resolved_commit", "APM lock");
   const contentHash = field(lock, "content_hash", "APM lock");
   if (!/^[a-f0-9]{40}$/i.test(resolvedCommit) || !/^sha256:[a-f0-9]{64}$/i.test(contentHash)) throw new Error("APM lock evidence is malformed");
-  return { package: input.package, skills: input.skills, locator: input.locator, ref: input.ref, resolvedCommit, contentHash };
+  return { package: input.package, skills: input.skills, locator: input.locator, ref: input.ref, ...(input.path === undefined ? {} : { path: input.path }), resolvedCommit, contentHash };
 }
 
 function artifactEvidence(root: string, input: BundleArtifact): ReleaseArtifact {
@@ -201,10 +226,11 @@ function validateRecord(record: ReleaseRecord): void {
   if (!Array.isArray(record.artifacts) || JSON.stringify(record.artifacts.map(artifact => artifact?.package)) !== JSON.stringify(RELEASE_ARTIFACT_PACKAGES) || record.artifacts.some(artifact => artifact?.version !== record.version)) throw new Error("release record artifacts must be ordered runtime then conformance at the product version");
   record.artifacts.forEach(artifact => validateArtifact(artifact, "release record artifact"));
   const apm = object(record.apm, "release record APM");
-  exactKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], "release record APM");
+  supportedKeys(apm, ["package", "skills", "locator", "ref", "resolvedCommit", "contentHash"], ["path"], "release record APM");
+  if (apm.path !== undefined) virtualPath(apm.path, "release record APM path");
   text(apm.package, "release record APM package");
   githubSshRepository(text(apm.locator, "release record APM locator"));
-  if (apm.ref !== `v${record.version}`) throw new Error("release record APM ref must be the immutable version tag");
+  if (!isImmutableRef(apm.ref, String(record.version))) throw new Error("release record APM ref must be the immutable version tag or a full commit SHA");
   if (!/^[a-f0-9]{40}$/i.test(String(apm.resolvedCommit)) || !/^sha256:[a-f0-9]{64}$/i.test(String(apm.contentHash))) throw new Error("release record APM evidence is malformed");
   skills(apm.skills, "release record APM skills");
   if (canonicalize(record.analyzerCompatibility) !== canonicalize(analyzer())) throw new Error("release record has unsupported analyzer compatibility");
@@ -237,7 +263,7 @@ export function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleas
   validateBundleLayout(root);
   if (!/^[a-f0-9]{40}$/i.test(request.sourceCommit)) throw new Error("sourceCommit must be a 40-character Git commit");
   const input = bundleInput(root);
-  if (input.apm.ref !== `v${PRODUCT_VERSION}` || input.artifacts.some(artifact => artifact.version !== PRODUCT_VERSION)) throw new Error("bundle version does not match the Archie product version authority");
+  if (!isImmutableRef(input.apm.ref, PRODUCT_VERSION) || input.artifacts.some(artifact => artifact.version !== PRODUCT_VERSION)) throw new Error("bundle version does not match the Archie product version authority");
   const artifacts = input.artifacts.map(artifact => artifactEvidence(root, artifact)) as [ReleaseArtifact, ReleaseArtifact];
   if (JSON.stringify(artifacts.map(artifact => artifact.package)) !== JSON.stringify(RELEASE_ARTIFACT_PACKAGES)) throw new Error("bundle artifacts must be ordered runtime then conformance");
   const record: ReleaseRecord = {

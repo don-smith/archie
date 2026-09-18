@@ -8,6 +8,7 @@ export * from "./repository-checks/run.js";
 export * from "./repository-checks/architecture-status-v1.js";
 export * from "./npm-tarball/inspect.js";
 export * from "./release-record/release-record-v3.js";
+export * from "./release-record/build-bundle.js";
 export * from "./release-install/npm-projection.js";
 export * from "./release-install/apm-projection.js";
 export { bootstrapTarget, readPinnedTarget, verifyPinnedTarget, type PinnedTarget, type StagedTarget } from "./release-install/target-state.js";

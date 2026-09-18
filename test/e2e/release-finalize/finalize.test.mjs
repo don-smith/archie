@@ -25,6 +25,7 @@ test("release-finalize produces identical local bundle records and receipts", ()
     assert.doesNotThrow(() => validateBundleLayout(first));
     const rejected = spawnSync(process.execPath, ["dist/packages/archie-cli/src/release-cli.js", "finalize", "--bundle", first], { encoding: "utf8" });
     assert.notEqual(rejected.status, 0);
-    assert.match(rejected.stderr, /Usage: archie-release finalize --bundle <local-directory> --source-commit/);
+    assert.match(rejected.stderr, /archie-release finalize --bundle <local-directory> --source-commit/);
+    assert.match(rejected.stderr, /archie-release build --bundle <output-directory> --ref/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
