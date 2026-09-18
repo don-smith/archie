@@ -5,7 +5,7 @@ import { assertSupportedEnvironment } from "../analysis/contracts.js";
 import { readPinnedTarget, bootstrapTarget, stageUpgradeTarget, type StagedTarget } from "./target-state.js";
 import type { ReleaseRecord, SelectedRelease } from "../release-record/release-record-v3.js";
 import { initialInstallReport, type ReleaseInstallReport } from "./report.js";
-import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
+import { beginInstallJournal, compensateInstall, updateInstallJournal, type JournalPhase } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
 import { generateApmLock, runApmChecks } from "./run-apm.js";
 export type { NativeCommand, NativeCommandResult, NativeCommandRunner } from "./run-npm.js";
@@ -118,15 +118,21 @@ function stageAndVerify(targetDirectory: string, skills: string[], stage: () => 
     const failureReport = failure instanceof ReleaseVerificationFailure ? failure.report : report;
     failureReport.failedPhase ??= phase;
     if (phase === "staging") failureReport.recordConsistency = "failed";
-    updateInstallJournal(targetDirectory, journal, "failed", failure);
+    // Best-effort from here: the journal is forensics, and a failure writing it
+    // — a full disk is the realistic one — must not mask the original failure
+    // or, worse, abort the catch block before compensation has run.
+    const record = (journalPhase: JournalPhase, cause: unknown): void => {
+      try { updateInstallJournal(targetDirectory, journal, journalPhase, cause); } catch { /* the thrown failure below is the report that matters */ }
+    };
+    record("failed", failure);
     try {
       compensateInstall(targetDirectory, journal);
       if (previousPin) verifyCurrentInstalledTarget(targetDirectory, options);
       failureReport.compensation = "passed";
-      updateInstallJournal(targetDirectory, journal, "compensated", failure);
+      record("compensated", failure);
     } catch (compensationFailure) {
       failureReport.compensation = "blocked";
-      updateInstallJournal(targetDirectory, journal, "compensation-incomplete", compensationFailure);
+      record("compensation-incomplete", compensationFailure);
       throw new ReleaseInstallFailure("release installation failed and compensation is incomplete", failureReport, compensationFailure);
     }
     throw new ReleaseInstallFailure("release installation failed; prior target state was restored", failureReport, failure);

@@ -40,7 +40,12 @@ NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
 command -v npm >/dev/null || die "npm is not on PATH."
 command -v git >/dev/null || die "git is not on PATH."
 command -v apm >/dev/null || die "APM is not on PATH. Archie deploys its skills with APM 0.29; see https://github.com/danielmeppiel/apm."
-[ -d "$TARGET/.git" ] || die "$TARGET is not a Git repository. Archie installs into a repository."
+# Not `[ -d "$TARGET/.git" ]`: inside a git worktree `.git` is a FILE holding a
+# `gitdir:` pointer, so that test rejects every worktree. Comparing the toplevel
+# keeps the original intent — install at the repository root, never a
+# subdirectory — while accepting worktrees.
+[ "$(git -C "$TARGET" rev-parse --show-toplevel 2>/dev/null)" = "$TARGET" ] \
+  || die "$TARGET is not the root of a Git repository. Archie installs into a repository root."
 
 REF="$(git -C "$CLONE" rev-parse HEAD)"
 git -C "$CLONE" diff --quiet || die "the Archie clone at $CLONE has local modifications; install from a clean clone so the pin matches a published commit."
@@ -55,10 +60,35 @@ git -C "$CLONE" cat-file -e "$REF^{commit}" 2>/dev/null || die "cannot resolve $
 if [ -f "$TARGET/.archie/release/release-record-v3.json" ]; then
   say "Archie is already installed here; upgrading it in place."
   MODE="upgrade"
-elif [ -e "$TARGET/.archie/release" ] || [ -e "$TARGET/.archie/version" ]; then
-  die "this repository holds a pre-v3 Archie pin. Remove it first:
-    rm -rf $TARGET/.archie/release $TARGET/.archie/runtime $TARGET/.archie/version
-  Your assessments in .archie/assessments are not affected."
+elif [ -f "$TARGET/.archie/release/release-record-v1.json" ] || [ -f "$TARGET/.archie/release/release-record-v2.json" ]; then
+  # Detected by the record files the runtime itself refuses (assertNoLegacyPin),
+  # NOT by `.archie/release` merely existing: a failed install leaves that
+  # directory and its journal behind, and testing for it reported a pre-v3 pin
+  # in a repository that had no pin at all.
+  #
+  # There is deliberately no automatic migration. Archie is private, and a
+  # pre-v3 pin exists in one repository. What this does instead is name every
+  # path, because removing only the three `.archie` ones leaves the stale Archie
+  # dependency in `apm.yml`; APM then resolves don-smith/archie twice and the
+  # next run fails deep in bootstrap with the unhelpful
+  # "APM lock dependencies must contain exactly one pinned Archie entry".
+  skills=""
+  if [ -f "$TARGET/apm.lock.yaml" ]; then
+    skills="$(sed -n 's|^[[:space:]]*-[[:space:]]*\(\.agents/skills/[^/]*\)$|\1|p' "$TARGET/apm.lock.yaml" | sort -u | tr '\n' ' ')"
+  fi
+  die "this repository holds a pre-v3 Archie pin, which cannot be upgraded in place.
+  Remove all of it, then run this script again:
+
+    cd $TARGET
+    rm -rf .archie/release .archie/runtime .archie/version
+    rm -f apm.lock.yaml${skills:+
+    rm -rf $skills}
+    # ...then delete the Archie dependency from apm.yml: the entry whose
+    # 'git:' is git@github.com:don-smith/archie.git. If Archie is the only
+    # dependency there, delete apm.yml too.
+
+  Untouched either way: .archie/assessments, your architecture/ directory, and
+  every skill under .agents/skills that Archie does not own."
 else
   MODE="bootstrap"
 fi

@@ -62,7 +62,13 @@ export function stageSelectedRelease(targetDirectory: string, selected: Selected
   const p = paths(targetDirectory);
   const existingManifest = readOptional(p.apmManifest);
   const existingLock = readOptional(p.apmLock);
-  if ((existingManifest === undefined) !== (existingLock === undefined)) throw new Error("APM target projection is incomplete; cannot safely preserve shared state");
+  // A manifest with no lock is a normal APM state — dependencies declared but
+  // never locked — and `generateApmLock` runs immediately after staging, so it
+  // is recoverable rather than unsafe. A lock with no manifest is not: nothing
+  // states what the lock is a lock of, so refuse, naming both paths.
+  if (existingManifest === undefined && existingLock !== undefined) {
+    throw new Error(`APM target projection is incomplete: ${p.apmLock} exists but ${p.apmManifest} does not; restore the manifest or remove the lock, then install again`);
+  }
   const generatedNpm = npmProjection(selected.record);
   const npm = { manifest: generatedNpm.manifest, lock: generatedNpm.lock };
   validateNpmProjection(npm, selected.record);

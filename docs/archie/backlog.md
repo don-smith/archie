@@ -2,7 +2,7 @@
 
 This is the tracked backlog for Archie. Update it when work lands or new work is found: move finished items to Done with their commits, and add new findings under Outstanding.
 
-Last updated 2026-09-18. `main` is pushed to `git@github.com:don-smith/archie.git`; product version `0.1.0-private.1`; the eight-skill APM context is also tagged there as `v0.1.0-private.1` (context-only commit `858fd77`).
+Last updated 2026-09-19. `main` is pushed to `git@github.com:don-smith/archie.git`; product version `0.1.0-private.1`; the eight-skill APM context is also tagged there as `v0.1.0-private.1` (context-only commit `858fd77`).
 
 ## Outstanding
 
@@ -17,7 +17,7 @@ Last updated 2026-09-18. `main` is pushed to `git@github.com:don-smith/archie.gi
 | N0d | **Done: the agent-skills target is checked before deployment.** `assertAgentSkillsTarget` runs in `runApmChecks` ahead of `apm install --frozen`, so bootstrap, upgrade and verify all refuse a project whose APM targets do not overlap, instead of APM skipping every skill and exiting successfully. `install.sh` checks the same thing up front with a message naming the line to add. | done |
 | N0e | **Done: the bundle fixture and `docs/archie/private-release-bundle.md` now describe the subfolder pin.** The fixture resolves `packages/archie-context` at a monorepo commit, and `ARCHIE_E2E_PUBLISHED_CONTEXT=1 node --test test/e2e/private-trials/published-context.test.mjs` passes against it: native APM locks and frozen-deploys all eight skills with byte hashes verified. Two facts recorded in the doc: the monorepo has no root `apm.yml`, so only the subfolder form resolves; and the plain string spec `apm install` writes produces a lock with no `skill_subset`, which `assertPinnedApmProjection` requires, so the manifest must use the mapping form with a `path:` key. | done |
 | N1 | Install Archie into a handful of repositories and use it: `archie bootstrap` from a finalized local bundle, then work through Assessment, Architecture Review, Architecture Docs with HTML Design, Conformance, and Drift Detection. Record friction, false positives, and wrong routes as new backlog items. `docs/archie/substantial-repository-trial-checklist.md` is a usage guide, not a gate. Assessment's no-MyFlow lifecycle and HTML Design in an installed Archie are verified this way. | manual (developer) |
-| N2 | Remove and reinstall any repository still pinned to release record v1 or v2 (for example the Jaspyr trial): `install.sh` detects the pre-v3 pin and names exactly what to remove, then installs. | manual (developer) |
+| N2 | Remove and reinstall any repository still pinned to release record v1 or v2 (in practice only the Jaspyr trial). **The Jaspyr trial on 2026-09-19 proved the original claim false: the refusal named only the three `.archie` paths, and following it exactly left the stale Archie dependency in `apm.yml`, so APM resolved `don-smith/archie` twice and the next run failed with "APM lock dependencies must contain exactly one pinned Archie entry".** Deliberately still no automatic migration — a pre-v3 pin exists in one repository and nothing else will ever use the path. The refusal now names every path, including the deployed skill directories read out of the old lock. | manual (developer) |
 
 ### Product follow-ups
 
@@ -55,6 +55,7 @@ Other coding-agent adapters; a merge-impact checking playbook after the Drift De
 
 | Area | What | Commits |
 |---|---|---|
+| Install | **Jaspyr trial, 2026-09-19.** Four install defects found by installing into a real pre-v3 repository, none reachable from the existing suite because N0a was only ever verified against a clean one: `install.sh` rejected every git worktree (`[ -d .git ]`, but a worktree's `.git` is a file); the pre-v3 refusal named only the three `.archie` paths (see N2); the refusal keyed off `.archie/release` existing, so a rolled-back install reported a pre-v3 pin in a repository that had none; and `stageSelectedRelease` refused an `apm.yml` with no `apm.lock.yaml` — a normal APM state, and exactly where the pre-v3 cleanup leaves you — with a message naming neither file. Also hardened: a journal write failure in the install failure path (a full disk) aborted the catch block before compensation could run. | this change |
 | Integration | Both feature branches merged; c4archviewer changes ported; `.myflow` removed from history; worktrees, branches, and sibling repositories retired with bundles kept | `e9bd9a3`, `3108f00`, `4be0bcf`, history rewrite, `2323fb1` |
 | Tidy-up | One Architecture Docs sequence (the old statusless path skipped the build); runtime command wording; retirement recorded in docs; unused migration fixtures removed; managed site plus status test; MyFlow workstream statuses | `55ee0c4` |
 | Assessment | No MyFlow: optional brief, `.archie/assessments/`, work-item hand-off, shared deep-module vocabulary, html-design default | `2161b62` |

@@ -129,17 +129,26 @@ function stageAndVerify(targetDirectory, skills, stage, previousPin, options) {
         failureReport.failedPhase ??= phase;
         if (phase === "staging")
             failureReport.recordConsistency = "failed";
-        updateInstallJournal(targetDirectory, journal, "failed", failure);
+        // Best-effort from here: the journal is forensics, and a failure writing it
+        // — a full disk is the realistic one — must not mask the original failure
+        // or, worse, abort the catch block before compensation has run.
+        const record = (journalPhase, cause) => {
+            try {
+                updateInstallJournal(targetDirectory, journal, journalPhase, cause);
+            }
+            catch { /* the thrown failure below is the report that matters */ }
+        };
+        record("failed", failure);
         try {
             compensateInstall(targetDirectory, journal);
             if (previousPin)
                 verifyCurrentInstalledTarget(targetDirectory, options);
             failureReport.compensation = "passed";
-            updateInstallJournal(targetDirectory, journal, "compensated", failure);
+            record("compensated", failure);
         }
         catch (compensationFailure) {
             failureReport.compensation = "blocked";
-            updateInstallJournal(targetDirectory, journal, "compensation-incomplete", compensationFailure);
+            record("compensation-incomplete", compensationFailure);
             throw new ReleaseInstallFailure("release installation failed and compensation is incomplete", failureReport, compensationFailure);
         }
         throw new ReleaseInstallFailure("release installation failed; prior target state was restored", failureReport, failure);
