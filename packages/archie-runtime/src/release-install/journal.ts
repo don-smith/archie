@@ -6,7 +6,7 @@ export type JournalPhase = "prepared" | "staging" | "native-verification" | "com
 type BackupEntry = { path: string; bytes?: string; symlink?: string };
 export interface InstallJournal { format: "archie-release-install-journal-v1"; phase: JournalPhase; entries: BackupEntry[]; restoreRoots: string[]; failure?: string; }
 
-function journalPath(targetDirectory: string): string { return join(resolve(targetDirectory), ".archie", "release", "install-journal.json"); }
+export function journalPath(targetDirectory: string): string { return join(resolve(targetDirectory), ".archie", "release", "install-journal.json"); }
 /** Lists files and symbolic links without following links, so package-manager binary links are restored as links. */
 function files(root: string): string[] {
   if (!existsSync(root)) return [];

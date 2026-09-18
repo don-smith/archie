@@ -23,8 +23,28 @@ if (typeof packageName !== "string" || !/^@[a-z0-9-]+\/[a-z0-9-]+$/.test(package
 }
 
 const entry = join(runtimePath, "node_modules", ...packageName.split("/"), "dist", "skill-runtime.js");
+
+/**
+ * A pinned project whose node_modules is missing is hydrated, not uninstalled: a fresh branch or
+ * worktree carries the pin and the tarballs but never the installed tree. Hydration is attempted
+ * offline first, which succeeds in seconds when this machine's npm cache is already warm and fails
+ * immediately when it is not. That keeps a multi-minute cold download out of an agent's turn, where
+ * it looks like a hang, and hands it to the developer as one command instead.
+ */
 if (!existsSync(entry)) {
-  throw new Error(`Pinned Archie runtime command is unavailable: ${entry}`);
+  if (!existsSync(join(runtimePath, "npm"))) {
+    throw new Error(`Pinned Archie runtime command is unavailable: ${entry}`);
+  }
+  process.stderr.write("Archie is pinned here but its runtime is not installed in this working tree; hydrating from the local npm cache.\n");
+  const hydrate = spawnSync("npm", ["ci", "--ignore-scripts", "--offline", "--no-audit", "--fund=false"], { cwd: runtimePath, stdio: "inherit" });
+  if (hydrate.status !== 0 || !existsSync(entry)) {
+    throw new Error([
+      "Archie is pinned in this project but its runtime is not installed here, and this machine's npm cache cannot supply it offline.",
+      "Run this once, then try again:",
+      `  (cd ${runtimePath} && npm ci --ignore-scripts && npx playwright install chromium)`,
+      "It downloads the runtime's dependencies and, on a cold machine, the Playwright browser (~150MB, stored once per machine)."
+    ].join("\n"));
+  }
 }
 const result = spawnSync(process.execPath, [entry, ...runtimeArgs], { cwd: target, stdio: "inherit" });
 if (result.error) throw result.error;

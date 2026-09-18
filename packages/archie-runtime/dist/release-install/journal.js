@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { RELEASE_RECORD_FILE } from "../release-record/release-record-v3.js";
-function journalPath(targetDirectory) { return join(resolve(targetDirectory), ".archie", "release", "install-journal.json"); }
+export function journalPath(targetDirectory) { return join(resolve(targetDirectory), ".archie", "release", "install-journal.json"); }
 /** Lists files and symbolic links without following links, so package-manager binary links are restored as links. */
 function files(root) {
     if (!existsSync(root))

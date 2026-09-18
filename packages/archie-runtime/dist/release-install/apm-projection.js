@@ -80,6 +80,18 @@ function mergeManifest(current, record, previous) {
     lines = replace(lines, apm, "    ", entry => ownsDependency(record, entry) || Boolean(previous && ownsDependency(previous, entry)), dependency(record), "APM manifest dependencies");
     return `${lines.join("\n")}\n`;
 }
+/**
+ * APM deploys a package only when the project's targets overlap the package's own. The Archie context
+ * declares `agent-skills`; a project without it is skipped with a warning and a successful exit, which
+ * is indistinguishable from an install that worked, so this is checked before deployment is attempted.
+ */
+export function assertAgentSkillsTarget(manifest) {
+    const lines = manifest.replace(/\r\n/g, "\n").split("\n");
+    const targets = skillSubset(lines, "targets");
+    if (!targets.includes("agent-skills")) {
+        throw new Error(`Archie skills deploy to the agent-skills APM target, which this project's apm.yml does not list (targets: ${targets.join(", ") || "none"}); add "- agent-skills" under targets and run the install again`);
+    }
+}
 /** Plans only an APM-valid manifest. Native APM owns the companion lock's metadata and serialization. */
 export function planApmProjection(record, current, previous) {
     return { manifest: mergeManifest(current.manifest, record, previous), lock: current.lock };

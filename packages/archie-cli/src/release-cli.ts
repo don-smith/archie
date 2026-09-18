@@ -1,4 +1,4 @@
-import { buildReleaseBundle, finalizeRelease } from "@archie/runtime";
+import { buildReleaseBundle, finalizeRelease } from "@archie/runtime/release";
 
 function usage(): never {
   throw new Error([

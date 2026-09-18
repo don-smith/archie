@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { RELEASE_RECORD_FILE, selectLocalRelease } from "../../../dist/packages/archie-runtime/src/index.js";
 import { bootstrapTarget, readPinnedTarget, verifyPinnedTarget } from "../../../dist/packages/archie-runtime/src/release-install/target-state.js";
-import { assertPinnedApmProjection, planApmProjection } from "../../../dist/packages/archie-runtime/src/release-install/apm-projection.js";
+import { assertAgentSkillsTarget, assertPinnedApmProjection, planApmProjection } from "../../../dist/packages/archie-runtime/src/release-install/apm-projection.js";
 import * as runtime from "../../../dist/packages/archie-runtime/src/index.js";
 import { finalizedBundle, makeBundle } from "../../support/release-bundle.mjs";
 
@@ -98,4 +98,13 @@ test("APM 0.29-style locks and same-locator unrelated dependencies are structura
     for (const skill of selected.record.apm.skills) assert.match(projection.manifest, new RegExp(`- ${skill}`));
     assert.equal(projection.lock, lock);
   } finally { rmSync(base, { recursive: true, force: true }); }
+});
+
+test("APM deployment refuses a project whose targets omit agent-skills", () => {
+  const manifest = [
+    "name: consumer", "version: 1.0.0", "targets:", "  - claude",
+    "dependencies:", "  apm: []", "  mcp: []", "includes: auto", "scripts: {}", ""
+  ].join("\n");
+  assert.throws(() => assertAgentSkillsTarget(manifest), /agent-skills APM target, which this project's apm\.yml does not list \(targets: claude\)/);
+  assert.doesNotThrow(() => assertAgentSkillsTarget(manifest.replace("  - claude", "  - claude\n  - agent-skills")));
 });

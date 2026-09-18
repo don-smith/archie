@@ -1,11 +1,13 @@
-export * from "./analysis/canonical-json.js";
+/**
+ * The release surface: building, finalizing, installing, verifying and removing a private bundle.
+ *
+ * It exists separately from the package barrel because the barrel also exports the analyzer, which
+ * imports TypeScript at load. The release CLIs run from a bare clone that has installed nothing, so
+ * they must reach this surface without pulling in any third-party dependency.
+ */
 export * from "./product-version.js";
+export * from "./analysis/canonical-json.js";
 export * from "./analysis/contracts.js";
-export * from "./analysis/typescript-program-v1.js";
-export * from "./analysis/typescript-program-v2.js";
-export * from "./repository-checks/contracts.js";
-export * from "./repository-checks/run.js";
-export * from "./repository-checks/architecture-status-v1.js";
 export * from "./npm-tarball/inspect.js";
 export * from "./release-record/release-record-v3.js";
 export * from "./release-record/build-bundle.js";
@@ -16,6 +18,6 @@ export * from "./release-install/report.js";
 export * from "./release-install/run-npm.js";
 export * from "./release-install/run-apm.js";
 export * from "./release-install/journal.js";
-export * from "./release-install/uninstall.js";
 export * from "./release-install/verify.js";
-//# sourceMappingURL=index.js.map
+export * from "./release-install/uninstall.js";
+//# sourceMappingURL=release.js.map

@@ -3,7 +3,7 @@
     "target": "ES2024", "module": "NodeNext", "moduleResolution": "NodeNext",
     "strict": true, "esModuleInterop": true, "skipLibCheck": true, "types": ["node"],
     "declaration": true, "sourceMap": true, "rootDir": ".",
-    "paths": { "@archie/runtime": ["./packages/archie-runtime/src/index.ts"] }
+    "paths": { "@archie/runtime": ["./packages/archie-runtime/src/index.ts"], "@archie/runtime/release": ["./packages/archie-runtime/src/release.ts"] }
   },
   "include": ["packages/*/src/**/*.ts", "test/**/*.ts"]
 }

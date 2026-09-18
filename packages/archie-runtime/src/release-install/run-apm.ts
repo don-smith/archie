@@ -1,4 +1,4 @@
-import { assertPinnedApmProjection } from "./apm-projection.js";
+import { assertAgentSkillsTarget, assertPinnedApmProjection } from "./apm-projection.js";
 import type { PinnedTarget } from "./target-state.js";
 import type { CheckStatus } from "./report.js";
 import { requireNative, type NativeCommandResult, type NativeCommandRunner } from "./run-npm.js";
@@ -16,6 +16,7 @@ export function generateApmLock(targetDirectory: string, run: NativeCommandRunne
 }
 /** Runs APM's frozen install and keeps its baseline and organization-policy outcomes separate. */
 export function runApmChecks(pin: PinnedTarget, run: NativeCommandRunner): ApmCheckResult {
+  assertAgentSkillsTarget(pin.apm.manifest);
   requireNative(run, { command: "apm", args: ["install", "--frozen"], cwd: pin.targetDirectory }, "apm install --frozen");
   requireNative(run, { command: "apm", args: ["audit", "--ci", "--no-policy"], cwd: pin.targetDirectory }, "APM no-policy baseline audit");
   const status = run({ command: "apm", args: ["policy", "status"], cwd: pin.targetDirectory });

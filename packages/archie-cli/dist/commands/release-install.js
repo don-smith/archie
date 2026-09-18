@@ -1,4 +1,4 @@
-import { bootstrapAndVerifyTarget, formatInstallReport, ReleaseInstallFailure, ReleaseVerificationFailure, selectLocalRelease, upgradeAndVerifyTarget, verifyInstalledTarget } from "@archie/runtime";
+import { bootstrapAndVerifyTarget, formatInstallReport, ReleaseInstallFailure, ReleaseVerificationFailure, selectLocalRelease, upgradeAndVerifyTarget, verifyInstalledTarget } from "@archie/runtime/release";
 function usage() {
     throw new Error("Usage: archie bootstrap --release <local-directory> [--target <directory>] [--format text|json] | archie upgrade --release <local-directory> [--target <directory>] [--format text|json] | archie verify [--target <directory>] [--format text|json]\nBootstrap and upgrade require an explicitly selected local bundle. Verify only uses the existing target pin. Signing, public-release trust, controller distribution, and key operations are deferred.");
 }

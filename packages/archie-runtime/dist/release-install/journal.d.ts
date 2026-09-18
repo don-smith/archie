@@ -11,6 +11,7 @@ export interface InstallJournal {
     restoreRoots: string[];
     failure?: string;
 }
+export declare function journalPath(targetDirectory: string): string;
 /** Durable preimage for all pin/configuration inputs plus native npm/APM deployment state. */
 export declare function beginInstallJournal(targetDirectory: string, skills: string[]): InstallJournal;
 export declare function updateInstallJournal(targetDirectory: string, journal: InstallJournal, phase: JournalPhase, failure?: unknown): void;

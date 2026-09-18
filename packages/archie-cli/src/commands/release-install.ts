@@ -1,4 +1,4 @@
-import { bootstrapAndVerifyTarget, formatInstallReport, ReleaseInstallFailure, ReleaseVerificationFailure, selectLocalRelease, upgradeAndVerifyTarget, verifyInstalledTarget } from "@archie/runtime";
+import { bootstrapAndVerifyTarget, formatInstallReport, ReleaseInstallFailure, ReleaseVerificationFailure, selectLocalRelease, upgradeAndVerifyTarget, verifyInstalledTarget } from "@archie/runtime/release";
 
 type Operation = "bootstrap" | "upgrade" | "verify";
 
