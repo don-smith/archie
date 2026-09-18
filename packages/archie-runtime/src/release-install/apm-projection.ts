@@ -70,6 +70,11 @@ function blankManifest(record: ReleaseRecord): string {
 function mergeManifest(current: string | undefined, record: ReleaseRecord, previous?: ReleaseRecord): string {
   if (!current?.trim()) return blankManifest(record);
   let lines = current.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
+  // `apm: []` is APM's own serialization for "no APM dependencies", so it is what
+  // every project that has never depended on one carries. Expanding it to a block
+  // key lets the Archie entry be inserted under it; left inline, `nestedSection`
+  // finds no `  apm:` line and refuses a manifest that is perfectly valid.
+  lines = lines.map(line => /^ {2}apm:[ \t]*\[[ \t]*\]$/.test(line) ? "  apm:" : line);
   const dependencies = section(lines, "dependencies", "APM manifest");
   const apm = nestedSection(lines, dependencies, "apm", "APM manifest");
   lines = replace(lines, apm, "    ", entry => ownsDependency(record, entry) || Boolean(previous && ownsDependency(previous, entry)), dependency(record), "APM manifest dependencies");
