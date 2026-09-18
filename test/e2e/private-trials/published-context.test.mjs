@@ -10,7 +10,7 @@ import { ARCHIE_SKILLS, inspectNpmTarball, npmProjection, PRODUCT_VERSION } from
 const fixture = "test/fixtures/private-bundles/valid";
 const sourceCommit = "abcdef0123456789abcdef0123456789abcdef01";
 const enabled = process.env.ARCHIE_E2E_PUBLISHED_CONTEXT === "1";
-const skip = enabled ? false : `set ARCHIE_E2E_PUBLISHED_CONTEXT=1 once the eight-skill Archie context is published at git@github.com:don-smith/archie.git tag v${PRODUCT_VERSION} (requires SSH access); see docs/archie/private-release-bundle.md`;
+const skip = enabled ? false : `set ARCHIE_E2E_PUBLISHED_CONTEXT=1 to resolve the eight-skill Archie context from the packages/archie-context subfolder of git@github.com:don-smith/archie.git at the fixture's pinned commit (requires SSH access); see docs/archie/private-release-bundle.md`;
 
 function packArtifact(workspace, bundle, file, payload) {
   const output = JSON.parse(execFileSync("npm", ["pack", "--json", "--workspace", workspace, "--pack-destination", join(bundle, "npm")], { encoding: "utf8" }));

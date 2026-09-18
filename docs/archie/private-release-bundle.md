@@ -24,15 +24,21 @@ apm/
   apm.lock.yaml
 ```
 
-`bundle.json` uses `archie-private-bundle-input-v3`. Its ordered `artifacts` array contains `@archie/runtime` first and `@archie/conformance` second. Both artifacts use the Archie product version and target-owned `file:npm/*.tgz` locators. Each entry names its lock file, tarball, and required payload. The Runtime lock is the complete npm v3 install lock: its root lists both local artifacts and it retains the exact dependency closure required by their packed manifests. Finalization rejects a lock whose root or direct artifact entries differ from the generated projection. The Runtime's required payload is its Architecture Docs command (`dist/architecture-docs/bin/architecture-docs.mjs`); Conformance's is `dist/cli.js`. The APM entry names the private Git SSH locator, immutable version ref, native manifest and lock, and all eight skills.
+`bundle.json` uses `archie-private-bundle-input-v3`. Its ordered `artifacts` array contains `@archie/runtime` first and `@archie/conformance` second. Both artifacts use the Archie product version and target-owned `file:npm/*.tgz` locators. Each entry names its lock file, tarball, and required payload. The Runtime lock is the complete npm v3 install lock: its root lists both local artifacts and it retains the exact dependency closure required by their packed manifests. Finalization rejects a lock whose root or direct artifact entries differ from the generated projection. The Runtime's required payload is its Architecture Docs command (`dist/architecture-docs/bin/architecture-docs.mjs`); Conformance's is `dist/cli.js`. The APM entry names the private Git SSH locator, an immutable ref, the repository-relative subfolder holding the context, the native manifest and lock, and all eight skills. An immutable ref is either the `v<version>` tag or a full 40-character commit SHA; a bundle built from a clone is pinned by commit. The subfolder is required because the monorepo has no root `apm.yml`, so the context resolves only through `packages/archie-context`.
 
-Run:
+Build the input from a monorepo checkout, then finalize it:
 
 ```bash
+archie-release build \
+  --bundle ./release-bundle \
+  --ref $(git rev-parse HEAD)
+
 archie-release finalize \
   --bundle ./release-bundle \
   --source-commit <40-character-Git-commit>
 ```
+
+`build` packs both artifacts, generates their shared npm lock, writes the APM manifest, and has native APM resolve the pin into `apm/apm.lock.yaml`. It defaults to the `git@github.com:don-smith/archie.git` locator and the `packages/archie-context` subfolder, overridable with `--locator` and `--path`, and packs from the current directory unless `--workspace` names another checkout. It reviews nothing and makes no authorization claim; finalization remains the separate step that closes the record.
 
 Finalization strictly checks each npm archive's ustar headers, checksums, bounds, termination, unique safe entry names, package identity, product version, lock integrity, SHA-256 digest, dependencies, engines, and binaries. It rejects archive links and unsupported entry types. It normalizes the required payload as a safe package-relative path and requires the corresponding regular file in the npm archive. It also checks the APM locator, ref, resolved commit, content hash, skill order, and analyzer compatibility. It writes:
 
@@ -57,7 +63,9 @@ Before finalization, confirm that the target Git identity can read the private c
 git ls-remote git@github.com:don-smith/archie.git
 ```
 
-With separate developer approval, publish the exact `packages/archie-context/` tree and create the immutable `v<version>` tag. Then create the bundle APM manifest with `git: git@github.com:don-smith/archie.git`, the approved ref, and the eight Archie skills. Run `apm lock` in the bundle context and confirm its resolved commit, content hash, ref, repository, and skill subset before finalizing. Do not reuse a lock from different context bytes.
+`archie-release build` then writes the manifest and runs `apm lock` for you. Two constraints govern its shape. The dependency must use the mapping form with a `path:` key: the plain string spec that `apm install` writes into `apm.yml` resolves the same bytes but produces a lock with **no `skill_subset`**, which the pinned projection requires. And the consuming project's APM targets must include `agent-skills`; a project whose targets do not overlap logs `Package targets [agent-skills] do not overlap authorized active targets; skipping`, deploys nothing, and still exits successfully.
+
+Confirm the generated lock's resolved commit, content hash, ref, repository, virtual path, and skill subset before finalizing. Do not reuse a lock from different context bytes. Creating or moving a `v<version>` tag still needs separate developer approval; pinning by commit SHA does not.
 
 ## Target operations
 
