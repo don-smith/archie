@@ -1,58 +1,51 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { analyzeTypeScriptProgram } from "../runtime-analysis.js";
 import { sha256 } from "../artifacts/digest.js";
-import { buildReport } from "../report/build.js";
-import { renderJson } from "../report/json.js";
-import { buildOnboardingSummary } from "../onboarding-summary/build.js";
-import { validateArchitectureContract, validateBaseline, validateRealizationMap } from "../formats/validate.js";
+import { analyzeTypeScriptProgram } from "../runtime-analysis.js";
 import { validateOnboardingState } from "../onboarding-state/validate.js";
+import { validateRealizationMap } from "../formats/validate.js";
+import { buildOnboardingSummary } from "../onboarding-summary/build.js";
+import { renderJson } from "../report/json.js";
+import { deriveEvidence, verifiedNormativeInputs } from "../evidence/derive.js";
 function readJson(path) { return JSON.parse(readFileSync(path, "utf8")); }
-function input(path, expected, name) {
-    const bytes = readFileSync(path);
-    if (sha256(bytes) !== expected)
-        throw new Error(`${name} input digest mismatch`);
-    return JSON.parse(bytes.toString("utf8"));
-}
 function write(path, value) { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, value); }
-function outputsMatch(targets, expected) {
-    return Object.entries(expected).every(([name, value]) => {
+function readOrEmpty(path) { try {
+    return readFileSync(path, "utf8");
+}
+catch {
+    return "";
+} }
+function divergedNames(targets, expected) {
+    return Object.entries(expected).flatMap(([name, value]) => {
         const target = targets[name];
-        return Boolean(target) && (() => { try {
-            return readFileSync(target, "utf8") === value;
-        }
-        catch {
-            return false;
-        } })();
+        if (!target)
+            return [];
+        return readOrEmpty(target) === value ? [] : [readOrEmpty(target) === "" ? `${name} (missing at ${target})` : name];
     });
 }
 function complete(targets, expected, behavior) {
     if (behavior === "verify") {
-        if (!outputsMatch(targets, expected))
-            throw new Error("derived evidence mismatch");
+        const diverged = divergedNames(targets, expected);
+        if (diverged.length > 0)
+            throw new Error(`derived evidence differs on disk from the recorded observation: ${diverged.join(", ")}; restore it with 'replay --state ... --regenerate'`);
         return;
     }
     for (const [name, value] of Object.entries(expected))
         write(targets[name], value);
 }
-function fromState(path, cwd) {
-    const statePath = resolve(cwd, path);
-    const state = validateOnboardingState(readJson(statePath));
+export function fromState(path, cwd) {
+    const state = validateOnboardingState(readJson(resolve(cwd, path)));
     for (const name of ["graph", "summary", "map", "contract", "report"])
         if (!state.evidence[name])
             throw new Error(`state does not retain ${name} evidence`);
-    const mapPath = resolve(cwd, state.paths.map);
-    const contractPath = resolve(cwd, state.paths.contract);
-    const map = validateRealizationMap(input(mapPath, state.evidence.map, "realization map"));
-    const contract = validateArchitectureContract(input(contractPath, state.evidence.contract, "architecture contract"));
-    const graph = analyzeTypeScriptProgram({ rootConfigs: state.scope.rootConfigs, scope: state.scope }, cwd);
-    const graphJson = renderJson(graph);
-    const summary = buildOnboardingSummary(graph);
-    const baseline = state.evidence.baseline ? validateBaseline(input(resolve(cwd, state.paths.baseline), state.evidence.baseline, "baseline")) : undefined;
-    const reportJson = renderJson(buildReport(graph, map, contract, baseline));
-    if (sha256(graphJson) !== state.evidence.graph || sha256(summary) !== state.evidence.summary || sha256(reportJson) !== state.evidence.report)
-        throw new Error("state evidence digest mismatch");
-    return { targets: { graph: resolve(cwd, state.paths.graph), summary: resolve(cwd, state.paths.summary), report: resolve(cwd, state.paths.report) }, evidence: { graph: graphJson, summary, report: reportJson } };
+    const inputs = verifiedNormativeInputs(state, cwd);
+    const derived = deriveEvidence(state, inputs, cwd);
+    const recomputed = { graph: derived.graphJson, summary: derived.summary, report: derived.reportJson };
+    const stale = ["graph", "summary", "report"].filter((name) => state.evidence[name] !== sha256(recomputed[name]));
+    if (stale.length > 0)
+        throw new Error(`derived evidence is stale for ${stale.join(", ")}: current source differs from the recorded observation`
+            + ` (normative map and contract${state.evidence.baseline ? " and baseline" : ""} verify) — re-record with 'onboard rerecord --state <state path>'`);
+    return { targets: { graph: resolve(cwd, state.paths.graph), summary: resolve(cwd, state.paths.summary), report: resolve(cwd, state.paths.report) }, evidence: recomputed };
 }
 function fromMap(path, cwd) {
     const mapPath = resolve(cwd, path);

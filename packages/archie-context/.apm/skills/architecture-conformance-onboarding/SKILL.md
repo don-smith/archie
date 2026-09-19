@@ -41,6 +41,26 @@ The CLI creates evidence; the maintainer chooses architecture and approval. Do n
      --checkpoint evidence-generated
    ```
 
+## Stale evidence after source drift
+
+When source changes without any architectural intent changing, `replay --state` fails with
+`derived evidence is stale for ...` while the normative map and contract still verify. Re-record the
+derived evidence at the same checkpoint — never to escape a changed verdict:
+
+```sh
+.archie/runtime/node_modules/.bin/architecture-conformance onboard rerecord \
+  --state .architecture-conformance/onboarding.json --expect-unchanged-verdict
+```
+
+The command re-derives the observed graph, summary, and report from current source, rewrites them, and
+re-records only their digests; the checkpoint, scope, paths, and normative digests stay untouched. It
+refuses tampered or missing normative and recorded artifacts, and prints before/after counts for
+modules, graph nodes and edges, and report results and gaps. With `--expect-unchanged-verdict` it
+fails when the report's results or gaps change, which is the assertion to use in CI; without the flag
+a changed verdict re-records, which the maintainer must review before the next advance. A verdict
+change is an architecture conversation, not a refresh: stop and present the new results to the
+maintainer instead of re-recording.
+
 ## Stops
 
 Stop and request a maintainer decision for missing local setup, source gaps, map overlap/unmatched/stale evidence, architecture classification, proposed-to-active approval, exceptions, and baseline handling. Maps, contracts, exceptions, approvals, and baselines are maintainer-owned normative artifacts; state only points to evidence.

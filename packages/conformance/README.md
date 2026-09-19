@@ -190,13 +190,15 @@ A report distinguishes implementation drift, documentation drift, and coverage d
 
 `replay` has two explicit source modes and two explicit behaviors. It creates evidence only. It does not approve a contract, update onboarding state, create a baseline, or change conformance exit behavior.
 
-Use state mode to reproduce one recorded observation. It reads the state-recorded map, contract, scope, paths, and evidence digests. It regenerates or verifies graph, summary, and report only when each recomputed digest matches the state. This is useful for restoring missing derived files from an unchanged observation.
+Use state mode to reproduce one recorded observation. It reads the state-recorded map, contract, scope, paths, and evidence digests. It regenerates or verifies graph, summary, and report only when each recomputed digest matches the state. `--regenerate` in state mode therefore means **restore the recorded observation** — it refuses current source that differs from it, which is what makes the restored files trustworthy. This is useful for restoring missing or damaged derived files from an unchanged observation.
 
 ```sh
 .archie/runtime/node_modules/.bin/architecture-conformance replay \
   --state .architecture-conformance/onboarding.json \
   --verify
 ```
+
+When verification fails, the diagnostic names the situation. If current source drifted while the normative map and contract still verify, it says `derived evidence is stale for ...` and points at `onboard rerecord`. If the files on disk differ from the recorded observation while source still matches, it says `derived evidence differs on disk ...` and points back at `--regenerate` to restore them.
 
 Use map mode to analyze a current realization-map scope. It writes or verifies graph and summary only. The outputs are deterministic paths under the map directory: `evidence/observed-graph.json` and `evidence/onboarding-summary.md`. Map mode cannot produce a conformance report because a realization map does not supply a contract.
 
@@ -207,6 +209,21 @@ Use map mode to analyze a current realization-map scope. It writes or verifies g
 ```
 
 Each invocation needs exactly one of `--state` or `--map` and exactly one of `--regenerate` or `--verify`. Verification writes nothing. Bad selections, unreadable inputs, stale state evidence, and output mismatches return code `3`.
+
+## 5b. Re-record evidence after source drift
+
+Source legitimately changes without architectural intent changing: a refactor moves modules, the observed graph ages, and the recorded evidence digests no longer match. `onboard rerecord` is the named, auditable operation for that case. It verifies the normative inputs (map, contract, and baseline when retained) against their recorded digests and refuses tampering, re-derives the observed graph, summary, and report from current source, rewrites the derived artifacts, and re-records only their digests — leaving the checkpoint, scope, paths, skill location, and normative digests untouched. It also refuses missing recorded artifacts, so the previous observation stays readable rather than being overwritten while unreproducible.
+
+```sh
+.archie/runtime/node_modules/.bin/architecture-conformance onboard rerecord \
+  --state .architecture-conformance/onboarding.json --expect-unchanged-verdict
+```
+
+It prints a summary naming the re-recorded evidence, whether the conformance verdict (results and gaps) is unchanged, and before/after counts for source modules, graph nodes and edges, and report results and gaps.
+
+`--expect-unchanged-verdict` turns the command into an assertion: it exits `3` without writing anything if the re-derived report's results or gaps differ from the recorded report. That is the form CI should use, because it can only pass when source moved and the verdict did not. Without the flag, a changed verdict is re-recorded, which a maintainer must review before the next checkpoint advance.
+
+`rerecord` never relaxes the digest guards or changes the checkpoint. A genuinely changed verdict is architecture work — review it with the maintainer; do not refresh it away.
 
 ## 6. Reconcile local drift records
 
@@ -263,7 +280,8 @@ Result codes are fixed. `0` means pass, `1` means blocking violation, `2` means 
 | 0 | No blocking active violation and no strict incompleteness |
 | 1 | Active blocking violation |
 | 2 | Strict analysis or coverage gap. This takes precedence over violations. |
-| 3 | Invalid arguments or unreadable, invalid, or incompatible input |
+| 3 | Invalid arguments or unreadable, invalid, or incompatible input. `onboard rerecord --expect-unchanged-verdict` also returns `3` when the conformance verdict changed. |
+| 4 | Re-record completed with a changed conformance verdict (without `--expect-unchanged-verdict`) |
 
 ## Support limits
 

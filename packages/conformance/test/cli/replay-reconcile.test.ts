@@ -39,7 +39,26 @@ test("state replay restores only matching historical evidence without changing s
     assert.match(await readFile(join(root, "evidence", "report.json"), "utf8"), /conformance-report\/v1/);
     assert.equal(await readFile(join(root, "onboarding.json"), "utf8"), originalState);
     await writeFile(join(root, "src", "a.ts"), "export const changed = 1;\n");
-    assert.equal(runCli(["replay", "--state", "onboarding.json", "--verify"], root).code, 3);
+    const stale = runCli(["replay", "--state", "onboarding.json", "--verify"], root);
+    assert.equal(stale.code, 3);
+    assert.match(stale.stderr, /derived evidence is stale for graph, summary, report/);
+    assert.match(stale.stderr, /normative map and contract verify/);
+    assert.match(stale.stderr, /onboard rerecord/);
+    const regenerateRefused = runCli(["replay", "--state", "onboarding.json", "--regenerate"], root);
+    assert.equal(regenerateRefused.code, 3);
+    assert.match(regenerateRefused.stderr, /derived evidence is stale/);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("state replay names on-disk divergence and points at restore, never re-record", async () => {
+  const root = await fixture();
+  try {
+    await writeFile(join(root, "evidence", "report.json"), "tampered");
+    await rm(join(root, "evidence", "observed-graph.json"), { force: true });
+    const result = runCli(["replay", "--state", "onboarding.json", "--verify"], root);
+    assert.equal(result.code, 3);
+    assert.match(result.stderr, /differs on disk from the recorded observation: graph \(missing at .*observed-graph\.json\), report/);
+    assert.match(result.stderr, /restore it with 'replay --state/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

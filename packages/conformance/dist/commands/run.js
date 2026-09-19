@@ -10,6 +10,7 @@ import { defaultOnboardingState, validateOnboardingState } from "../onboarding-s
 import { advanceOnboardingState } from "../onboarding-state/update.js";
 import { verifyLocalOnboardingSetup } from "../onboarding-state/setup.js";
 import { replay } from "../replay/run.js";
+import { rerecord } from "../evidence/rerecord.js";
 import { reconcile } from "../reconciliation/compare.js";
 import { buildOnboardingSummary } from "../onboarding-summary/build.js";
 function parseArgs(args) {
@@ -52,6 +53,21 @@ function onboardingPaths(args) {
 function exclusions(args) {
     return (args.values.get("--exclude") ?? []).map((path) => ({ path, reason: "command-line exclusion" }));
 }
+function outcomeSummary(outcome) {
+    return {
+        version: "onboarding-rerecord/v1",
+        checkpoint: outcome.checkpoint,
+        reRecorded: outcome.reRecorded,
+        verdictUnchanged: outcome.verdictUnchanged,
+        counts: {
+            sourceModules: outcome.modules,
+            graphNodes: outcome.graphNodes,
+            graphEdges: outcome.graphEdges,
+            reportResults: outcome.reportResults,
+            reportGaps: outcome.reportGaps
+        }
+    };
+}
 export function runCli(argv, cwd = process.cwd()) {
     try {
         const [command, ...rest] = argv;
@@ -72,6 +88,14 @@ export function runCli(argv, cwd = process.cwd()) {
                 const checkpoint = required(onboardingArgs, "--checkpoint");
                 const advanced = advanceOnboardingState(state, { checkpoint }, cwd);
                 return { code: 0, stdout: emit(renderJson(advanced), statePath, cwd), stderr: "" };
+            }
+            if (operation === "rerecord") {
+                const statePath = onboardingArgs.values.get("--state")?.[0] ?? ".architecture-conformance/onboarding.json";
+                const expectUnchanged = onboardingArgs.flags.has("--expect-unchanged-verdict");
+                if (expectUnchanged && onboardingArgs.values.get("--expect-unchanged-verdict"))
+                    throw new Error("--expect-unchanged-verdict is a flag and takes no value");
+                const { outcome } = rerecord(readJson(statePath, cwd), { expectUnchangedVerdict: expectUnchanged, repositoryRoot: cwd });
+                return { code: 0, stdout: emit(renderJson(outcomeSummary(outcome)), undefined, cwd), stderr: "" };
             }
             throw new Error(`unknown onboard operation: ${operation ?? ""}`);
         }
