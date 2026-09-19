@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { RELEASE_RECORD_FILE } from "../release-record/release-record-v3.js";
+import { claudeBridgePaths } from "./claude-skills.js";
 
 export type JournalPhase = "prepared" | "staging" | "native-verification" | "completed" | "failed" | "compensated" | "compensation-incomplete";
 type BackupEntry = { path: string; bytes?: string; symlink?: string };
@@ -20,20 +21,23 @@ function backup(path: string): BackupEntry {
 function isSymlink(path: string): boolean {
   try { return lstatSync(path).isSymbolicLink(); } catch { return false; }
 }
-function tracked(targetDirectory: string, restoreRoots: string[]): string[] {
+function tracked(targetDirectory: string, restoreRoots: string[], bridge: string[]): string[] {
   const target = resolve(targetDirectory), archie = join(target, ".archie");
   return [
     join(archie, "version"), join(archie, "release", RELEASE_RECORD_FILE), join(archie, "release", "selection-receipt.json"),
     join(archie, "runtime", "package.json"), join(archie, "runtime", "package-lock.json"), join(target, "apm.yml"), join(target, "apm.lock.yaml"),
-    ...restoreRoots.flatMap(files)
+    ...restoreRoots.flatMap(files),
+    // The Claude Code bridge links, listed as individual entries rather than a restore root: they
+    // live among skills the repository owns, so the directory itself must never be emptied.
+    ...bridge
   ];
 }
 function write(path: string, journal: InstallJournal): void { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, `${JSON.stringify(journal, null, 2)}\n`); }
 /** Durable preimage for all pin/configuration inputs plus native npm/APM deployment state. */
-export function beginInstallJournal(targetDirectory: string, skills: string[]): InstallJournal {
+export function beginInstallJournal(targetDirectory: string, skills: string[], previousSkills: string[] = []): InstallJournal {
   const target = resolve(targetDirectory), runtime = join(target, ".archie", "runtime");
   const restoreRoots = [join(runtime, "npm"), join(runtime, "node_modules"), ...skills.map(skill => join(target, ".agents", "skills", skill))];
-  const entries = tracked(target, restoreRoots).map(backup);
+  const entries = tracked(target, restoreRoots, claudeBridgePaths(target, skills, previousSkills)).map(backup);
   const journal: InstallJournal = { format: "archie-release-install-journal-v1", phase: "prepared", entries, restoreRoots };
   write(journalPath(target), journal); return journal;
 }

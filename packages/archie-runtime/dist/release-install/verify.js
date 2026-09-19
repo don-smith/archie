@@ -7,6 +7,7 @@ import { initialInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi } from "./run-npm.js";
 import { generateApmLock, runApmChecks } from "./run-apm.js";
+import { linkClaudeSkills, verifyClaudeSkillLinks } from "./claude-skills.js";
 function deployedFiles(targetDirectory, record) {
     const files = [];
     const visit = (path) => {
@@ -91,6 +92,8 @@ export function verifyInstalledTarget(targetDirectory, options = {}) {
         verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
         report.apm.content = "passed";
         report.replay = "passed";
+        phase = "claude-skills";
+        report.claudeSkills = verifyClaudeSkillLinks(pin.targetDirectory, pin.record.apm.skills);
         return report;
     }
     catch (failure) {
@@ -110,8 +113,8 @@ export class ReleaseInstallFailure extends Error {
         this.name = "ReleaseInstallFailure";
     }
 }
-function stageAndVerify(targetDirectory, skills, stage, previousPin, options) {
-    const journal = beginInstallJournal(targetDirectory, skills);
+function stageAndVerify(targetDirectory, skills, previousSkills, stage, previousPin, options) {
+    const journal = beginInstallJournal(targetDirectory, skills, previousSkills);
     const report = initialInstallReport();
     let phase = "staging";
     try {
@@ -121,6 +124,10 @@ function stageAndVerify(targetDirectory, skills, stage, previousPin, options) {
         updateInstallJournal(targetDirectory, journal, "native-verification");
         generateApmLock(targetDirectory, options.run ?? nativeRun);
         const verified = verifyInstalledTarget(targetDirectory, options);
+        // Last, because it links to the deployed skill trees: APM must have written them, and their
+        // bytes must have been verified against the lock, before anything is pointed at them.
+        phase = "claude-skills";
+        verified.claudeSkills = linkClaudeSkills(targetDirectory, skills, previousSkills).status;
         updateInstallJournal(targetDirectory, journal, "completed");
         return { ...staged, report: verified };
     }
@@ -155,7 +162,7 @@ function stageAndVerify(targetDirectory, skills, stage, previousPin, options) {
     }
 }
 export function bootstrapAndVerifyTarget(targetDirectory, selected, options = {}) {
-    return stageAndVerify(targetDirectory, selected.record.apm.skills, () => bootstrapTarget(targetDirectory, selected), false, options);
+    return stageAndVerify(targetDirectory, selected.record.apm.skills, [], () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory, selected, options = {}) {
     // Do not let staging overwrite a target whose installed runtime or deployed skills are already inconsistent.
@@ -167,6 +174,9 @@ export function upgradeAndVerifyTarget(targetDirectory, selected, options = {}) 
         report.failedPhase = "pre-upgrade-verification";
         throw new ReleaseInstallFailure("current installed target verification failed before upgrade staging", report, failure);
     }
-    return stageAndVerify(targetDirectory, selected.record.apm.skills, () => stageUpgradeTarget(targetDirectory, selected), true, options);
+    // The skills the installed pin deploys, read before staging overwrites it: a skill this release
+    // drops must have its Claude Code link removed, and afterwards nothing records that it existed.
+    const previousSkills = readPinnedTarget(targetDirectory).record.apm.skills;
+    return stageAndVerify(targetDirectory, selected.record.apm.skills, [...previousSkills], () => stageUpgradeTarget(targetDirectory, selected), true, options);
 }
 //# sourceMappingURL=verify.js.map

@@ -34,6 +34,9 @@ export function uninstallTarget(targetDirectory) {
     for (const root of [...journal.restoreRoots, join(archie, "release"), join(archie, "runtime")])
         pruneEmpty(root, target);
     pruneEmpty(join(target, ".agents", "skills"), target);
+    // Bounded at `.claude` rather than the target: the bridge may have created `.claude/skills`, but
+    // `.claude` itself predates the install — it is what told Archie to build a bridge at all.
+    pruneEmpty(join(target, ".claude", "skills"), join(target, ".claude"));
     if (!preserved.length)
         pruneEmpty(archie, target);
     return { targetDirectory: target, preserved: preserved.map(name => `.archie/${name}`) };

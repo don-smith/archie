@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { RELEASE_RECORD_FILE } from "../release-record/release-record-v3.js";
+import { claudeBridgePaths } from "./claude-skills.js";
 export function journalPath(targetDirectory) { return join(resolve(targetDirectory), ".archie", "release", "install-journal.json"); }
 /** Lists files and symbolic links without following links, so package-manager binary links are restored as links. */
 function files(root) {
@@ -23,20 +24,23 @@ function isSymlink(path) {
         return false;
     }
 }
-function tracked(targetDirectory, restoreRoots) {
+function tracked(targetDirectory, restoreRoots, bridge) {
     const target = resolve(targetDirectory), archie = join(target, ".archie");
     return [
         join(archie, "version"), join(archie, "release", RELEASE_RECORD_FILE), join(archie, "release", "selection-receipt.json"),
         join(archie, "runtime", "package.json"), join(archie, "runtime", "package-lock.json"), join(target, "apm.yml"), join(target, "apm.lock.yaml"),
-        ...restoreRoots.flatMap(files)
+        ...restoreRoots.flatMap(files),
+        // The Claude Code bridge links, listed as individual entries rather than a restore root: they
+        // live among skills the repository owns, so the directory itself must never be emptied.
+        ...bridge
     ];
 }
 function write(path, journal) { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, `${JSON.stringify(journal, null, 2)}\n`); }
 /** Durable preimage for all pin/configuration inputs plus native npm/APM deployment state. */
-export function beginInstallJournal(targetDirectory, skills) {
+export function beginInstallJournal(targetDirectory, skills, previousSkills = []) {
     const target = resolve(targetDirectory), runtime = join(target, ".archie", "runtime");
     const restoreRoots = [join(runtime, "npm"), join(runtime, "node_modules"), ...skills.map(skill => join(target, ".agents", "skills", skill))];
-    const entries = tracked(target, restoreRoots).map(backup);
+    const entries = tracked(target, restoreRoots, claudeBridgePaths(target, skills, previousSkills)).map(backup);
     const journal = { format: "archie-release-install-journal-v1", phase: "prepared", entries, restoreRoots };
     write(journalPath(target), journal);
     return journal;

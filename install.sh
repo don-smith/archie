@@ -11,6 +11,10 @@
 # resolves the Archie skill context from GitHub. It never pushes, never tags,
 # and never touches your application's package.json or package-lock.json.
 #
+# If the repository has a .claude directory, the skills APM deploys to
+# .agents/skills are also linked into .claude/skills, which is the only place
+# Claude Code looks for them. See "Claude Code" in README.md.
+#
 # Run `uninstall.sh` from the same clone to reverse it.
 
 set -euo pipefail
@@ -23,7 +27,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --target) TARGET="$(cd "$2" && pwd)"; shift 2 ;;
     --skip-browsers) SKIP_BROWSERS=1; shift ;;
-    -h|--help) sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "install.sh: unknown option $1" >&2; exit 2 ;;
   esac
 done
@@ -173,6 +177,8 @@ Archie is installed in $TARGET.
 
   Committed:   .archie/release, .archie/version, .archie/runtime/package-lock.json,
                .archie/runtime/npm/*.tgz, .agents/skills/*, apm.yml, apm.lock.yaml
+  Your choice: .claude/skills/* — symlinks into .agents/skills, written only when this
+               repository has a .claude directory. The report line above says what happened.
   Not committed: .archie/runtime/node_modules (rehydrated on demand)
 
 Next: open your coding agent in this repository and invoke the 'archie' skill.

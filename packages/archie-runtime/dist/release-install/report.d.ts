@@ -10,6 +10,8 @@ export interface ReleaseInstallReport {
         content: CheckStatus;
     };
     analyzerCompatibility: CheckStatus;
+    /** The `.claude/skills` bridge: `not-applied` when the repository does not use Claude Code. */
+    claudeSkills: CheckStatus;
     replay: CheckStatus;
     compensation: CheckStatus;
     failedPhase?: string;

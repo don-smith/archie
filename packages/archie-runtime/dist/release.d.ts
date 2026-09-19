@@ -18,5 +18,6 @@ export * from "./release-install/report.js";
 export * from "./release-install/run-npm.js";
 export * from "./release-install/run-apm.js";
 export * from "./release-install/journal.js";
+export * from "./release-install/claude-skills.js";
 export * from "./release-install/verify.js";
 export * from "./release-install/uninstall.js";

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -25,6 +25,33 @@ test("runs native checks in the required order and reports non-authorization", (
     assert.equal(result.report.apm.frozen, "passed");
     assert.equal(result.report.apm.baseline, "passed");
     assert.equal(result.report.apm.policy, "passed");
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});
+
+test("bridges the deployed skills into .claude/skills for a repository that uses Claude Code", () => {
+  const base = root();
+  try {
+    const project = target(base);
+    const selected = selectLocalRelease(bundle(base));
+    // What APM deploys and what tells Archie the repository uses Claude Code; the native runner is
+    // a stand-in, so the skill trees this bridge links to are placed here rather than by `apm install`.
+    mkdirSync(join(project, ".claude"), { recursive: true });
+    for (const skill of selected.record.apm.skills) mkdirSync(join(project, ".agents", "skills", skill), { recursive: true });
+
+    const result = bootstrapAndVerifyTarget(project, selected, options([]));
+    assert.equal(result.report.claudeSkills, "passed");
+    for (const skill of selected.record.apm.skills) {
+      assert.equal(readlinkSync(join(project, ".claude", "skills", skill)), `../../.agents/skills/${skill}`);
+    }
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});
+
+test("leaves .claude alone in a repository that does not use Claude Code", () => {
+  const base = root();
+  try {
+    const project = target(base);
+    const result = bootstrapAndVerifyTarget(project, selectLocalRelease(bundle(base)), options([]));
+    assert.equal(result.report.claudeSkills, "not-applied");
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
 

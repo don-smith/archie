@@ -6,6 +6,8 @@ export interface ReleaseInstallReport {
   npm: CheckStatus;
   apm: { frozen: CheckStatus; baseline: CheckStatus; policy: CheckStatus; content: CheckStatus };
   analyzerCompatibility: CheckStatus;
+  /** The `.claude/skills` bridge: `not-applied` when the repository does not use Claude Code. */
+  claudeSkills: CheckStatus;
   replay: CheckStatus;
   compensation: CheckStatus;
   failedPhase?: string;
@@ -15,7 +17,7 @@ export function initialInstallReport(): ReleaseInstallReport {
   return {
     authorization: "not-assessed", recordConsistency: "passed", npm: "not-run",
     apm: { frozen: "not-run", baseline: "not-run", policy: "not-run", content: "not-run" },
-    analyzerCompatibility: "passed", replay: "not-run", compensation: "not-run"
+    analyzerCompatibility: "passed", claudeSkills: "not-run", replay: "not-run", compensation: "not-run"
   };
 }
 
@@ -26,6 +28,7 @@ export function formatInstallReport(report: ReleaseInstallReport): string {
     `APM frozen install: ${report.apm.frozen}`, `APM baseline audit: ${report.apm.baseline}`,
     `APM policy: ${report.apm.policy}`, `APM content: ${report.apm.content}`,
     `Analyzer compatibility: ${report.analyzerCompatibility}`,
+    `Claude Code skills: ${report.claudeSkills}`,
     `Replay: ${report.replay}`, `Compensation: ${report.compensation}`,
     ...(report.failedPhase ? [`Failed phase: ${report.failedPhase}`] : [])
   ].join("\n");

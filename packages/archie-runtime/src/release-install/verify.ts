@@ -8,6 +8,7 @@ import { initialInstallReport, type ReleaseInstallReport } from "./report.js";
 import { beginInstallJournal, compensateInstall, updateInstallJournal, type JournalPhase } from "./journal.js";
 import { assertInstalledNpm, nativeRun, runNpmCi, type NativeCommandRunner } from "./run-npm.js";
 import { generateApmLock, runApmChecks } from "./run-apm.js";
+import { linkClaudeSkills, verifyClaudeSkillLinks } from "./claude-skills.js";
 export type { NativeCommand, NativeCommandResult, NativeCommandRunner } from "./run-npm.js";
 
 export interface ReleaseInstallOptions {
@@ -89,6 +90,8 @@ export function verifyInstalledTarget(targetDirectory: string, options: ReleaseI
   pin = readPinnedTarget(targetDirectory);
   verifyDeployedSkills(pin.targetDirectory, pin.record, pin.apm.lock, options.verifyApmDeployment);
   report.apm.content = "passed"; report.replay = "passed";
+  phase = "claude-skills";
+  report.claudeSkills = verifyClaudeSkillLinks(pin.targetDirectory, pin.record.apm.skills);
   return report;
   } catch (failure) {
     report.failedPhase = phase;
@@ -101,8 +104,8 @@ export class ReleaseInstallFailure extends Error {
   constructor(message: string, readonly report: ReleaseInstallReport, readonly cause?: unknown) { super(message); this.name = "ReleaseInstallFailure"; }
 }
 
-function stageAndVerify(targetDirectory: string, skills: string[], stage: () => StagedTarget, previousPin: boolean, options: ReleaseInstallOptions): StagedTarget & { report: ReleaseInstallReport } {
-  const journal = beginInstallJournal(targetDirectory, skills);
+function stageAndVerify(targetDirectory: string, skills: string[], previousSkills: string[], stage: () => StagedTarget, previousPin: boolean, options: ReleaseInstallOptions): StagedTarget & { report: ReleaseInstallReport } {
+  const journal = beginInstallJournal(targetDirectory, skills, previousSkills);
   const report = initialInstallReport();
   let phase = "staging";
   try {
@@ -112,6 +115,10 @@ function stageAndVerify(targetDirectory: string, skills: string[], stage: () => 
     updateInstallJournal(targetDirectory, journal, "native-verification");
     generateApmLock(targetDirectory, options.run ?? nativeRun);
     const verified = verifyInstalledTarget(targetDirectory, options);
+    // Last, because it links to the deployed skill trees: APM must have written them, and their
+    // bytes must have been verified against the lock, before anything is pointed at them.
+    phase = "claude-skills";
+    verified.claudeSkills = linkClaudeSkills(targetDirectory, skills, previousSkills).status;
     updateInstallJournal(targetDirectory, journal, "completed");
     return { ...staged, report: verified };
   } catch (failure) {
@@ -140,7 +147,7 @@ function stageAndVerify(targetDirectory: string, skills: string[], stage: () => 
 }
 
 export function bootstrapAndVerifyTarget(targetDirectory: string, selected: SelectedRelease, options: ReleaseInstallOptions = {}): StagedTarget & { report: ReleaseInstallReport } {
-  return stageAndVerify(targetDirectory, selected.record.apm.skills, () => bootstrapTarget(targetDirectory, selected), false, options);
+  return stageAndVerify(targetDirectory, selected.record.apm.skills, [], () => bootstrapTarget(targetDirectory, selected), false, options);
 }
 export function upgradeAndVerifyTarget(targetDirectory: string, selected: SelectedRelease, options: ReleaseInstallOptions = {}): StagedTarget & { report: ReleaseInstallReport } {
   // Do not let staging overwrite a target whose installed runtime or deployed skills are already inconsistent.
@@ -151,5 +158,8 @@ export function upgradeAndVerifyTarget(targetDirectory: string, selected: Select
     report.failedPhase = "pre-upgrade-verification";
     throw new ReleaseInstallFailure("current installed target verification failed before upgrade staging", report, failure);
   }
-  return stageAndVerify(targetDirectory, selected.record.apm.skills, () => stageUpgradeTarget(targetDirectory, selected), true, options);
+  // The skills the installed pin deploys, read before staging overwrites it: a skill this release
+  // drops must have its Claude Code link removed, and afterwards nothing records that it existed.
+  const previousSkills = readPinnedTarget(targetDirectory).record.apm.skills;
+  return stageAndVerify(targetDirectory, selected.record.apm.skills, [...previousSkills], () => stageUpgradeTarget(targetDirectory, selected), true, options);
 }
