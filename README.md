@@ -1,24 +1,46 @@
 # Archie
 
-Architecture assessment, review, documentation, conformance, and drift detection, delivered to a
-repository as one private package of agent skills plus a pinned runtime.
+Archie is an architecture agent for a code repository. It assesses a system's architecture, reviews
+one module in depth, maintains evidence-backed architecture documentation, checks dependency rules
+deterministically, and reports drift. It arrives as one package of agent skills plus a pinned
+runtime.
 
-Archie is private. Nothing is published to npm, and installing it needs read access to this
-repository and nothing else.
+Archie routes each request to the capability that owns it and stops for your decision before
+anything durable changes. It proposes; you decide what becomes true.
+
+## What Archie does
+
+| Capability | Use it when |
+|---|---|
+| Architecture Assessment | A whole system needs a recovered fact model and evidence-led findings before redesign or alignment. |
+| Architecture Review | No work item is open, but one bounded module deserves a layer-by-layer structural review. |
+| Architecture Docs | Architecture pages, their claims, and the evidence behind them need to be written or brought back up to date. |
+| LikeC4 authoring | A C4 model or a view has to answer a named architecture question. |
+| Conformance onboarding | A TypeScript repository needs its current dependency structure observed before anyone writes rules. |
+| Architecture Contracts | A maintainer is ready to state intended dependencies and check them deterministically. |
+| HTML Design | Architecture content needs a readable, self-contained HTML presentation. |
+
+You select each capability on its own, and each keeps its own meaning. A review finding is not an
+architecture pass, and observed code never becomes approved intent by itself.
+[Product boundaries](docs/archie/product-boundaries.md) states the limits in full, and
+[Working with Archie](docs/archie/managed-site-guide.md) describes each capability's problem,
+result, and starting point.
 
 ## Install
+
+Archie is not published to npm. You install it from a clone of this repository, and the clone is all
+you need: no registry account and no token.
 
 Run this from inside the repository you want Archie in:
 
 ```bash
-git clone --depth 1 git@github.com:don-smith/archie.git /tmp/archie-install
+git clone --depth 1 https://github.com/don-smith/archie.git /tmp/archie-install
 cd /path/to/your/repo
 /tmp/archie-install/install.sh
 ```
 
-There is no `curl | bash` one-liner, deliberately. A private repository will not serve raw files
-without a token, and cloning first means you can read `install.sh` before you run it — it is
-commented throughout for exactly that.
+There is no `curl | bash` one-liner, deliberately. Cloning first means you can read `install.sh`
+before you run it, and it is commented throughout for exactly that.
 
 You need Node 24, npm, git, and [APM](https://github.com/danielmeppiel/apm) 0.29 on your PATH. The
 install checks all four up front and stops with a specific message if one is missing.
@@ -26,14 +48,16 @@ install checks all four up front and stops with a specific message if one is mis
 Options: `--target <dir>` to install somewhere other than the current directory, and
 `--skip-browsers` to defer the Playwright download.
 
-### What it does
+### What the install does
 
-1. Packs the Archie runtime and conformance artifacts from the clone. Nothing is compiled — the
-   built output is committed — so no dependency install happens in the clone.
-2. Has APM resolve the eight Archie skills from this repository at the clone's exact commit.
-3. Finalizes a release record pinning all of it, and installs it into your repository.
-4. Links the skills into `.claude/skills/` if your repository uses Claude Code (see below).
-5. Downloads the Playwright browser, which is stored once per machine rather than per repository.
+1. It packs the Archie runtime and conformance artifacts from the clone. The built output is
+   committed, so nothing is compiled and the clone installs no dependencies.
+2. APM resolves the eight Archie skills from this repository at the clone's exact commit.
+3. The installer finalizes a release record pinning all of it, then installs that into your
+   repository.
+4. It links the skills into `.claude/skills/` if your repository uses Claude Code (see below).
+5. It downloads the Playwright browser, which is stored once per machine rather than once per
+   repository.
 
 It never pushes, never tags, and never touches your application's `package.json` or
 `package-lock.json`.
@@ -45,7 +69,7 @@ It never pushes, never tags, and never touches your application's `package.json`
 | `.agents/skills/*` | yes — the eight skills, shared with your team |
 | `.claude/skills/*` | your choice — symlinks, and only if you use Claude Code (see below) |
 | `.archie/release/`, `.archie/version` | yes — the pin |
-| `.archie/runtime/package-lock.json`, `.archie/runtime/npm/*.tgz` | yes — 177KB, so branches and worktrees hydrate offline |
+| `.archie/runtime/package-lock.json`, `.archie/runtime/npm/*.tgz` | yes — about 185KB, so branches and worktrees hydrate offline |
 | `apm.yml`, `apm.lock.yaml` | yes |
 | `.archie/runtime/node_modules/` | no — machine-local, rehydrated on demand |
 
@@ -57,9 +81,9 @@ if the cache is cold it prints the one command to run.
 
 APM deploys every skill to `.agents/skills/`. Claude Code does not read that directory: it
 discovers skills in `~/.claude/skills`, `<repo>/.claude/skills`, and plugins, and nowhere else.
-Adding `claude` to your `apm.yml` targets does not change this — APM's agent-specific targets
-govern other primitives, and skills deploy to `.agents/skills/` either way. So when your repository
-has a `.claude/` directory, the install also writes one relative symlink per skill:
+Adding `claude` to your `apm.yml` targets does not change this. APM's agent-specific targets govern
+other primitives, and skills deploy to `.agents/skills/` either way. So when your repository has a
+`.claude/` directory, the install also writes one relative symlink per skill:
 
 ```
 .claude/skills/archie -> ../../.agents/skills/archie
@@ -89,8 +113,9 @@ and Linux. If Windows matters to you, keep `.claude/` ignored and let each insta
 
 ## Use
 
-Open your coding agent in the repository and invoke the `archie` skill. It works out what the
-repository needs and routes from there.
+Open your coding agent in the repository and invoke the `archie` skill. Describe the architecture
+question or the change you are making. Archie works out what the repository needs and routes from
+there.
 
 ## Uninstall
 
@@ -105,7 +130,18 @@ holding skills Archie does not own keeps them, in `.agents/skills` and in `.clau
 `.archie/assessments/` is kept. It is your work product, not Archie's, and the uninstall says so
 rather than quietly deleting it.
 
+## Status
+
+Archie is early. The version is `0.1.0-private.1`, the two release tags install an earlier
+skills-only context, and the product is verified by installing it into real repositories and using
+it rather than by a formal review gate. It is developed and used on macOS and Linux.
+
+## License
+
+[MIT](LICENSE). The bundled html-design artifact checker includes third-party code; see
+[THIRD_PARTY_NOTICES.md](packages/html-design/skills/html-design/THIRD_PARTY_NOTICES.md).
+
 ## Development
 
 See [AGENTS.md](AGENTS.md) for the monorepo layout, the generated files, and the verification gates,
-and [docs/archie/backlog.md](docs/archie/backlog.md) for outstanding work.
+and [the backlog](docs/archie/backlog.md) for outstanding work.

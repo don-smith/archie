@@ -46,7 +46,7 @@ The private-trial evaluator refuses a dirty tree, so commit before running it or
 
 ## Distribution
 
-Nothing is published to npm; every `@archie/*` package is private. A release bundle is a local directory holding the Runtime and Conformance tarballs plus locks; `archie bootstrap --release <dir>` installs them into a target's `.archie/runtime`. This monorepo's remote is the private GitHub repository `git@github.com:don-smith/archie.git`. The existing release tags `v0.1.0-private.0` and `v0.1.0-private.1` point at earlier context-only commits holding just the APM skill context, which targets fetch with native APM. APM can also install the context straight from this repository's `packages/archie-context` subfolder; how Archie should install into repositories going forward is open (backlog N0). See [docs/archie/private-release-bundle.md](docs/archie/private-release-bundle.md).
+Nothing is published to npm; every `@archie/*` package is private. A release bundle is a local directory holding the Runtime and Conformance tarballs plus locks; `archie bootstrap --release <dir>` installs them into a target's `.archie/runtime`. This monorepo's remote is the public GitHub repository `git@github.com:don-smith/archie.git`. The existing release tags `v0.1.0-private.0` and `v0.1.0-private.1` point at earlier context-only commits holding just the APM skill context, which targets fetch with native APM. APM can also install the context straight from this repository's `packages/archie-context` subfolder; how Archie should install into repositories going forward is open (backlog N0). See [docs/archie/private-release-bundle.md](docs/archie/private-release-bundle.md).
 
 ## Working rules
 

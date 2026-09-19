@@ -2,7 +2,7 @@
 #
 # Installs Archie into the repository you run it from.
 #
-#   git clone --depth 1 git@github.com:don-smith/archie.git /tmp/archie-install
+#   git clone --depth 1 https://github.com/don-smith/archie.git /tmp/archie-install
 #   cd /path/to/your/repo
 #   /tmp/archie-install/install.sh
 #
