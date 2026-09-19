@@ -29,7 +29,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:40ef43fb6aeab7a4aa62bfeee5c1a2e89004082c75aea2086fac3cb6acd85f04
+  content_hash: sha256:13eba83a2adcd714efe8977759bfa10895e407c301a514dcc9769fd26b611f2c
 - kind: project-relative
   target: agents
   value: .agents/skills/archie/references/drift-detection.md
@@ -47,7 +47,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:80600556ce31ea3fc87584eafda5ca5650f5fa859df02a3c6eba148a6bb0acbd
+  content_hash: sha256:acc7ab7a32086b48f5d323cba78eb8b858fac9f235124ed8cc56fc5a7f7b9cf5
 - kind: project-relative
   target: agents
   value: .agents/skills/archie/references/operating-contract.md
@@ -756,9 +756,9 @@ local_deployed_files:
 - .agents/skills/likec4-authoring/likec4-reference.md
 local_deployed_file_hashes:
   .agents/skills/archie/SKILL.md: sha256:f712ed4fe75be0ad4e50f78667a60f27ae39c32ef4668580620987dce73aec0a
-  .agents/skills/archie/references/capability-catalog.md: sha256:40ef43fb6aeab7a4aa62bfeee5c1a2e89004082c75aea2086fac3cb6acd85f04
+  .agents/skills/archie/references/capability-catalog.md: sha256:13eba83a2adcd714efe8977759bfa10895e407c301a514dcc9769fd26b611f2c
   .agents/skills/archie/references/drift-detection.md: sha256:04f8030956dd23ab8a4fa9e02a8ecc84732a84aa200183f6b96f5f33a24a5214
-  .agents/skills/archie/references/managed-site-guide.md: sha256:80600556ce31ea3fc87584eafda5ca5650f5fa859df02a3c6eba148a6bb0acbd
+  .agents/skills/archie/references/managed-site-guide.md: sha256:acc7ab7a32086b48f5d323cba78eb8b858fac9f235124ed8cc56fc5a7f7b9cf5
   .agents/skills/archie/references/operating-contract.md: sha256:3c00bdc0d46636aa434023a88d1a3dd69d3a1b4bc96d4b27fe5cccc5275b964a
   .agents/skills/archie/scripts/dispatch-runtime.mjs: sha256:f2bfa4fe0b7af4f283a1d28c79208b3ddfbdc42b68fed88742950b0c09c94c50
   .agents/skills/architecture-assessment/SKILL.md: sha256:aa685325e739e83c56c6817607a67638c5e059defdbf4495032a4d82449b1126

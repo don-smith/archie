@@ -37,7 +37,13 @@ test("managed-site guide covers the registered capabilities and marker contract"
   }
   assert.match(guide, /Architecture Assessment skill[\s\S]*optional brief/i);
   assert.doesNotMatch(guide, /planning artifact|workstream/i);
-  assert.match(guide, /exact target-local `architecture-conformance` devDependency/);
+  // The conformance CLI ships inside the pinned Archie runtime, so a target
+  // needs no dependency of its own. Both halves are asserted: the guide must
+  // name the runtime executable, and must not send anyone back to installing
+  // the deprecated standalone package or reaching for npx.
+  assert.match(guide, /\.archie\/runtime\/node_modules\/\.bin\/architecture-conformance onboard setup/);
+  assert.doesNotMatch(guide, /target-local `architecture-conformance` devDependency/);
+  assert.doesNotMatch(guide, /npx --no-install architecture-conformance/);
   assert.match(guide, /Architecture Review[\s\S]*\.archie\/reviews\//);
   assert.match(guide, /HTML Design[\s\S]*without any extra installation/);
   assert.doesNotMatch(guide, /structural-inspection|no available owner/i);

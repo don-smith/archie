@@ -75,7 +75,7 @@ The observed import graph is an output of Conformance onboarding, not a standalo
 **Result.** Conformance onboarding produces the observed import graph, an onboarding summary, and a setup proposal. The maintainer chooses architecture intent and approvals. Archie and the analyzer cannot promote observed relationships into active rules.
 
 <!-- archie-capability:conformance-onboarding:start -->
-**Start.** The target must first pin an exact target-local `architecture-conformance` devDependency. Ask Archie to route the request to Conformance onboarding, then run `npx --no-install architecture-conformance onboard setup` from the target repository. If local setup fails, stop and install the exact dependency before analysis.
+**Start.** Ask Archie to route the request to Conformance onboarding, then run `.archie/runtime/node_modules/.bin/architecture-conformance onboard setup` from the target repository. The CLI ships inside the pinned Archie runtime, so the target needs no `architecture-conformance` dependency of its own; never use a global executable or `npx`. If local setup fails, repair the Archie installation before analysis.
 
 ### Architecture Contracts
 
@@ -89,7 +89,7 @@ The observed import graph is an output of Conformance onboarding, not a standalo
 **Result.** The capability produces a precise contract or exception and a deterministic conformance report. Only the CLI decides whether evidence conforms to the approved rules. A maintainer decides intent, active-rule approval, exceptions, and baseline handling.
 
 <!-- archie-capability:architecture-contracts:start -->
-**Start.** Ask Archie to route the work to Architecture Contracts with the current observed evidence, realization map, contract, and CLI report. After the maintainer supplies the required decision, run `architecture-conformance check --map <map> --contract <contract> --strict` and trace results to their rule and source evidence.
+**Start.** Ask Archie to route the work to Architecture Contracts with the current observed evidence, realization map, contract, and CLI report. After the maintainer supplies the required decision, run `.archie/runtime/node_modules/.bin/architecture-conformance check --map <map> --contract <contract> --strict` and trace results to their rule and source evidence.
 
 ### Architecture Review
 
