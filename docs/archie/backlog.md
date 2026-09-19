@@ -40,6 +40,7 @@ Last updated 2026-09-19. `main` is pushed to `git@github.com:don-smith/archie.gi
 | T2 | The source manifest and migration inventories keep absolute `/Users/don/projects/...` paths of retired repositories as history. Decide whether to keep them. | `source-import-manifest.json`, `packages/*/migration-inventory.json` |
 | T3 | Deployment hardening: one canonical parser for bundle and native-lock evidence (P2 severity). | `docs/archie/roadmap.md` |
 | T4 | Watch for flakiness: once, right after `npm install` and `apm install`, two release-record tests failed together, then passed on every rerun (four combined runs). Not reproduced. | `test/release-record/release-record-v3.test.mjs` |
+| T5 | An uninstall leaves APM's own artifacts behind: `apm_modules/` and the `.gitignore` holding `apm_modules/` that `apm install` writes in a repository that had neither. The install journal records only what Archie writes, and these are APM's, so uninstall never sees them. Harmless — both are ignored and rehydratable — but a repository that had no APM before Archie does not go back to having none. Seen installing and uninstalling into a scratch repository on 2026-09-19 while verifying the Claude Code bridge (N0f). | `packages/archie-runtime/src/release-install/journal.ts`, `uninstall.sh` |
 
 ### Your housekeeping
 
