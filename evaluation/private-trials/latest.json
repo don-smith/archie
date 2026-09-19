@@ -3,7 +3,7 @@
   "candidate": {
     "status": "local-only",
     "version": "0.1.0-private.1",
-    "sourceCommit": "24a9ce8e61accd76d917588f7324956d2ee4ebb5",
+    "sourceCommit": "ebfeb231f1040ba1432e5207625b50f1990b471b",
     "schemaVersion": 3,
     "authorization": "not-assessed"
   },
@@ -17,14 +17,14 @@
   },
   "finalization": {
     "deterministic": true,
-    "recordSha256": "b16b1eee8c63be53cd912e7ed6bc1aaf1e8780fa6e79e800b762e86e7d98c545",
+    "recordSha256": "b2306cd928ab45a39836c60945a9c0738246ddea369e07b2f29c4f09b627bc80",
     "artifactManifest": {
       "count": 9,
-      "digest": "b680c300cf87cdb3a5d8a6ede107597d0a98bb2b44545e9ce4e8aa7f2699d834"
+      "digest": "9a70cf995c460a07e39603ecb7ac57e816380c9e8eb1270f4124e3650b052810"
     },
     "repeatedArtifactManifest": {
       "count": 9,
-      "digest": "b680c300cf87cdb3a5d8a6ede107597d0a98bb2b44545e9ce4e8aa7f2699d834"
+      "digest": "9a70cf995c460a07e39603ecb7ac57e816380c9e8eb1270f4124e3650b052810"
     },
     "orderedArtifacts": [
       "@archie/runtime",
@@ -43,6 +43,7 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
+      "claudeSkills": "not-applied",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -57,6 +58,7 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
+      "claudeSkills": "not-applied",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -71,6 +73,7 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
+      "claudeSkills": "not-applied",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -85,6 +88,7 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
+      "claudeSkills": "not-applied",
       "replay": "passed",
       "compensation": "not-run"
     },
@@ -99,30 +103,31 @@
         "content": "passed"
       },
       "analyzerCompatibility": "passed",
+      "claudeSkills": "not-applied",
       "replay": "passed",
       "compensation": "not-run"
     },
     "byteStable": true,
     "manifests": {
       "bootstrap": {
-        "count": 8299,
-        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+        "count": 8317,
+        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
       },
       "firstVerify": {
-        "count": 8299,
-        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+        "count": 8317,
+        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
       },
       "secondVerify": {
-        "count": 8299,
-        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+        "count": 8317,
+        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
       },
       "sameVersion": {
-        "count": 8299,
-        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+        "count": 8317,
+        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
       },
       "replay": {
-        "count": 8299,
-        "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+        "count": 8317,
+        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
       }
     }
   },
@@ -135,12 +140,12 @@
     "compensation": "passed",
     "restored": true,
     "before": {
-      "count": 8299,
-      "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+      "count": 8317,
+      "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
     },
     "after": {
-      "count": 8299,
-      "digest": "b92b18d4f3387229aeb408272f8c3d41c34bd41db3c963d42bbe84e7f1a8aee4"
+      "count": 8317,
+      "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
     }
   },
   "integrity": {
@@ -148,36 +153,36 @@
     "stagedArtifacts": {
       "@archie/runtime": {
         "locator": "file:npm/archie-runtime.tgz",
-        "sha256": "268814cf73784a448c4e7a600ba6c50de2bad9cdddcc508000aadf39ac644f84",
-        "recordedSha256": "268814cf73784a448c4e7a600ba6c50de2bad9cdddcc508000aadf39ac644f84"
+        "sha256": "3fac9fe4a259fefc7b8a6be45efb7007db39812f003200dc5f29d904f962b04f",
+        "recordedSha256": "3fac9fe4a259fefc7b8a6be45efb7007db39812f003200dc5f29d904f962b04f"
       },
       "@archie/conformance": {
         "locator": "file:npm/conformance.tgz",
-        "sha256": "a40cf369bcc1a13c5712e5b769e5bdf73d2492351dca395fec83f5a2909e9a76",
-        "recordedSha256": "a40cf369bcc1a13c5712e5b769e5bdf73d2492351dca395fec83f5a2909e9a76"
+        "sha256": "f7581b8390b31b94d61e543c8649c3dd6639341ea7862a9a679039c20812d87b",
+        "recordedSha256": "f7581b8390b31b94d61e543c8649c3dd6639341ea7862a9a679039c20812d87b"
       }
     },
     "packages": {
       "@archie/runtime": {
         "exact": true,
         "packed": {
-          "count": 112,
-          "digest": "c338f621708a0a8850e9159174ba859c0c725ab0e458ba9628b1f2c8399d8e97"
+          "count": 124,
+          "digest": "d351ef720e6c87df9036613fb8b58037b79d6e6f9e26a9c0888229f4826d2c79"
         },
         "installed": {
-          "count": 112,
-          "digest": "c338f621708a0a8850e9159174ba859c0c725ab0e458ba9628b1f2c8399d8e97"
+          "count": 124,
+          "digest": "d351ef720e6c87df9036613fb8b58037b79d6e6f9e26a9c0888229f4826d2c79"
         }
       },
       "@archie/conformance": {
         "exact": true,
         "packed": {
-          "count": 122,
-          "digest": "faf705c8c290df8a9bc5754a9ac9eab918fe22f6b0852732b4a0fd498973b5b1"
+          "count": 128,
+          "digest": "1661dbdeea1d6d2f99f9dac2da830924de1e32f313dea08c7532d33fcd4602a6"
         },
         "installed": {
-          "count": 122,
-          "digest": "faf705c8c290df8a9bc5754a9ac9eab918fe22f6b0852732b4a0fd498973b5b1"
+          "count": 128,
+          "digest": "1661dbdeea1d6d2f99f9dac2da830924de1e32f313dea08c7532d33fcd4602a6"
         }
       }
     },
@@ -186,11 +191,11 @@
         "exact": true,
         "canonical": {
           "count": 6,
-          "digest": "f57a478fcb910ea634a5fef4f2697dcd70763035d65b0c102bb1756f3e9bf416"
+          "digest": "61a4f176b7e06f504c4272962c292055a34eec75c82e078fc562183817f4e5ba"
         },
         "deployed": {
           "count": 6,
-          "digest": "f57a478fcb910ea634a5fef4f2697dcd70763035d65b0c102bb1756f3e9bf416"
+          "digest": "61a4f176b7e06f504c4272962c292055a34eec75c82e078fc562183817f4e5ba"
         }
       },
       "architecture-assessment": {
@@ -208,11 +213,11 @@
         "exact": true,
         "canonical": {
           "count": 1,
-          "digest": "a34b7a022ff7ecd3eafa0fd5f49fe9b6ae54c99f112d03dd6ecbb7ea84aa6459"
+          "digest": "186036aa9d2b723bb911c3acad046a5813e6fa62404ed7048c78ce4d1ec03884"
         },
         "deployed": {
           "count": 1,
-          "digest": "a34b7a022ff7ecd3eafa0fd5f49fe9b6ae54c99f112d03dd6ecbb7ea84aa6459"
+          "digest": "186036aa9d2b723bb911c3acad046a5813e6fa62404ed7048c78ce4d1ec03884"
         }
       },
       "architecture-contracts": {
@@ -332,5 +337,5 @@
     "tag": "not-authorized",
     "note": "The local RC uses retained deterministic APM fixture identity while deploying and byte-checking the current eight-skill context. A real immutable private ref and native APM lock remain manual gates."
   },
-  "textReport": "Archie private release verification\nArchie authorization: NOT ASSESSED — locally reviewed private release selected.\nRecord consistency: passed\nnpm: passed\nAPM frozen install: passed\nAPM baseline audit: passed\nAPM policy: passed\nAPM content: passed\nAnalyzer compatibility: passed\nReplay: passed\nCompensation: not-run"
+  "textReport": "Archie private release verification\nArchie authorization: NOT ASSESSED — locally reviewed private release selected.\nRecord consistency: passed\nnpm: passed\nAPM frozen install: passed\nAPM baseline audit: passed\nAPM policy: passed\nAPM content: passed\nAnalyzer compatibility: passed\nClaude Code skills: not-applied\nReplay: passed\nCompensation: not-run"
 }
