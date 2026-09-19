@@ -2,6 +2,7 @@
   "name": "@archie/conformance",
   "version": "0.1.0-private.1",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "bin": {
     "architecture-conformance": "./dist/cli.js"
