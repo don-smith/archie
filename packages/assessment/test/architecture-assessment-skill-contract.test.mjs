@@ -17,7 +17,7 @@ test("declares valid discovery metadata and invocation shape", async () => {
   assert.ok(frontmatter, "missing YAML frontmatter");
   assert.match(frontmatter[1], /^name: architecture-assessment$/m);
   assert.match(frontmatter[1], /^description: Use when .+$/m);
-  assert.match(frontmatter[1], /^argument-hint: \[target\] \[--brief <file>\] \[--output <dir>\]$/m);
+  assert.match(frontmatter[1], /^argument-hint: "\[target\] \[--brief <file>\] \[--output <dir>\]"$/m);
   assert.match(text, /architecture-assessment \[target\] \[--brief <file>\] \[--output <dir>\]/);
 });
 
