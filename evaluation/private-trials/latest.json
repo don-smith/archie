@@ -3,7 +3,7 @@
   "candidate": {
     "status": "local-only",
     "version": "0.1.0-private.1",
-    "sourceCommit": "9a9cadd518139fb61590b26408d53fa467913faf",
+    "sourceCommit": "af498fb13abd12e83763ed9787ea6630fb07aa10",
     "schemaVersion": 3,
     "authorization": "not-assessed"
   },
@@ -17,14 +17,14 @@
   },
   "finalization": {
     "deterministic": true,
-    "recordSha256": "0f2d5fd4770b59edf16a1a75dc99e4fd41392d6acf6782b5ee4e439b2e039cb5",
+    "recordSha256": "c7ac59fbfc26212886fc0b69f6fdb14b8aed872439e66aec341d7078e526db5a",
     "artifactManifest": {
       "count": 9,
-      "digest": "0b55914ddfed55420a87d142cf460aebd5dd6450b6752847c0f4e6f698b16533"
+      "digest": "dd0f1e410a068a96685e4b04740eef2bf041cbab311fef1c866225db972d3fcb"
     },
     "repeatedArtifactManifest": {
       "count": 9,
-      "digest": "0b55914ddfed55420a87d142cf460aebd5dd6450b6752847c0f4e6f698b16533"
+      "digest": "dd0f1e410a068a96685e4b04740eef2bf041cbab311fef1c866225db972d3fcb"
     },
     "orderedArtifacts": [
       "@archie/runtime",
@@ -111,23 +111,23 @@
     "manifests": {
       "bootstrap": {
         "count": 8317,
-        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+        "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
       },
       "firstVerify": {
         "count": 8317,
-        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+        "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
       },
       "secondVerify": {
         "count": 8317,
-        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+        "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
       },
       "sameVersion": {
         "count": 8317,
-        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+        "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
       },
       "replay": {
         "count": 8317,
-        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+        "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
       }
     }
   },
@@ -141,11 +141,11 @@
     "restored": true,
     "before": {
       "count": 8317,
-      "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+      "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
     },
     "after": {
       "count": 8317,
-      "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
+      "digest": "cdf456662059717e87c994e7a0fde2beff80cf33b4577ad900f72428cf511b15"
     }
   },
   "integrity": {
