@@ -1,7 +1,7 @@
 ---
 name: architecture-assessment
 description: Use when a developer needs an evidence-led, whole-system architecture explanation and assessment before redesign, alignment, or refactoring.
-argument-hint: [target] [--brief <file>] [--output <dir>]
+argument-hint: "[target] [--brief <file>] [--output <dir>]"
 ---
 
 # Architecture assessment
