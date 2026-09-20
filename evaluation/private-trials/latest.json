@@ -3,7 +3,7 @@
   "candidate": {
     "status": "local-only",
     "version": "0.1.0-private.1",
-    "sourceCommit": "ebfeb231f1040ba1432e5207625b50f1990b471b",
+    "sourceCommit": "9a9cadd518139fb61590b26408d53fa467913faf",
     "schemaVersion": 3,
     "authorization": "not-assessed"
   },
@@ -17,14 +17,14 @@
   },
   "finalization": {
     "deterministic": true,
-    "recordSha256": "b2306cd928ab45a39836c60945a9c0738246ddea369e07b2f29c4f09b627bc80",
+    "recordSha256": "0f2d5fd4770b59edf16a1a75dc99e4fd41392d6acf6782b5ee4e439b2e039cb5",
     "artifactManifest": {
       "count": 9,
-      "digest": "9a70cf995c460a07e39603ecb7ac57e816380c9e8eb1270f4124e3650b052810"
+      "digest": "0b55914ddfed55420a87d142cf460aebd5dd6450b6752847c0f4e6f698b16533"
     },
     "repeatedArtifactManifest": {
       "count": 9,
-      "digest": "9a70cf995c460a07e39603ecb7ac57e816380c9e8eb1270f4124e3650b052810"
+      "digest": "0b55914ddfed55420a87d142cf460aebd5dd6450b6752847c0f4e6f698b16533"
     },
     "orderedArtifacts": [
       "@archie/runtime",
@@ -111,23 +111,23 @@
     "manifests": {
       "bootstrap": {
         "count": 8317,
-        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
       },
       "firstVerify": {
         "count": 8317,
-        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
       },
       "secondVerify": {
         "count": 8317,
-        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
       },
       "sameVersion": {
         "count": 8317,
-        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
       },
       "replay": {
         "count": 8317,
-        "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+        "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
       }
     }
   },
@@ -141,11 +141,11 @@
     "restored": true,
     "before": {
       "count": 8317,
-      "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+      "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
     },
     "after": {
       "count": 8317,
-      "digest": "8981afbc2ba86df5f5f416b0919b705a28feb1a6b6c0cdde70964ec1005db29e"
+      "digest": "1969631e789fc54c33681de34ce7e34ded3ed2a65df57c4398c2cd46f1cdae87"
     }
   },
   "integrity": {
@@ -202,11 +202,11 @@
         "exact": true,
         "canonical": {
           "count": 14,
-          "digest": "2849aacac4d3140eb918eac8ff5d53cdc0eabb433b199c7f60e806ff0d7e54c9"
+          "digest": "28d26314d0d59416688324243ad1a3cb3dd5609eb7081b553f7c7e4b686cb983"
         },
         "deployed": {
           "count": 14,
-          "digest": "2849aacac4d3140eb918eac8ff5d53cdc0eabb433b199c7f60e806ff0d7e54c9"
+          "digest": "28d26314d0d59416688324243ad1a3cb3dd5609eb7081b553f7c7e4b686cb983"
         }
       },
       "architecture-conformance-onboarding": {
