@@ -1,13 +1,13 @@
 # Substantial-repository trial checklist
 
-Use this only after the local Phase 8 packet is green. Choose a repository that is large enough to exercise real package boundaries and has a clean Git state or disposable worktree.
+The developer-owned manual trial for a release candidate. Use this only after the local candidate evidence is green (see [release-candidate-evidence](./release-candidate-evidence.md)). Choose a repository that is large enough to exercise real package boundaries and has a clean Git state or disposable worktree.
 
 ## Before installation
 
 - Record the repository commit, Node/npm/APM versions, current Archie state, and any existing APM manifest or lock.
 - Keep a recoverable copy of existing `.archie`, `.agents/skills`, `apm.yml`, and `apm.lock.yaml` state.
 - Select the reviewed local release directory explicitly. Do not use `latest`, a network URL, or an unreviewed replacement record.
-- Confirm separately whether GitHub SSH preflight or an immutable private context tag is approved. Do not create or push a tag as part of this checklist without that approval.
+- Confirm separately whether GitHub SSH preflight or an immutable context tag is approved. Do not create or push a tag as part of this checklist without that approval.
 
 ## Install and replay
 
@@ -37,7 +37,7 @@ Record the repository and candidate commits, commands, reports, observed benefit
 
 - continue local trials;
 - fix before another trial;
-- approve a separate immutable-ref or private-release operation;
+- approve a separate immutable-ref or release operation;
 - reject the candidate.
 
 A successful trial does not itself authorize push, tag, publication, or sibling-repository archival.

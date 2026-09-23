@@ -11,7 +11,7 @@ Current documentation behavior. Unmarked content describes present supported beh
 - `docs/archie/deep-module-vocabulary.md` is the canonical deep-module term source for Assessment and Architecture Review. It byte-projects to both skills' `references/deep-module-vocabulary.md`.
 - `README.md` is a derived entry point: install, use, uninstall, and status, pointing at the managed-site guide and the product boundaries.
 - `AGENTS.md` is the repository working contract for agents, including the verification gates and the generated-file policy.
-- Operational how-tos (release bundle building, evidence reading, recovery, repository trials) derive from `03-delivery/` and `02-system/`; where a step-by-step runbook is kept, it is a companion under the owning node, not an intent authority.
+- Operational how-tos derive from `03-delivery/` and `02-system/`. The step-by-step runbooks kept as companions under `03-delivery/guides/` are [release-bundle-operations](../03-delivery/guides/release-bundle-operations.md), [release-candidate-evidence](../03-delivery/guides/release-candidate-evidence.md), and [substantial-repository-trial-checklist](../03-delivery/guides/substantial-repository-trial-checklist.md); they are not intent authorities.
 
 ## Projection behavior
 

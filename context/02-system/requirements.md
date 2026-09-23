@@ -13,6 +13,8 @@ Builds on [root requirements](../requirements.md). This node owns the system bou
 - **ARCHIE.SYS-R03 Analyzer support is exact and limited.** One analyzer adapter is supported, with a pinned TypeScript version, Node major, platform and architecture payload, and recorded known defects; unsupported environments are rejected up front. `refines: ARCHIE-R04`
 - **ARCHIE.SYS-R04 The VRS tree is excluded from shipped content.** `context/` is not on any package file allowlist and is not part of the APM projection or any installed target path. `refines: ARCHIE-R06`
 - **ARCHIE.SYS-R05 Target-owned commands keep their meaning.** Repository-local checks and analyzers remain target-owned with original exits and evidence meanings; Archie never converts advisory results or target-owned checks into one universal architecture result. `refines: ARCHIE-R04`
+- **ARCHIE.SYS-R06 Drift detection creates no contract and writes nothing.** The Drift Detection playbook compares a declared boundary by coordinating existing repository-owned checks; it creates no capability or repository contract and writes no target assets. `refines: ARCHIE-R02`
+- **ARCHIE.SYS-R07 Producer records stay frozen; consumers preserve meanings.** The producer artifacts `assessment-evidence/v1`, `conformance-report/v1`, and `onboarding-state/v1` stay frozen; public consumer envelopes add identity, result-code meanings, evidence digests, freshness inputs, and state versions without changing producer bytes, and consumers must not convert missing or uncertain evidence into a pass. `refines: ARCHIE-R04`
 
 ## Assumptions
 

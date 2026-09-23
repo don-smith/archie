@@ -52,29 +52,29 @@ test("managed-site guide covers the registered capabilities and marker contract"
   assert.doesNotMatch(guide, /Architecture Audit/i);
 });
 
-test("foundation and catalog use the registered capability vocabulary", () => {
-  const foundation = readFileSync("docs/archie/foundation.md", "utf8");
+test("product spec and catalog use the registered capability vocabulary", () => {
+  const productSpec = readFileSync("context/01-product/spec.md", "utf8");
   const catalog = readFileSync("skills/archie/references/capability-catalog.md", "utf8");
   for (const capability of capabilityContracts) {
-    assert.ok(foundation.includes(`| \`${capability.id}\` |`));
+    assert.ok(productSpec.includes(`| \`${capability.id}\` |`));
     assert.ok(catalog.includes(`| \`${capability.id}\` |`));
   }
-  assert.doesNotMatch(`${foundation}\n${catalog}`, /Architecture Audit/i);
-  assert.doesNotMatch(`${foundation}\n${catalog}`, /module audit/i);
+  assert.doesNotMatch(`${productSpec}\n${catalog}`, /Architecture Audit/i);
+  assert.doesNotMatch(`${productSpec}\n${catalog}`, /module audit/i);
 });
 
 test("managed-site packaging is the sole exception to target-owned architecture documents", () => {
-  const foundation = readFileSync("docs/archie/foundation.md", "utf8");
+  const productSpec = readFileSync("context/01-product/spec.md", "utf8");
   assert.match(
-    foundation,
+    productSpec,
     /packaged managed-site Archie page[\s\S]*sole narrow exception[\s\S]*ID `archie`[\s\S]*title `Archie`[\s\S]*slug `archie`[\s\S]*hidden completeness markers/i,
   );
   assert.match(
-    foundation,
+    productSpec,
     /target repository still owns every other page, model, glossary, evidence source, local adaptation of the Archie page, and review rule/i,
   );
-  assert.match(foundation, /does not create an Archie-wide architecture-document format/i);
-  assert.doesNotMatch(foundation, /Archie (?:defines|imposes|requires) an Archie-wide architecture-document format/i);
+  assert.match(productSpec, /does not create an Archie-wide architecture-document format/i);
+  assert.doesNotMatch(productSpec, /Archie (?:defines|imposes|requires) an Archie-wide architecture-document format/i);
 });
 
 test("reviewed source imports, completed migrations, and exclusions are recorded", () => {
@@ -114,8 +114,8 @@ test("reviewed source imports, completed migrations, and exclusions are recorded
   assert.equal(existsSync("packages/capabilities/assets/conformance"), false);
   assert.doesNotMatch(readFileSync("packages/assessment/skills/architecture-assessment/SKILL.md", "utf8"), /myflow/i);
 });
-test("private release runbook documents v2 artifacts, SSH preflight, and recovery", () => {
-  const runbook = readFileSync("docs/archie/private-release-bundle.md", "utf8");
+test("release bundle runbook documents bundle input, SSH preflight, and recovery", () => {
+  const runbook = readFileSync("context/03-delivery/guides/release-bundle-operations.md", "utf8");
   assert.match(runbook, /archie-private-bundle-input-v3/);
   assert.match(runbook, /@archie\/runtime/);
   assert.match(runbook, /@archie\/conformance/);

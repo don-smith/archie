@@ -1,10 +1,10 @@
-# Private release bundle
+# Release bundle operations
 
-A private Archie release bundle is a maintainer-reviewed local directory. Version 3 contains the Runtime and Conformance npm artifacts plus the eight-skill APM context: `archie`, `architecture-assessment`, `architecture-conformance-onboarding`, `architecture-contracts`, `architecture-docs`, `architecture-review`, `html-design`, and `likec4-authoring`.
+A Archie release bundle is a maintainer-reviewed local directory. Version 3 contains the Runtime and Conformance npm artifacts (`@archie/runtime`, `@archie/conformance`) plus the eight-skill APM context: `archie`, `architecture-assessment`, `architecture-conformance-onboarding`, `architecture-contracts`, `architecture-docs`, `architecture-review`, `html-design`, and `likec4-authoring`. The normative guarantees behind these steps live in the [03-delivery spec](../spec.md) and [requirements](../requirements.md); this guide is the step-by-step companion.
 
 ## Prerequisites and authority
 
-Use Node 24, npm 11, APM 0.29, Git, and SSH access to the private context repository. Credentials stay in the operator's SSH agent or normal package-manager configuration. Never put tokens, keys, environment files, or credential material in the bundle.
+Use Node 24, npm 11, APM 0.29, Git, and SSH access to the context repository. Credentials stay in the operator's SSH agent or normal package-manager configuration. Never put tokens, keys, environment files, or credential material in the bundle.
 
 Finalization, bootstrap, upgrade, and verify are local operations. They do not authorize publication, pushing, tagging, archiving sibling repositories, or making them read-only. Obtain separate developer approval before any Git push or tag operation.
 
@@ -25,6 +25,8 @@ apm/
 ```
 
 `bundle.json` uses `archie-private-bundle-input-v3`. Its ordered `artifacts` array contains `@archie/runtime` first and `@archie/conformance` second. Both artifacts use the Archie product version and target-owned `file:npm/*.tgz` locators. Each entry names its lock file, tarball, and required payload. The Runtime lock is the complete npm v3 install lock: its root lists both local artifacts and it retains the exact dependency closure required by their packed manifests. Finalization rejects a lock whose root or direct artifact entries differ from the generated projection. The Runtime's required payload is its Architecture Docs command (`dist/architecture-docs/bin/architecture-docs.mjs`); Conformance's is `dist/cli.js`. The APM entry names the private Git SSH locator, an immutable ref, the repository-relative subfolder holding the context, the native manifest and lock, and all eight skills. An immutable ref is either the `v<version>` tag or a full 40-character commit SHA; a bundle built from a clone is pinned by commit. The subfolder is required because the monorepo has no root `apm.yml`, so the context resolves only through `packages/archie-context`.
+
+## Build and finalize
 
 Build the input from a monorepo checkout, then finalize it:
 
@@ -57,13 +59,13 @@ The receipt states that authorization was not assessed. It proves finalized-byte
 
 ## Private context preflight
 
-Before finalization, confirm that the target Git identity can read the private context repository:
+Before finalization, confirm that the target Git identity can read the context repository:
 
 ```bash
 git ls-remote git@github.com:don-smith/archie.git
 ```
 
-`archie-release build` then writes the manifest and runs `apm lock` for you. Two constraints govern its shape. The dependency must use the mapping form with a `path:` key: the plain string spec that `apm install` writes into `apm.yml` resolves the same bytes but produces a lock with **no `skill_subset`**, which the pinned projection requires. And the consuming project's APM targets must include `agent-skills`; a project whose targets do not overlap logs `Package targets [agent-skills] do not overlap authorized active targets; skipping`, deploys nothing, and still exits successfully.
+`archie-release build` then writes the manifest and runs `apm lock` for you. Two constraints govern its shape. The dependency must use the mapping form with a `path:` key: the plain string spec that `apm install` writes into `apm.yml` resolves the same bytes but produces a lock with no `skill_subset`, which the pinned projection requires. And the consuming project's APM targets must include `agent-skills`; a project whose targets do not overlap logs `Package targets [agent-skills] do not overlap authorized active targets; skipping`, deploys nothing, and still exits successfully.
 
 Confirm the generated lock's resolved commit, content hash, ref, repository, virtual path, and skill subset before finalizing. Do not reuse a lock from different context bytes. Creating or moving a `v<version>` tag still needs separate developer approval; pinning by commit SHA does not.
 
@@ -103,8 +105,8 @@ Inspect `failure-report.json`, `failure-report.stderr`, and `.archie/release/ins
 
 ## Local release-candidate evidence
 
-Run `npm run private-trial:evaluate` to build two independent local v3 bundles and exercise the integrated matrix. The evaluator uses genuine Runtime and Conformance packs, the exact generated lock, real offline npm installation, both installed commands, byte comparisons for both packages and all eight skills, replay, refusal of a pre-v3 pin, mutation rejection, policy outcomes, and compensation. Its retained packet is `evaluation/private-trials/latest.json`.
+Run `npm run private-trial:evaluate` to build two independent local v3 bundles and exercise the integrated matrix. The evaluator uses genuine Runtime and Conformance packs, the exact generated lock, real offline npm installation, both installed commands, byte comparisons for both packages and all eight skills, replay, refusal of a pre-v3 pin, mutation rejection, policy outcomes, and compensation. Its retained packet is `evaluation/private-trials/latest.json`; see [the evidence guide](./release-candidate-evidence.md) for reading it.
 
-The local evaluator deliberately does not run GitHub SSH preflight or create the immutable private context ref. It records those gates as deferred and uses the retained APM identity fixture while byte-checking the current canonical skills. After the eight-skill context is published at `v<version>`, run `ARCHIE_E2E_PUBLISHED_CONTEXT=1 npm run test:e2e -- private-trials` to exercise native APM locking and frozen deployment against it. Follow [the substantial-repository trial checklist](substantial-repository-trial-checklist.md) before any release decision.
+The local evaluator deliberately does not run GitHub SSH preflight or create the immutable private context ref. It records those gates as deferred and uses the retained APM identity fixture while byte-checking the current canonical skills. After the eight-skill context is published at `v<version>`, run `ARCHIE_E2E_PUBLISHED_CONTEXT=1 npm run test:e2e -- private-trials` to exercise native APM locking and frozen deployment against it. Follow [the substantial-repository trial checklist](./substantial-repository-trial-checklist.md) before any release decision.
 
 Until the external context gate and developer repository trial are complete, the candidate is local-only and not release-approved.

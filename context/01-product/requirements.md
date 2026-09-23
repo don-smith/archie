@@ -9,6 +9,7 @@ Builds on [root requirements](../requirements.md). This node owns the product-fa
 ## Assumptions
 
 - **ARCHIE.PROD-A01 The seven capabilities are the shipped membership.** `assessment`, `architecture-docs`, `likec4-authoring`, `conformance-onboarding`, `architecture-contracts`, `architecture-review`, and `html-design` are the registered product capabilities with stable IDs.
+- **ARCHIE.PROD-A02 Pi is a proven adapter, not the product boundary.** The core operating contract is agent-neutral; adapter support is added only when there is a real consumer and a bounded compatibility test.
 
 ## Requirements
 
@@ -17,3 +18,5 @@ Builds on [root requirements](../requirements.md). This node owns the product-fa
 - **ARCHIE.PROD-R03 Material changes stop for the developer.** Durable or material changes follow the proposal-before-apply rule: intent, evidence, affected files, expected effect, and verification are presented, and the developer decides. `refines: ARCHIE-R03`
 - **ARCHIE.PROD-R04 Product identity is lockstep.** One version across workspaces and generated projections; every workspace package matches the root version, and the product version is not the release-record schema version. `refines: ARCHIE-R01`
 - **ARCHIE.PROD-R05 Distribution stays private.** The product is not published to npm, has no public package coordinates, and is installed from a clone of this repository; packages stay private with no publish configuration. `refines: ARCHIE-R01`
+- **ARCHIE.PROD-R06 Membership changes only through a maintainer decision.** The seven-capability membership and the eight-skill deployed set change only through an explicit product-boundary decision, and every release record pins the current membership. `refines: ARCHIE-R02`
+- **ARCHIE.PROD-R07 Adapters own host wiring only.** Host adapters own installation, discovery, command or prompt wiring, configuration, UI, and host-native confirmation; they never fork capability logic, and a confirmation mechanism in one host does not enforce the rule in another. `refines: ARCHIE-R03`

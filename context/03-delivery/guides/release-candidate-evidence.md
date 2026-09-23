@@ -1,4 +1,8 @@
-# Private-trial evidence
+# Release candidate evidence
+
+How to run the retained local release-candidate evaluator and read its packet. The normative guarantees are in the [03-delivery spec](../spec.md); the bundle build and target steps are in [release-bundle-operations](./release-bundle-operations.md).
+
+## Running the evaluator
 
 Run the retained release-candidate evaluator from a clean checkout:
 
@@ -12,7 +16,7 @@ The command builds both private workspaces first, then the evaluator requires a 
 
 The evaluator uses real `npm ci --ignore-scripts --offline` with an isolated cache and an unreachable registry. It installs the exact generated lock and compares each installed Runtime and Conformance package with the selected tarball. It also executes the installed `architecture-docs` and `architecture-conformance` commands.
 
-The local evaluator does not resolve or publish the private Git context. A deterministic APM seam stages the retained lock identity, deploys the current eight canonical skill trees, records every deployed file hash, and exercises frozen install, baseline, pass, block, and no-policy outcomes. `npm run test:e2e -- apm-context` separately exercises native APM 0.29 frozen installation against its accepted fixture.
+The local evaluator does not resolve or publish the Git context. A deterministic APM seam stages the retained lock identity, deploys the current eight canonical skill trees, records every deployed file hash, and exercises frozen install, baseline, pass, block, and no-policy outcomes. `npm run test:e2e -- apm-context` separately exercises native APM 0.29 frozen installation against its accepted fixture.
 
 ## Reading the packet
 
@@ -34,8 +38,8 @@ The text receipt must contain:
 Archie authorization: NOT ASSESSED — locally reviewed private release selected.
 ```
 
-Manual review is recorded honestly rather than left pending: every migration's `gateEvidence.manualReview` in `source-import-manifest.json` reads `not-performed: verified through use until an evaluation system exists`. Archie is verified by installing it into real repositories and using it; findings from that use become backlog items.
+Manual review is recorded honestly rather than left pending: every migration's `gateEvidence.manualReview` in `source-import-manifest.json` reads `not-performed: verified through use until an evaluation system exists`. Archie is verified by installing it into real repositories and using it; findings from that use become roadmap items.
 
-This packet proves local byte consistency and recovery behavior. It does not approve the candidate, verify a real immutable private context ref, exercise a substantial external repository, or claim signing, publisher identity, public-release trust, controller distribution, or permission to publish.
+This packet proves local byte consistency and recovery behavior. It does not approve the candidate, verify a real immutable context ref, exercise a substantial external repository, or claim signing, publisher identity, public-release trust, controller distribution, or permission to publish.
 
-Use [the substantial-repository trial checklist](substantial-repository-trial-checklist.md) for the developer-owned manual trial. Record findings before any push, tag, archival, or release decision.
+Use [the substantial-repository trial checklist](./substantial-repository-trial-checklist.md) for the developer-owned manual trial. Record findings before any push, tag, archival, or release decision.

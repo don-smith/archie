@@ -22,7 +22,7 @@ anything durable changes. It proposes; you decide what becomes true.
 
 You select each capability on its own, and each keeps its own meaning. A review finding is not an
 architecture pass, and observed code never becomes approved intent by itself.
-[Product boundaries](docs/archie/product-boundaries.md) states the limits in full, and
+[Product boundaries](context/01-product/spec.md) states the limits in full, and
 [Working with Archie](docs/archie/managed-site-guide.md) describes each capability's problem,
 result, and starting point.
 
@@ -144,4 +144,4 @@ it rather than by a formal review gate. It is developed and used on macOS and Li
 ## Development
 
 See [AGENTS.md](AGENTS.md) for the monorepo layout, the generated files, and the verification gates,
-and [the backlog](docs/archie/backlog.md) for outstanding work.
+and [the roadmap](context/roadmap.md) for outstanding work.

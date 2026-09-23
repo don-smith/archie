@@ -4,8 +4,8 @@ Archie is an architecture-focused agent product: architecture assessment, archit
 
 ## Start here
 
-- **Backlog:** [docs/archie/backlog.md](docs/archie/backlog.md) lists outstanding and completed work. Read it before choosing work, and update it when work lands or new work is found.
-- **Product boundaries and roadmap:** [docs/archie/product-boundaries.md](docs/archie/product-boundaries.md), [docs/archie/roadmap.md](docs/archie/roadmap.md), [docs/archie/foundation.md](docs/archie/foundation.md).
+- **Intent and roadmap:** [context/](context/) is the maintainer intent layer: [requirements](context/requirements.md), [roadmap](context/roadmap.md) (tracks outstanding and completed work — read it before choosing work, and update it when work lands or new work is found), [open questions](context/open-questions.md), and [the four nodes](context/01-product/spec.md).
+- **Product boundaries:** [context/01-product/spec.md](context/01-product/spec.md) and [context/02-system/spec.md](context/02-system/spec.md) own product identity, capability membership, and the system contract; [context/03-delivery/spec.md](context/03-delivery/spec.md) owns release identity and verification.
 - **Routing:** `skills/archie/SKILL.md` and `skills/archie/references/capability-catalog.md` define the seven capabilities and how Archie selects them.
 
 ## Layout
@@ -22,7 +22,8 @@ Archie is an architecture-focused agent product: architecture assessment, archit
 | `packages/archie-cli/` | `archie` and `archie-release` commands |
 | `packages/capabilities/` | Capability contracts |
 | `packages/archie-context/` | The APM skill context (generated projection plus `apm.yml` and `apm.lock.yaml`) |
-| `docs/archie/` | Product documentation; `managed-site-guide.md` and `deep-module-vocabulary.md` are canonical sources projected into skills |
+| `context/` | The maintainer-only VRS intent layer: requirements, specs, ontology, roadmap, open questions, decisions, deltas; never installed into targets |
+| `docs/archie/` | Remaining product documentation: `managed-site-guide.md` and `deep-module-vocabulary.md` are the two canonical sources projected into skills |
 
 ## Generated files: regenerate, never hand-edit
 
@@ -46,7 +47,7 @@ The private-trial evaluator refuses a dirty tree, so commit before running it or
 
 ## Distribution
 
-Nothing is published to npm; every `@archie/*` package is private. A release bundle is a local directory holding the Runtime and Conformance tarballs plus locks; `archie bootstrap --release <dir>` installs them into a target's `.archie/runtime`. This monorepo's remote is the public GitHub repository `git@github.com:don-smith/archie.git`. The existing release tags `v0.1.0-private.0` and `v0.1.0-private.1` point at earlier context-only commits holding just the APM skill context, which targets fetch with native APM. APM can also install the context straight from this repository's `packages/archie-context` subfolder; how Archie should install into repositories going forward is open (backlog N0). See [docs/archie/private-release-bundle.md](docs/archie/private-release-bundle.md).
+Nothing is published to npm; every `@archie/*` package is private. A release bundle is a local directory holding the Runtime and Conformance tarballs plus locks; `archie bootstrap --release <dir>` installs them into a target's `.archie/runtime`. This monorepo's remote is the public GitHub repository `git@github.com:don-smith/archie.git`. The existing release tags `v0.1.0-private.0` and `v0.1.0-private.1` point at earlier context-only commits holding just the APM skill context, which targets fetch with native APM. APM can also install the context straight from this repository's `packages/archie-context` subfolder; the current install path is the scripted `install.sh` that wraps `archie bootstrap`. See [context/03-delivery/spec.md](context/03-delivery/spec.md) and the runbook at [context/03-delivery/guides/release-bundle-operations.md](context/03-delivery/guides/release-bundle-operations.md).
 
 ## Working rules
 

@@ -4,7 +4,7 @@
 
 ## Context
 
-This tree is the sole current settled-intent source for Archie maintenance; it is not installed into targets. Node directories own their contracts: `01-product/` (identity, capabilities, authority), `02-system/` (runtime, context projection, analyzer evidence), `03-delivery/` (versioning, release records, verification, recovery), `04-docs/` (source precedence and derived guides).
+This tree is the sole current settled-intent source for Archie maintenance; it is not installed into targets. Node directories own their contracts: `01-product/` (identity, capabilities, authority), `02-system/` (runtime, context projection, analyzer and producer/consumer evidence), `03-delivery/` (versioning, release records, verification, recovery), `04-docs/` (source precedence and derived guides).
 
 ## Assumptions
 
@@ -27,3 +27,4 @@ This tree is the sole current settled-intent source for Archie maintenance; it i
 - **ARCHIE-R05 The root `context/` tree is the sole current settled-intent source.** It owns Archie-maintainer requirements, specifications, terminology, roadmap, open questions, decisions, and deltas.
 - **ARCHIE-R06 The VRS tree is maintainer-only.** `context/` is a source-only module and is excluded from every package artifact and installed target projection.
 - **ARCHIE-R07 Release identity is exact and local.** The release record pins the product version, source commit, artifact hashes, lock, and APM evidence; selection never resolves a release from the network.
+- **ARCHIE-R08 Architecture assets are target-owned.** Targets own their architecture assets and asset contracts; Archie discovers them during onboarding and routes work to the owning capability, and the packaged managed-site Archie page is the sole narrow packaged exception.
