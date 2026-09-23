@@ -6,7 +6,7 @@ targets:
 dependencies:
   apm:
     - git: git@github.com:don-smith/archie.git
-      ref: a4a7825abca2d17b969aff577c3a60afa1248b58
+      ref: 94e7572a787aa1c24d11fd0a7a24824ff78b4001
       path: packages/archie-context
       skills:
         - archie
