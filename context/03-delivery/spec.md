@@ -14,7 +14,11 @@ Finalization validates the bundle input, npm archives (headers, checksums, bound
 
 > Archie authorization: NOT ASSESSED — locally reviewed private release selected.
 
-The receipt boundary also states that signing, public-release trust, controller distribution, and key operations are deferred. The record's `authorization` field carries the required legacy literal `authorization: {kind: 'none', claim: 'locally-reviewed-private-trial'}`; it is wire evidence, not review evidence (see [DELTA-001](../.delta/DELTA-001-legacy-authorization-wire.md)). Selection requires the explicit local directory, re-verifies every artifact byte, checks the exact npm lock projection and APM evidence, and rejects missing, extra, duplicated, reordered, network-located, mixed-version, or mutated artifacts.
+The receipt boundary also states that signing, public-release trust, controller distribution, and key operations are deferred. Selection accepts both the current boundary sentence —
+
+> Archie authorization: NOT ASSESSED — locally reviewed release selected.
+
+— and its historical wording (`locally reviewed private release selected`), so previously finalized v3 bundles remain selectable. The record's `authorization` field carries the required legacy literal `authorization: {kind: 'none', claim: 'locally-reviewed-private-trial'}`; it is wire evidence, not review evidence (see [DELTA-001](../.delta/DELTA-001-legacy-authorization-wire.md)). Selection requires the explicit local directory, re-verifies every artifact byte, checks the exact npm lock projection and APM evidence, and rejects missing, extra, duplicated, reordered, network-located, mixed-version, or mutated artifacts.
 
 ## Local operations
 

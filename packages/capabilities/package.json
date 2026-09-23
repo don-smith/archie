@@ -1,5 +1,5 @@
 {
-  "name": "@archie/capabilities", "version": "0.1.0-private.1", "private": true,
+  "name": "@archie/capabilities", "version": "0.3.0", "private": true,
   "type": "module", "main": "./dist/index.js", "types": "./dist/index.d.ts",
   "files": ["dist", "README.md"], "engines": { "node": ">=24 <25" }
 }

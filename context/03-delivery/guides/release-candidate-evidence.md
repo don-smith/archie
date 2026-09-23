@@ -35,8 +35,10 @@ A usable local packet has:
 The text receipt must contain:
 
 ```text
-Archie authorization: NOT ASSESSED — locally reviewed private release selected.
+Archie authorization: NOT ASSESSED — locally reviewed release selected.
 ```
+
+Selection also accepts the historical boundary wording `Archie authorization: NOT ASSESSED — locally reviewed private release selected.`, so previously finalized v3 bundles remain selectable.
 
 Manual review is recorded honestly rather than left pending: every migration's `gateEvidence.manualReview` in `source-import-manifest.json` reads `not-performed: verified through use until an evaluation system exists`. Archie is verified by installing it into real repositories and using it; findings from that use become roadmap items.
 

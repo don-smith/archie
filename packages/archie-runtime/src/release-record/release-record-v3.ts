@@ -60,7 +60,10 @@ export interface SelectedRelease {
 type BundleArtifact = { package: string; version: string; locator: string; lockFile: string; tarball: string; requiredPlatformPayload: string };
 type BundleInput = { format: typeof BUNDLE_INPUT_FORMAT; artifacts: BundleArtifact[]; apm: { package: string; skills: ArchieSkill[]; locator: string; ref: string; path?: string; manifest: string; lockFile: string } };
 
-const REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
+const REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed release selected.";
+/** The historical receipt boundary, still accepted on selection so previously finalized v3 bundles remain selectable. */
+const LEGACY_REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
+const REVIEW_BOUNDARIES = [REVIEW_BOUNDARY, LEGACY_REVIEW_BOUNDARY];
 const sha256 = (bytes: string | Buffer) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes: Buffer) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const isSha256 = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
@@ -277,7 +280,7 @@ export function finalizeRelease(request: FinalizeReleaseRequest): FinalizeReleas
   const bytes = serializeReleaseRecord(record);
   const recordSha256 = sha256(bytes);
   const receipt = [
-    "Archie private release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid",
+    "Archie release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid",
     `Artifacts: ${RELEASE_ARTIFACT_PACKAGES.join(", ")}`, `Skills: ${record.apm.skills.join(", ")}`, REVIEW_BOUNDARY,
     "This receipt reports finalized-byte consistency only. Signing, public-release trust, controller distribution, and key operations are deferred.", ""
   ].join("\n");
@@ -298,7 +301,7 @@ export function selectLocalRelease(directory: string): SelectedRelease {
   if (!existsSync(recordPath) || !statSync(recordPath).isFile() || !existsSync(receiptPath) || !statSync(receiptPath).isFile()) throw new Error("release bundle is incomplete; final record and review receipt are required");
   const recordBytes = readFileSync(recordPath, "utf8");
   const record = parseReleaseRecord(recordBytes);
-  if (!readFileSync(receiptPath, "utf8").includes(REVIEW_BOUNDARY)) throw new Error("release bundle review receipt does not state the non-authorization boundary");
+  if (!REVIEW_BOUNDARIES.some(boundary => readFileSync(receiptPath, "utf8").includes(boundary))) throw new Error("release bundle review receipt does not state the non-authorization boundary");
   const input = bundleInput(root);
   const artifacts = input.artifacts.map((inputArtifact, index) => {
     const artifact = record.artifacts[index]!;

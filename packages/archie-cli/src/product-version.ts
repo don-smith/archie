@@ -1,2 +1,2 @@
 /** Generated from the root product version authority. */
-export const PRODUCT_VERSION = "0.1.0-private.1" as const;
+export const PRODUCT_VERSION = "0.3.0" as const;

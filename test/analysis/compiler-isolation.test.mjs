@@ -16,5 +16,5 @@ test("keeps the TypeScript compiler inside Runtime's versioned adapter", async (
   assert.deepEqual(imports.filter(([, content]) => /from ["']typescript(?:\/unstable[^"']*)?["']/.test(content)).map(([file]) => file), ["packages/archie-runtime/src/analysis/typescript-program-v1-core.ts"]);
   const conformanceManifest = JSON.parse(await readFile("packages/conformance/package.json", "utf8"));
   assert.equal(conformanceManifest.dependencies.typescript, undefined);
-  assert.equal(conformanceManifest.dependencies["@archie/runtime"], "0.1.0-private.1");
+  assert.equal(conformanceManifest.dependencies["@archie/runtime"], "0.3.0");
 });

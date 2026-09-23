@@ -1,6 +1,6 @@
 {
   "name": "@archie/architecture-review",
-  "version": "0.1.0-private.1",
+  "version": "0.3.0",
   "private": true,
   "description": "Archie's Architecture Review skill: a layer-by-layer structural review of one bounded module that produces triaged findings and a phased polish plan.",
   "type": "module",

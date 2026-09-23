@@ -14,7 +14,7 @@ function put(path, contents) {
 function installedTarget() {
   const target = mkdtempSync(join(tmpdir(), "archie-uninstall-"));
   put(join(target, "README.md"), "the project\n");
-  put(join(target, ".archie", "version"), "0.1.0-private.1\n");
+  put(join(target, ".archie", "version"), "0.3.0\n");
   put(join(target, ".archie", "release", "release-record-v3.json"), "{}\n");
   put(join(target, ".archie", "runtime", "package-lock.json"), "{}\n");
   put(join(target, ".archie", "runtime", "npm", "archie-runtime.tgz"), "tarball\n");

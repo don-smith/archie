@@ -132,7 +132,7 @@ rather than quietly deleting it.
 
 ## Status
 
-Archie is early. The version is `0.1.0-private.1`, the two release tags install an earlier
+Archie is early. The version is `0.3.0`, the two release tags install an earlier
 skills-only context, and the product is verified by installing it into real repositories and using
 it rather than by a formal review gate. It is developed and used on macOS and Linux.
 

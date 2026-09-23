@@ -34,7 +34,7 @@ const lockFor = (ref, virtualPath) => [
   "  host: github.com",
   `  resolved_commit: ${COMMIT}`,
   `  resolved_ref: ${ref}`,
-  "  version: 0.1.0-private.1",
+  "  version: 0.3.0",
   ...(virtualPath === undefined ? [] : [`  virtual_path: ${virtualPath}`, "  is_virtual: true"]),
   "  package_type: apm_package",
   `  content_hash: ${CONTENT_HASH}`,

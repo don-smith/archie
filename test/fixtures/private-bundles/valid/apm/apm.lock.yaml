@@ -7,7 +7,7 @@ dependencies:
   host: github.com
   resolved_commit: a4a7825abca2d17b969aff577c3a60afa1248b58
   resolved_ref: a4a7825abca2d17b969aff577c3a60afa1248b58
-  version: 0.1.0-private.1
+  version: 0.3.0
   virtual_path: packages/archie-context
   is_virtual: true
   package_type: apm_package

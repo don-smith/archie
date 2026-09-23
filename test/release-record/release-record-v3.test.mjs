@@ -31,12 +31,21 @@ test("finalization is deterministic, orders both local artifacts, and carries th
   assert.deepEqual(one.record.apm.skills, ARCHIE_SKILLS);
   assert.equal(one.record.authorization.kind, "none");
   const receipt = readFileSync(one.receiptPath, "utf8");
-  assert.match(receipt, /Archie authorization: NOT ASSESSED — locally reviewed private release selected\./);
+  assert.match(receipt, /Archie authorization: NOT ASSESSED — locally reviewed release selected\./);
   assert.match(receipt, /Skills: archie, .*html-design, likec4-authoring/);
   const projection = npmProjection(one.record);
   assert.deepEqual(Object.keys(JSON.parse(projection.manifest).dependencies), ["@archie/runtime", "@archie/conformance"]);
   assert.ok(JSON.parse(projection.lock).packages["node_modules/likec4"], "the lock retains the runtime dependency closure");
   assert.equal(selectLocalRelease(join(base, "one")).record.schemaVersion, 3);
+}));
+
+test("selection accepts the historical and current non-authorization receipt sentences", () => withBase("archie-v3-receipts-", (base) => {
+  const bundle = finalizedBundle(base);
+  const receiptPath = join(bundle, "release-review.txt");
+  const receipt = readFileSync(receiptPath, "utf8");
+  assert.match(receipt, /Archie authorization: NOT ASSESSED — locally reviewed release selected\./);
+  writeFileSync(receiptPath, receipt.replace("Archie authorization: NOT ASSESSED — locally reviewed release selected.", "Archie authorization: NOT ASSESSED — locally reviewed private release selected."));
+  assert.equal(selectLocalRelease(bundle).record.schemaVersion, 3);
 }));
 
 test("noncanonical bytes, unknown fields, authorization variants, and APM identity drift fail closed", () => withBase("archie-v3-parse-", (base) => {

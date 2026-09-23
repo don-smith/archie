@@ -6,7 +6,7 @@ Current direction and ordered work for Archie maintainers. Past milestones are h
 
 - The public repository is the delivery path; the product is installed from a clone and verified by installing it into real repositories and using it, rather than by a formal review gate (see [03-delivery](./03-delivery/requirements.md)).
 - Historical tags `v0.1.0-private.0` and `v0.1.0-private.1` install an earlier skills-only context; they are history and are not moved.
-- The current product identity is `0.1.0-private.1`, as recorded in the root `package.json`, `README.md`, and generated projections.
+- The current product identity is `0.3.0`, as recorded in the root `package.json`, `README.md`, and generated projections.
 
 ## In flight
 

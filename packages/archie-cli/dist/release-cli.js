@@ -43,5 +43,5 @@ const result = finalizeRelease({ bundleDirectory, sourceCommit });
 console.log(`Finalized ${result.record.product}@${result.record.version}`);
 console.log(`Record: ${result.recordPath}`);
 console.log(`Receipt: ${result.receiptPath}`);
-console.log("Archie authorization: NOT ASSESSED — locally reviewed private release selected.");
+console.log("Archie authorization: NOT ASSESSED — locally reviewed release selected.");
 //# sourceMappingURL=release-cli.js.map

@@ -22,7 +22,10 @@ export const ARCHIE_SKILLS = [
     "likec4-authoring"
 ];
 export const RELEASE_ARTIFACT_PACKAGES = ["@archie/runtime", "@archie/conformance"];
-const REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
+const REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed release selected.";
+/** The historical receipt boundary, still accepted on selection so previously finalized v3 bundles remain selectable. */
+const LEGACY_REVIEW_BOUNDARY = "Archie authorization: NOT ASSESSED — locally reviewed private release selected.";
+const REVIEW_BOUNDARIES = [REVIEW_BOUNDARY, LEGACY_REVIEW_BOUNDARY];
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const sha512Integrity = (bytes) => `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
 const isSha256 = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
@@ -280,7 +283,7 @@ export function finalizeRelease(request) {
     const bytes = serializeReleaseRecord(record);
     const recordSha256 = sha256(bytes);
     const receipt = [
-        "Archie private release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid",
+        "Archie release review receipt", `Product: ${record.product}@${record.version}`, `Record SHA-256: ${recordSha256}`, "Bundle layout: valid",
         `Artifacts: ${RELEASE_ARTIFACT_PACKAGES.join(", ")}`, `Skills: ${record.apm.skills.join(", ")}`, REVIEW_BOUNDARY,
         "This receipt reports finalized-byte consistency only. Signing, public-release trust, controller distribution, and key operations are deferred.", ""
     ].join("\n");
@@ -303,7 +306,7 @@ export function selectLocalRelease(directory) {
         throw new Error("release bundle is incomplete; final record and review receipt are required");
     const recordBytes = readFileSync(recordPath, "utf8");
     const record = parseReleaseRecord(recordBytes);
-    if (!readFileSync(receiptPath, "utf8").includes(REVIEW_BOUNDARY))
+    if (!REVIEW_BOUNDARIES.some(boundary => readFileSync(receiptPath, "utf8").includes(boundary)))
         throw new Error("release bundle review receipt does not state the non-authorization boundary");
     const input = bundleInput(root);
     const artifacts = input.artifacts.map((inputArtifact, index) => {

@@ -1,6 +1,6 @@
 {
   "name": "@archie/html-design",
-  "version": "0.1.0-private.1",
+  "version": "0.3.0",
   "private": true,
   "description": "Archie's HTML Design skill: a design system and artifact tools for self-contained HTML documents, review packets, and architecture sites.",
   "license": "MIT",

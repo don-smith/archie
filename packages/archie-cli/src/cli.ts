@@ -6,5 +6,5 @@ if (command[0] === "bootstrap" || command[0] === "upgrade" || command[0] === "ve
   runReleaseInstallCommand(command);
 } else {
   const deferred = "Signing, public-release trust, controller distribution, and key operations are deferred.";
-  console.log(`Archie ${PRODUCT_VERSION} private trials: ${deferred}`);
+  console.log(`Archie ${PRODUCT_VERSION}, locally reviewed: ${deferred}`);
 }

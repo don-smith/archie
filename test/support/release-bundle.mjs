@@ -6,7 +6,7 @@ import { finalizeRelease, npmProjection, RELEASE_RECORD_FILE } from "../../dist/
 
 export const fixture = "test/fixtures/private-bundles/valid";
 export const sourceCommit = "abcdef0123456789abcdef0123456789abcdef01";
-export const version = "0.1.0-private.1";
+export const version = "0.3.0";
 
 const artifactSpecs = [
   { file: "archie-runtime", name: "@archie/runtime", payload: "dist/architecture-docs/bin/architecture-docs.mjs", bin: { "architecture-docs": "dist/architecture-docs/bin/architecture-docs.mjs" }, dependencies: {} },

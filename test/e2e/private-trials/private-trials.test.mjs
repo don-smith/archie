@@ -15,7 +15,7 @@ test("private-trial evaluation proves the integrated release-candidate matrix", 
     assert.equal(evidence.format, "archie-private-trial-evidence-v3");
     assert.deepEqual(evidence.candidate, {
       status: "local-only",
-      version: "0.1.0-private.1",
+      version: "0.3.0",
       sourceCommit: evidence.candidate.sourceCommit,
       schemaVersion: 3,
       authorization: "not-assessed"
@@ -44,7 +44,7 @@ test("private-trial evaluation proves the integrated release-candidate matrix", 
     for (const [name, mutation] of Object.entries(evidence.mutations)) assert.equal(mutation.rejected, true, `${name} mutation was accepted`);
     assert.equal(evidence.externalGates.push, "not-authorized");
     assert.equal(evidence.externalGates.tag, "not-authorized");
-    assert.match(evidence.textReport, /Archie authorization: NOT ASSESSED — locally reviewed private release selected\./);
+    assert.match(evidence.textReport, /Archie authorization: NOT ASSESSED — locally reviewed release selected\./);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

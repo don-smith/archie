@@ -1,6 +1,6 @@
 {
   "name": "@archie/conformance",
-  "version": "0.1.0-private.1",
+  "version": "0.3.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -30,6 +30,6 @@
     "node": ">=24 <25"
   },
   "dependencies": {
-    "@archie/runtime": "0.1.0-private.1"
+    "@archie/runtime": "0.3.0"
   }
 }

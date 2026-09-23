@@ -23,7 +23,7 @@ export function initialInstallReport(): ReleaseInstallReport {
 
 export function formatInstallReport(report: ReleaseInstallReport): string {
   return [
-    "Archie private release verification", "Archie authorization: NOT ASSESSED — locally reviewed private release selected.",
+    "Archie release verification", "Archie authorization: NOT ASSESSED — locally reviewed release selected.",
     `Record consistency: ${report.recordConsistency}`, `npm: ${report.npm}`,
     `APM frozen install: ${report.apm.frozen}`, `APM baseline audit: ${report.apm.baseline}`,
     `APM policy: ${report.apm.policy}`, `APM content: ${report.apm.content}`,
