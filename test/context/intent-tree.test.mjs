@@ -213,6 +213,46 @@ test("a refines target that is not a declared ID is rejected", () => {
   }
 });
 
+test("a refines target whose namespace prefix is not in the ID scheme table is rejected as malformed", () => {
+  const base = tempBase();
+  try {
+    const files = validTree();
+    files["01-product/requirements.md"] = "# Requirements\n\n**Role:** product.\n\n## Requirements\n\n- **ARCHIE.PROD-R01 A child requirement. `refines: ARCHIE.EXTRA-R01`**\n";
+    const result = withBroken(base, files);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.diagnostics.some((line) => line.includes("malformed refines target") && line.includes("ARCHIE.EXTRA-R01")),
+      result.diagnostics.join("\n")
+    );
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("content inside fenced code blocks is ignored by the pattern scans", () => {
+  const base = tempBase();
+  try {
+    const files = validTree();
+    files["vision.md"] = [
+      "# Vision",
+      "",
+      "```md",
+      "- **ARCHIE-R01 Duplicate declared inside a fence.**",
+      "**Maturity: proposal**",
+      "`refines: ARCHIE-R999`",
+      "See [the requirements](./missing.md).",
+      "```",
+      "",
+      "Some vision."
+    ].join("\n");
+    files["02-system/spec.md"] = "# Spec\n\n```md\n## Status: Bogus\n```\n\n## Status: Draft\n\nSome behavior.\n";
+    const result = withBroken(base, files);
+    assert.equal(result.ok, true, result.diagnostics.join("\n"));
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
 test("an ID declared in the wrong namespace directory is rejected", () => {
   const base = tempBase();
   try {

@@ -30,22 +30,16 @@ function toPosix(path) {
 }
 
 function stripFences(text) {
-  return text
-    .split("\n")
-    .filter((line, index, lines) => {
-      if (line.trimStart().startsWith("```")) {
-        let depth = 1;
-        for (let next = index + 1; next < lines.length; next += 1) {
-          if (lines[next].trimStart().startsWith("```")) {
-            depth = 0;
-            break;
-          }
-        }
-        return depth === 0;
-      }
-      return true;
-    })
-    .join("\n");
+  const out = [];
+  let inFence = false;
+  for (const line of text.split("\n")) {
+    if (line.trimStart().startsWith("```")) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence) out.push(line);
+  }
+  return out.join("\n");
 }
 
 function markdownFiles(root) {
@@ -171,9 +165,9 @@ export function checkTree(root) {
     if (entryKind(target) !== "directory") fail(`ID scheme table maps namespace to a missing directory: ${dir}`);
   }
 
-  // Spec Status: every spec.md has exactly one legal ## Status.
+  // Spec Status: every spec.md has exactly one legal ## Status (outside fences).
   for (const file of specFiles) {
-    const text = readFileSync(file, "utf8");
+    const text = stripFences(readFileSync(file, "utf8"));
     const matches = [...text.matchAll(/^##\s*Status\s*:?\s*(.*)$/gm)];
     if (matches.length === 0) fail(`${rel(file)}: spec is missing its ## Status heading`);
     else if (matches.length > 1) fail(`${rel(file)}: spec has more than one ## Status heading`);
@@ -183,9 +177,9 @@ export function checkTree(root) {
     }
   }
 
-  // Maturity vocabulary: only the bold experimental marker is legal.
+  // Maturity vocabulary: only the bold experimental marker is legal (outside fences).
   for (const file of files) {
-    const text = readFileSync(file, "utf8");
+    const text = stripFences(readFileSync(file, "utf8"));
     for (const match of text.matchAll(MATURITY_PATTERN)) {
       if (match[0] !== MATURITY_MARKER) fail(`${rel(file)}: forbidden maturity marker "${match[0]}" (only ${MATURITY_MARKER} is legal)`);
     }
@@ -214,12 +208,16 @@ export function checkTree(root) {
   }
   for (const message of placementFailures) fail(message);
 
-  // refines: every target must be a declared ID.
+  // refines: every target must be a declared ID, and its namespace prefix must
+  // come from the ID scheme table (the single namespace registry).
+  const refinesPrefixes = [...table.keys()];
   for (const file of files) {
     const text = stripFences(readFileSync(file, "utf8"));
     for (const match of text.matchAll(REFINES_PATTERN)) {
       const target = match[1].split("`").pop();
-      if (!/^ARCHIE(?:\.(?:PROD|SYS|DEL|DOCS))?-(?:A|T|R|DQ)\d+$/.test(target)) fail(`${rel(file)}: malformed refines target "${target}"`);
+      const kind = target.match(/^(.*)-(?:A|T|R|DQ)\d+$/);
+      const prefix = kind ? `${kind[1]}-` : null;
+      if (!prefix || !refinesPrefixes.includes(prefix)) fail(`${rel(file)}: malformed refines target "${target}" (namespace prefix not in the ID scheme table)`);
       else if (!declared.has(target)) fail(`${rel(file)}: refines target ${target} is not a declared ID`);
     }
   }
@@ -262,7 +260,7 @@ export function checkTree(root) {
 
 function checkDecision(path, name, isFile) {
   if (!isFile || !DECISION_PATTERN.test(name)) return `unsupported decision entry (expected NNNN-slug.md): ${name}`;
-  const text = readFileSync(path, "utf8");
+  const text = stripFences(readFileSync(path, "utf8"));
   if (!/^Status:\s*accepted\b/mi.test(text)) return "decision status must be accepted";
   const statusLine = text.split("\n").find((line) => /^Status:\s*accepted\b/i.test(line)) ?? "";
   if (!/\d{4}-\d{2}-\d{2}/.test(statusLine)) return "decision status must carry a dated acceptance (YYYY-MM-DD)";
@@ -286,7 +284,7 @@ function checkDecision(path, name, isFile) {
 
 function checkDelta(path, name, isFile) {
   if (!isFile || !DELTA_PATTERN.test(name)) return `unsupported delta entry (expected DELTA-NNN-slug.md): ${name}`;
-  const text = readFileSync(path, "utf8");
+  const text = stripFences(readFileSync(path, "utf8"));
   const owner = text.split("\n").find((line) => /^Owner:\s*\S/.test(line));
   if (!owner) return "delta is missing its Owner line";
   const statusLine = text.split("\n").find((line) => /^Status:\s*\S/.test(line));

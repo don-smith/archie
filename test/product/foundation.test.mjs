@@ -17,6 +17,11 @@ test("all workspaces use the product version and stay private", () => {
   for (const packageName of packages) { const manifest = JSON.parse(readFileSync(`packages/${packageName}/package.json`)); assert.equal(manifest.version, root.version); assert.equal(manifest.private, true); }
   assert.equal(PRODUCT_VERSION, root.version);
   assert.equal(JSON.parse(readFileSync("packages/archie-context/product-version.json")).version, root.version);
+  for (const apmManifest of ["packages/archie-context/apm.yml", "test/fixtures/private-bundles/valid/apm/apm.yml"]) {
+    const versionLine = readFileSync(apmManifest, "utf8").split("\n").find((line) => line.startsWith("version:"));
+    assert.ok(versionLine, `${apmManifest} is missing its version line`);
+    assert.equal(versionLine.split(":")[1].trim(), root.version, `${apmManifest} version`);
+  }
 });
 test("capabilities preserve independent request, result, and authority contracts", () => {
   assert.equal(capabilityContracts.length, 7);

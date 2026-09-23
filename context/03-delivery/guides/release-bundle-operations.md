@@ -1,6 +1,6 @@
 # Release bundle operations
 
-A Archie release bundle is a maintainer-reviewed local directory. Version 3 contains the Runtime and Conformance npm artifacts (`@archie/runtime`, `@archie/conformance`) plus the eight-skill APM context: `archie`, `architecture-assessment`, `architecture-conformance-onboarding`, `architecture-contracts`, `architecture-docs`, `architecture-review`, `html-design`, and `likec4-authoring`. The normative guarantees behind these steps live in the [03-delivery spec](../spec.md) and [requirements](../requirements.md); this guide is the step-by-step companion.
+An Archie release bundle is a maintainer-reviewed local directory. Version 3 contains the Runtime and Conformance npm artifacts (`@archie/runtime`, `@archie/conformance`) plus the eight-skill APM context: `archie`, `architecture-assessment`, `architecture-conformance-onboarding`, `architecture-contracts`, `architecture-docs`, `architecture-review`, `html-design`, and `likec4-authoring`. The normative guarantees behind these steps live in the [03-delivery spec](../spec.md) and [requirements](../requirements.md); this guide is the step-by-step companion.
 
 ## Prerequisites and authority
 
