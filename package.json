@@ -18,6 +18,7 @@
     "test:html-design": "npm run test --workspace @archie/html-design",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pack:check": "node scripts/check-package-content.mjs",
+    "check:intent": "node scripts/check-intent-tree.mjs context",
     "test:e2e": "node scripts/run-e2e.mjs",
     "private-trial:evaluate": "npm run build --silent && node scripts/run-private-trial-evaluation.mjs"
   },
